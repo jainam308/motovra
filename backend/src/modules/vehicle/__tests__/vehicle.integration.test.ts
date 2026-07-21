@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../../../app';
 import { PrismaClient } from '@prisma/client';
-import jwtUtils from '../../../common/utils/jwt';
+import { jwtUtils } from '../../../common/utils/jwt';
 
 const prisma = new PrismaClient();
 

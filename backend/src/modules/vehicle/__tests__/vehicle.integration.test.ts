@@ -87,3 +87,45 @@ describe('GET /api/vehicles/search', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('PUT /api/vehicles/:id', () => {
+  it('should return 400 for invalid payload before touching DB', async () => {
+    const adminToken = jwtUtils.generateAccessToken({ userId: 'admin1', role: 'ADMIN' });
+    const res = await request(app)
+      .put('/api/vehicles/123')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ price: -500 });
+    
+    expect(res.status).toBe(400);
+  });
+
+  it('should return 404 for non-existent id', async () => {
+    const adminToken = jwtUtils.generateAccessToken({ userId: 'admin1', role: 'ADMIN' });
+    const res = await request(app)
+      .put('/api/vehicles/non-existent-id')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ make: 'Honda', model: 'Civic', category: 'SEDAN', price: 20000, quantity: 5 });
+    
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('DELETE /api/vehicles/:id', () => {
+  it('should return 403 for CUSTOMER role', async () => {
+    const customerToken = jwtUtils.generateAccessToken({ userId: 'cust1', role: 'CUSTOMER' });
+    const res = await request(app)
+      .delete('/api/vehicles/123')
+      .set('Authorization', `Bearer ${customerToken}`);
+    
+    expect(res.status).toBe(403);
+  });
+
+  it('should return 404 for non-existent id', async () => {
+    const adminToken = jwtUtils.generateAccessToken({ userId: 'admin1', role: 'ADMIN' });
+    const res = await request(app)
+      .delete('/api/vehicles/non-existent-id')
+      .set('Authorization', `Bearer ${adminToken}`);
+    
+    expect(res.status).toBe(404);
+  });
+});

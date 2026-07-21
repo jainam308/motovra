@@ -18,5 +18,23 @@ export const vehicleController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const vehicle = await vehicleService.update(req.params.id, req.body);
+      res.status(200).json(vehicle);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      await vehicleService.delete(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
   }
 };

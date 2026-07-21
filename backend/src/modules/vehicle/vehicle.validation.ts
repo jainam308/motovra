@@ -22,5 +22,13 @@ export const vehicleValidation = {
       return helpers.message({ custom: 'minPrice cannot be greater than maxPrice' } as any);
     }
     return obj;
-  })
+  }),
+
+  update: Joi.object({
+    make: Joi.string().optional(),
+    model: Joi.string().optional(),
+    category: Joi.string().optional(),
+    price: Joi.number().positive().optional(),
+    quantity: Joi.number().integer().min(0).optional()
+  }).options({ stripUnknown: false, allowUnknown: false, abortEarly: false })
 };

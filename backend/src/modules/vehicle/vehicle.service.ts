@@ -53,5 +53,39 @@ export const vehicleService = {
         totalPages: Math.ceil(total / limit)
       }
     };
+  },
+
+  async update(id: string, data: any): Promise<any> {
+    const { error, value } = vehicleValidation.update.validate(data);
+    if (error) {
+      const err: any = new Error(error.details[0].message);
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const existing = await prisma.vehicle.findUnique({ where: { id } });
+    if (!existing) {
+      const err: any = new Error('Vehicle not found');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    return prisma.vehicle.update({
+      where: { id },
+      data: value
+    });
+  },
+
+  async delete(id: string): Promise<any> {
+    const existing = await prisma.vehicle.findUnique({ where: { id } });
+    if (!existing) {
+      const err: any = new Error('Vehicle not found');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    return prisma.vehicle.delete({
+      where: { id }
+    });
   }
 };

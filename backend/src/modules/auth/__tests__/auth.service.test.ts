@@ -1,9 +1,9 @@
 import { authService } from '../auth.service';
-import bcrypt from 'bcrypt';
+import { passwordUtils } from '../../../common/utils/password';
 import { PrismaClient } from '@prisma/client';
 import { ConflictError } from '../../../common/errors/ConflictError';
 
-// Mock Prisma and bcrypt
+// Mock Prisma and passwordUtils
 jest.mock('@prisma/client', () => {
   const mPrismaClient = {
     user: {
@@ -14,8 +14,11 @@ jest.mock('@prisma/client', () => {
   return { PrismaClient: jest.fn(() => mPrismaClient) };
 });
 
-jest.mock('bcrypt', () => ({
-  hash: jest.fn(),
+jest.mock('../../../common/utils/password', () => ({
+  passwordUtils: {
+    hash: jest.fn(),
+    compare: jest.fn(),
+  }
 }));
 
 const prisma = new PrismaClient();
@@ -27,12 +30,12 @@ describe('Auth Service - register', () => {
 
   it('should hash the password with bcrypt (cost 12) and create user', async () => {
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-    (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword123');
+    (passwordUtils.hash as jest.Mock).mockResolvedValue('hashedPassword123');
     (prisma.user.create as jest.Mock).mockResolvedValue({ id: '1', email: 'test@example.com' });
 
     const result = await authService.register('test@example.com', 'password123');
 
-    expect(bcrypt.hash).toHaveBeenCalledWith('password123', 12);
+    expect(passwordUtils.hash).toHaveBeenCalledWith('password123');
     expect(prisma.user.create).toHaveBeenCalledWith({
       data: {
         email: 'test@example.com',
@@ -47,7 +50,7 @@ describe('Auth Service - register', () => {
     (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: '1', email: 'test@example.com' });
 
     await expect(authService.register('test@example.com', 'password123')).rejects.toThrow(ConflictError);
-    expect(bcrypt.hash).not.toHaveBeenCalled();
+    expect(passwordUtils.hash).not.toHaveBeenCalled();
     expect(prisma.user.create).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
 import { ConflictError } from '../../common/errors/ConflictError';
+import { passwordUtils } from '../../common/utils/password';
 
 const prisma = new PrismaClient();
 
@@ -14,7 +14,7 @@ export const authService = {
       throw new ConflictError('Email already in use');
     }
 
-    const passwordHash = await bcrypt.hash(password, 12);
+    const passwordHash = await passwordUtils.hash(password);
 
     const user = await prisma.user.create({
       data: {

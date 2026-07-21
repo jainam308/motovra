@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { vehicleValidation } from './vehicle.validation';
 
 const prisma = new PrismaClient();
@@ -90,28 +90,39 @@ export const vehicleService = {
   },
 
   async purchase(id: string): Promise<any> {
-    // NAIVE non-transactional read-modify-write
-    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
-    if (!vehicle) {
-      const err: any = new Error('Vehicle not found');
-      err.statusCode = 404;
-      throw err;
-    }
-    
-    if (vehicle.quantity < 1) {
-      const err: any = new Error('Out of stock');
-      err.statusCode = 409;
-      throw err;
-    }
+    try {
+      return await prisma.$transaction(
+        async (tx) => {
+          const vehicle = await tx.vehicle.findUnique({ where: { id } });
+          if (!vehicle) {
+            const err: any = new Error('Vehicle not found');
+            err.statusCode = 404;
+            throw err;
+          }
+          
+          if (vehicle.quantity < 1) {
+            const err: any = new Error('Out of stock');
+            err.statusCode = 409;
+            throw err;
+          }
 
-    // Deliberate delay to expose race condition in naive implementation
-    await new Promise(resolve => setTimeout(resolve, 50));
-
-    // Since we aren't using transactions, two concurrent requests can both pass the quantity check above.
-    return prisma.vehicle.update({
-      where: { id },
-      data: { quantity: vehicle.quantity - 1 }
-    });
+          return tx.vehicle.update({
+            where: { id },
+            data: { quantity: vehicle.quantity - 1 }
+          });
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        }
+      );
+    } catch (error: any) {
+      if (error.code === 'P2034') {
+        const err: any = new Error('Concurrency conflict. Please try again.');
+        err.statusCode = 409;
+        throw err;
+      }
+      throw error;
+    }
   },
 
   async restock(id: string, amount: number): Promise<any> {

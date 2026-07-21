@@ -93,6 +93,38 @@ export const authService = {
   },
 
   async googleLogin(profile: any): Promise<any> {
-    throw new Error('Not implemented');
+    const email = profile.emails?.[0].value;
+    if (!email) throw new Error('No email found in Google profile');
+
+    let user = await prisma.user.findUnique({ where: { googleId: profile.id } });
+    if (!user) {
+      user = await prisma.user.findUnique({ where: { email } });
+      if (user) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { googleId: profile.id }
+        });
+      } else {
+        user = await prisma.user.create({
+          data: {
+            email,
+            googleId: profile.id,
+          }
+        });
+      }
+    }
+
+    const accessToken = jwtUtils.generateAccessToken({ userId: user.id, role: user.role });
+    const refreshToken = jwtUtils.generateRefreshToken({ userId: user.id });
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      }
+    });
+
+    return { accessToken, refreshToken };
   }
 };

@@ -9,6 +9,7 @@ jest.mock('@prisma/client', () => {
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
     },
     refreshToken: {
       findUnique: jest.fn(),
@@ -99,10 +100,26 @@ describe('Auth Service - googleLogin', () => {
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
     (prisma.user.create as jest.Mock).mockResolvedValue({ id: '1', role: 'CUSTOMER' });
     
-    await expect(authService.googleLogin({
+    const result = await authService.googleLogin({
       id: 'google123',
       emails: [{ value: 'google@example.com' }]
-    })).rejects.toThrow('Not implemented');
+    });
+    expect(result).toHaveProperty('accessToken');
+    expect(result).toHaveProperty('refreshToken');
+    expect(prisma.user.create).toHaveBeenCalled();
+  });
+
+  it('should link googleId if email already exists', async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValueOnce(null);
+    (prisma.user.findUnique as jest.Mock).mockResolvedValueOnce({ id: '1', email: 'google@example.com', role: 'CUSTOMER' });
+    (prisma.user.update as jest.Mock).mockResolvedValue({ id: '1', role: 'CUSTOMER' });
+    
+    const result = await authService.googleLogin({
+      id: 'google123',
+      emails: [{ value: 'google@example.com' }]
+    });
+    expect(result).toHaveProperty('accessToken');
+    expect(prisma.user.update).toHaveBeenCalled();
   });
 });
 

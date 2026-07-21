@@ -3,6 +3,23 @@ import app from '../../../app';
 import { PrismaClient } from '@prisma/client';
 import { passwordUtils } from '../../../common/utils/password';
 
+jest.mock('passport', () => ({
+  authenticate: jest.fn((strategy, options, callback) => (req: any, res: any, next: any) => {
+    if (strategy === 'google') {
+      if (req.originalUrl.includes('/google/callback')) {
+        if (callback) {
+          return callback(null, { id: 'mockedGoogleId', emails: [{ value: 'test@example.com' }] });
+        }
+      } else {
+        return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?state=${options.state}`);
+      }
+    }
+    next();
+  }),
+  use: jest.fn(),
+  initialize: jest.fn(() => (req: any, res: any, next: any) => next())
+}));
+
 const prisma = new PrismaClient();
 
 describe('POST /api/auth/login', () => {
@@ -88,16 +105,38 @@ describe('POST /api/auth/login', () => {
   });
 
   describe('GET /api/auth/google', () => {
-    it('should redirect to Google', async () => {
+    it('should redirect to Google with state parameter', async () => {
       const res = await request(app).get('/api/auth/google');
-      expect(res.status).not.toBe(501);
+      expect(res.status).toBe(302);
+      expect(res.header.location).toContain('state=');
+      expect(res.headers['set-cookie'][0]).toMatch(/oauth_state=/);
     });
   });
 
   describe('GET /api/auth/google/callback', () => {
-    it('should return tokens on callback', async () => {
-      const res = await request(app).get('/api/auth/google/callback');
-      expect(res.status).not.toBe(501);
+    it('should return tokens on callback with valid state', async () => {
+      const authRes = await request(app).get('/api/auth/google');
+      const cookies = authRes.headers['set-cookie'];
+      const location = authRes.header.location;
+      const stateParam = new URL(location).searchParams.get('state');
+
+      const res = await request(app)
+        .get(`/api/auth/google/callback?state=${stateParam}`)
+        .set('Cookie', cookies);
+      
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('accessToken');
+    });
+
+    it('should return 401 on state mismatch CSRF attempt', async () => {
+      const authRes = await request(app).get('/api/auth/google');
+      const cookies = authRes.headers['set-cookie'];
+
+      const res = await request(app)
+        .get(`/api/auth/google/callback?state=invalid_hacker_state`)
+        .set('Cookie', cookies);
+      
+      expect(res.status).toBe(401);
     });
   });
 });

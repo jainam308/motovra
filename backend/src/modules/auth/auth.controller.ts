@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from './auth.service';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import './google.strategy';
 
 export const authController = {
   async login(req: Request, res: Response, next: NextFunction) {
@@ -56,10 +60,57 @@ export const authController = {
   },
 
   async googleAuth(req: Request, res: Response, next: NextFunction) {
-    res.status(501).json({ error: 'Not implemented' });
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const state = jwt.sign({ nonce }, process.env.JWT_SECRET!, { expiresIn: '5m' });
+    
+    res.cookie('oauth_state', state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 5 * 60 * 1000,
+      sameSite: 'lax'
+    });
+
+    passport.authenticate('google', { 
+      session: false, 
+      scope: ['profile', 'email'],
+      state
+    })(req, res, next);
   },
 
   async googleCallback(req: Request, res: Response, next: NextFunction) {
-    res.status(501).json({ error: 'Not implemented' });
+    const returnedState = req.query.state as string;
+    const cookieState = req.cookies?.oauth_state;
+
+    if (!returnedState || !cookieState || returnedState !== cookieState) {
+      return res.status(401).json({ error: 'State mismatch CSRF protection failed' });
+    }
+
+    try {
+      jwt.verify(returnedState, process.env.JWT_SECRET!);
+    } catch (e) {
+      return res.status(401).json({ error: 'Invalid or expired state' });
+    }
+
+    res.clearCookie('oauth_state');
+
+    passport.authenticate('google', { session: false }, async (err: any, profile: any) => {
+      if (err) return next(err);
+      if (!profile) return res.status(401).json({ error: 'Google authentication failed' });
+
+      try {
+        const tokens = await authService.googleLogin(profile);
+
+        res.cookie('refreshToken', tokens.refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        res.status(200).json({ accessToken: tokens.accessToken });
+      } catch (error) {
+        next(error);
+      }
+    })(req, res, next);
   }
 };

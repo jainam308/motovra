@@ -1,8 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { ConflictError } from '../../common/errors/ConflictError';
+import { UnauthorizedError } from '../../common/errors/UnauthorizedError';
 import { passwordUtils } from '../../common/utils/password';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret';
 
 export const authService = {
   async register(email: string, password: string): Promise<any> {
@@ -28,6 +32,28 @@ export const authService = {
   },
 
   async login(email: string, password: string): Promise<any> {
-    throw new Error('Not implemented');
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedError('Invalid credentials');
+    }
+
+    const isValid = await passwordUtils.compare(password, user.passwordHash);
+    if (!isValid) {
+      throw new UnauthorizedError('Invalid credentials');
+    }
+
+    const accessToken = jwt.sign(
+      { userId: user.id, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    const refreshToken = jwt.sign(
+      { userId: user.id },
+      JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return { accessToken, refreshToken };
   }
 };

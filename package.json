@@ -1,0 +1,13 @@
+{
+  "name": "motovra",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  }
+}

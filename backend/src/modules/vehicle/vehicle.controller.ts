@@ -9,5 +9,14 @@ export const vehicleController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async list(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await vehicleService.list(req.query);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
   }
 };

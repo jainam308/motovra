@@ -7,5 +7,20 @@ export const vehicleValidation = {
     category: Joi.string().required(),
     price: Joi.number().positive().required(),
     quantity: Joi.number().integer().min(0).required()
-  }).options({ stripUnknown: false, allowUnknown: false, abortEarly: false })
+  }).options({ stripUnknown: false, allowUnknown: false, abortEarly: false }),
+
+  search: Joi.object({
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).default(20),
+    make: Joi.string().optional(),
+    model: Joi.string().optional(),
+    category: Joi.string().optional(),
+    minPrice: Joi.number().min(0).optional(),
+    maxPrice: Joi.number().min(0).optional(),
+  }).custom((obj, helpers) => {
+    if (obj.minPrice !== undefined && obj.maxPrice !== undefined && obj.minPrice > obj.maxPrice) {
+      return helpers.message({ custom: 'minPrice cannot be greater than maxPrice' } as any);
+    }
+    return obj;
+  })
 };

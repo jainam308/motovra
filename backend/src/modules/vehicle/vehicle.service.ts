@@ -15,5 +15,43 @@ export const vehicleService = {
     return prisma.vehicle.create({
       data: value
     });
+  },
+
+  async list(query: any): Promise<any> {
+    const { error, value } = vehicleValidation.search.validate(query);
+    if (error) {
+      const err: any = new Error(error.message);
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const { page, limit, make, model, category, minPrice, maxPrice } = value;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (make) where.make = { contains: make, mode: 'insensitive' };
+    if (model) where.model = { contains: model, mode: 'insensitive' };
+    if (category) where.category = { contains: category, mode: 'insensitive' };
+    
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = minPrice;
+      if (maxPrice !== undefined) where.price.lte = maxPrice;
+    }
+
+    const [data, total] = await Promise.all([
+      prisma.vehicle.findMany({ where, skip, take: limit }),
+      prisma.vehicle.count({ where })
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   }
 };

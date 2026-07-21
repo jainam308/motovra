@@ -2,11 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import { ConflictError } from '../../common/errors/ConflictError';
 import { UnauthorizedError } from '../../common/errors/UnauthorizedError';
 import { passwordUtils } from '../../common/utils/password';
-import jwt from 'jsonwebtoken';
+import { jwtUtils } from '../../common/utils/jwt';
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh_secret';
 
 export const authService = {
   async register(email: string, password: string): Promise<any> {
@@ -42,17 +40,8 @@ export const authService = {
       throw new UnauthorizedError('Invalid credentials');
     }
 
-    const accessToken = jwt.sign(
-      { userId: user.id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '15m' }
-    );
-
-    const refreshToken = jwt.sign(
-      { userId: user.id },
-      JWT_REFRESH_SECRET,
-      { expiresIn: '7d' }
-    );
+    const accessToken = jwtUtils.generateAccessToken({ userId: user.id, role: user.role });
+    const refreshToken = jwtUtils.generateRefreshToken({ userId: user.id });
 
     return { accessToken, refreshToken };
   }

@@ -53,5 +53,13 @@ export const authController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async googleAuth(req: Request, res: Response, next: NextFunction) {
+    res.status(501).json({ error: 'Not implemented' });
+  },
+
+  async googleCallback(req: Request, res: Response, next: NextFunction) {
+    res.status(501).json({ error: 'Not implemented' });
   }
 };

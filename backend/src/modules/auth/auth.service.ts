@@ -90,5 +90,9 @@ export const authService = {
   async logout(token: string): Promise<void> {
     if (!token) return;
     await prisma.refreshToken.deleteMany({ where: { token } });
+  },
+
+  async googleLogin(profile: any): Promise<any> {
+    throw new Error('Not implemented');
   }
 };

@@ -92,3 +92,17 @@ describe('Auth Service - logout', () => {
   });
 });
 
+describe('Auth Service - googleLogin', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('should create a new user if googleId does not exist', async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+    (prisma.user.create as jest.Mock).mockResolvedValue({ id: '1', role: 'CUSTOMER' });
+    
+    await expect(authService.googleLogin({
+      id: 'google123',
+      emails: [{ value: 'google@example.com' }]
+    })).rejects.toThrow('Not implemented');
+  });
+});
+

@@ -86,4 +86,18 @@ describe('POST /api/auth/login', () => {
       expect(refreshRes.status).toBe(401);
     });
   });
+
+  describe('GET /api/auth/google', () => {
+    it('should redirect to Google', async () => {
+      const res = await request(app).get('/api/auth/google');
+      expect(res.status).not.toBe(501);
+    });
+  });
+
+  describe('GET /api/auth/google/callback', () => {
+    it('should return tokens on callback', async () => {
+      const res = await request(app).get('/api/auth/google/callback');
+      expect(res.status).not.toBe(501);
+    });
+  });
 });

@@ -85,5 +85,9 @@ export const authService = {
     } catch (error) {
       throw new UnauthorizedError('Invalid refresh token');
     }
+  },
+
+  async logout(token: string): Promise<void> {
+    throw new Error('Not implemented');
   }
 };

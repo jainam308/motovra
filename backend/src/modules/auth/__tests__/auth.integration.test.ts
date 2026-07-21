@@ -64,4 +64,26 @@ describe('POST /api/auth/login', () => {
       expect(refreshRes.headers['set-cookie'][0]).toMatch(/refreshToken=.*;.*HttpOnly/);
     });
   });
+
+  describe('POST /api/auth/logout', () => {
+    it('should clear the cookie and invalidate the token, making subsequent refreshes fail', async () => {
+      const loginRes = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'testlogin@example.com', password: 'password123' });
+      
+      const cookies = loginRes.headers['set-cookie'];
+
+      const logoutRes = await request(app)
+        .post('/api/auth/logout')
+        .set('Cookie', cookies);
+      
+      expect(logoutRes.status).toBe(200);
+
+      const refreshRes = await request(app)
+        .post('/api/auth/refresh')
+        .set('Cookie', cookies);
+      
+      expect(refreshRes.status).toBe(401);
+    });
+  });
 });

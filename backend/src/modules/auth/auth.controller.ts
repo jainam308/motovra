@@ -36,5 +36,13 @@ export const authController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      res.status(501).json({ error: 'Not implemented' });
+    } catch (error) {
+      next(error);
+    }
   }
 };

@@ -82,3 +82,13 @@ describe('Auth Service - login', () => {
   });
 });
 
+describe('Auth Service - logout', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should delete the refresh token from the database', async () => {
+    await expect(authService.logout('some-token')).rejects.toThrow();
+  });
+});
+

@@ -76,4 +76,28 @@ From this point onward, follow the same Test-Driven Development (TDD) workflow t
 Implement the user login flow with JWT-based authentication. Add unit and integration tests for the complete login flow, including invalid credentials and protected route access.
 prompt9:
 the integration red phase has been crashed please check and solve the issue
+Prompt 10:
 
+Let's add refresh tokens next. Implement secure refresh token rotation, store the refresh token in the database, and replace it whenever a new one is issued. Follow the same TDD workflow and include both unit and integration tests.
+
+Prompt 11:
+
+Now implement logout. When a user logs out, invalidate their refresh token so it can't be used again. Add the necessary tests and stop once everything is passing.
+
+Prompt 12:
+
+Let's add Google Sign-In. Integrate Google OAuth and issue the same JWT access and refresh tokens after a successful login. If any manual setup or credentials are required, stop and let me handle that first.
+
+Prompt 13:
+Finally, add role-based access control. Create reusable middleware to protect routes based on user roles, and cover both allowed and denied access with unit and integration tests. Follow the same RED → GREEN → REFACTOR workflow we've used throughout.
+Prompt 14:
+Let's start the Vehicle module. Implement the POST /api/vehicles endpoint so only ADMIN users can create vehicles. Follow the same RED → GREEN → REFACTOR workflow by writing the failing tests first, then implement the validation, service, controller, and route until all tests pass. Stop once it's complete so I can review it.
+
+Prompt 15:
+Now implement vehicle listing. Add GET /api/vehicles with pagination, sorting, and filtering by make, model, category, and price range using query parameters. Continue following the same TDD workflow and include both unit and integration tests.
+
+Prompt 16:
+Implement vehicle update and delete. Add PUT /api/vehicles/:id and DELETE /api/vehicles/:id with proper validation, authorization, and error handling. Write the failing tests first, complete the implementation, refactor, and ensure all tests pass before moving on.
+
+Prompt 17:
+Finally, implement vehicle purchase and restocking. Use a Prisma transaction with TransactionIsolationLevel.Serializable to safely handle concurrent purchases and prevent overselling. Add a restock endpoint for administrators and include unit and integration tests, including a concurrency test. Follow the same RED → GREEN → REFACTOR workflow and stop once the entire Vehicle module is complete so I can review i

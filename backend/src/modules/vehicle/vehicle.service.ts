@@ -87,5 +87,50 @@ export const vehicleService = {
     return prisma.vehicle.delete({
       where: { id }
     });
+  },
+
+  async purchase(id: string): Promise<any> {
+    // NAIVE non-transactional read-modify-write
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+    if (!vehicle) {
+      const err: any = new Error('Vehicle not found');
+      err.statusCode = 404;
+      throw err;
+    }
+    
+    if (vehicle.quantity < 1) {
+      const err: any = new Error('Out of stock');
+      err.statusCode = 409;
+      throw err;
+    }
+
+    // Deliberate delay to expose race condition in naive implementation
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Since we aren't using transactions, two concurrent requests can both pass the quantity check above.
+    return prisma.vehicle.update({
+      where: { id },
+      data: { quantity: vehicle.quantity - 1 }
+    });
+  },
+
+  async restock(id: string, amount: number): Promise<any> {
+    if (!amount || amount < 1) {
+      const err: any = new Error('Invalid amount');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+    if (!vehicle) {
+      const err: any = new Error('Vehicle not found');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    return prisma.vehicle.update({
+      where: { id },
+      data: { quantity: vehicle.quantity + amount }
+    });
   }
 };

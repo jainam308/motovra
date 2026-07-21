@@ -9,5 +9,7 @@ router.get('/', vehicleController.list);
 router.get('/search', vehicleController.list);
 router.put('/:id', requireAuth, requireRole('ADMIN'), vehicleController.update);
 router.delete('/:id', requireAuth, requireRole('ADMIN'), vehicleController.delete);
+router.post('/:id/purchase', requireAuth, vehicleController.purchase);
+router.post('/:id/restock', requireAuth, requireRole('ADMIN'), vehicleController.restock);
 
 export default router;

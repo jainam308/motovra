@@ -129,3 +129,42 @@ describe('DELETE /api/vehicles/:id', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('POST /api/vehicles/:id/restock', () => {
+  it('should return 403 for CUSTOMER role', async () => {
+    const customerToken = jwtUtils.generateAccessToken({ userId: 'cust1', role: 'CUSTOMER' });
+    const res = await request(app)
+      .post('/api/vehicles/123/restock')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({ amount: 5 });
+    
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('POST /api/vehicles/:id/purchase (Concurrency)', () => {
+  it('should handle concurrent purchases safely and prevent negative quantity', async () => {
+    const adminToken = jwtUtils.generateAccessToken({ userId: 'admin1', role: 'ADMIN' });
+    const customerToken = jwtUtils.generateAccessToken({ userId: 'cust1', role: 'CUSTOMER' });
+
+    const vehicleRes = await request(app)
+      .post('/api/vehicles')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ make: 'Honda', model: 'Concurrent', category: 'SEDAN', price: 20000, quantity: 1 });
+    
+    const vehicleId = vehicleRes.body.id;
+
+    const req1 = request(app).post(`/api/vehicles/${vehicleId}/purchase`).set('Authorization', `Bearer ${customerToken}`);
+    const req2 = request(app).post(`/api/vehicles/${vehicleId}/purchase`).set('Authorization', `Bearer ${customerToken}`);
+
+    const [res1, res2] = await Promise.all([req1, req2]);
+
+    const statuses = [res1.status, res2.status].sort();
+    
+    // RED phase expectation (This will FAIL with naive implementation!)
+    expect(statuses).toEqual([200, 409]);
+
+    const finalVehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
+    expect(finalVehicle?.quantity).toBe(0);
+  });
+});

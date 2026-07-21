@@ -36,5 +36,23 @@ export const vehicleController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async purchase(req: Request, res: Response, next: NextFunction) {
+    try {
+      const vehicle = await vehicleService.purchase(req.params.id);
+      res.status(200).json(vehicle);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async restock(req: Request, res: Response, next: NextFunction) {
+    try {
+      const vehicle = await vehicleService.restock(req.params.id, req.body.amount);
+      res.status(200).json(vehicle);
+    } catch (error) {
+      next(error);
+    }
   }
 };

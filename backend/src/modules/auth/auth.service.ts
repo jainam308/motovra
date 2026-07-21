@@ -43,10 +43,47 @@ export const authService = {
     const accessToken = jwtUtils.generateAccessToken({ userId: user.id, role: user.role });
     const refreshToken = jwtUtils.generateRefreshToken({ userId: user.id });
 
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      }
+    });
+
     return { accessToken, refreshToken };
   },
 
   async refresh(token: string): Promise<any> {
-    throw new Error('Not implemented');
+    if (!token) throw new UnauthorizedError('No refresh token provided');
+
+    try {
+      const decoded = jwtUtils.verifyRefreshToken(token);
+      
+      const dbToken = await prisma.refreshToken.findUnique({ where: { token } });
+      if (!dbToken) {
+        throw new UnauthorizedError('Invalid refresh token');
+      }
+
+      await prisma.refreshToken.delete({ where: { id: dbToken.id } });
+
+      const user = await prisma.user.findUnique({ where: { id: dbToken.userId } });
+      if (!user) throw new UnauthorizedError('User not found');
+
+      const accessToken = jwtUtils.generateAccessToken({ userId: user.id, role: user.role });
+      const refreshToken = jwtUtils.generateRefreshToken({ userId: user.id });
+
+      await prisma.refreshToken.create({
+        data: {
+          token: refreshToken,
+          userId: user.id,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        }
+      });
+
+      return { accessToken, refreshToken };
+    } catch (error) {
+      throw new UnauthorizedError('Invalid refresh token');
+    }
   }
 };

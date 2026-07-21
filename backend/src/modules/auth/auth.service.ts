@@ -88,6 +88,7 @@ export const authService = {
   },
 
   async logout(token: string): Promise<void> {
-    throw new Error('Not implemented');
+    if (!token) return;
+    await prisma.refreshToken.deleteMany({ where: { token } });
   }
 };

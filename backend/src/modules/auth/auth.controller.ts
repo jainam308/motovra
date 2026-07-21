@@ -40,7 +40,16 @@ export const authController = {
 
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
-      res.status(501).json({ error: 'Not implemented' });
+      const token = req.cookies?.refreshToken;
+      if (token) {
+        await authService.logout(token);
+      }
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+      res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
       next(error);
     }

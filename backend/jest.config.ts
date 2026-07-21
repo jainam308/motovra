@@ -17,6 +17,7 @@ const config: Config = {
     '!src/config/**/*.ts',
   ],
   coverageDirectory: 'coverage',
+  testTimeout: 30000,
 };
 
 export default config;

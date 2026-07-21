@@ -25,5 +25,9 @@ export const authService = {
     });
 
     return user;
+  },
+
+  async login(email: string, password: string): Promise<any> {
+    throw new Error('Not implemented');
   }
 };

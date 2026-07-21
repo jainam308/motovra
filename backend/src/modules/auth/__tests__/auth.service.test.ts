@@ -54,3 +54,26 @@ describe('Auth Service - register', () => {
     expect(prisma.user.create).not.toHaveBeenCalled();
   });
 });
+
+describe('Auth Service - login', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should throw Error for incorrect password', async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: '1', email: 'test@example.com', passwordHash: 'hash' });
+    (passwordUtils.compare as jest.Mock).mockResolvedValue(false);
+
+    await expect(authService.login('test@example.com', 'wrong')).rejects.toThrow();
+  });
+
+  it('should return tokens for correct credentials', async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: '1', email: 'test@example.com', passwordHash: 'hash' });
+    (passwordUtils.compare as jest.Mock).mockResolvedValue(true);
+
+    const result = await authService.login('test@example.com', 'correct');
+    expect(result).toHaveProperty('accessToken');
+    expect(result).toHaveProperty('refreshToken');
+  });
+});
+

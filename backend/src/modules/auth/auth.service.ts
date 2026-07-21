@@ -44,5 +44,9 @@ export const authService = {
     const refreshToken = jwtUtils.generateRefreshToken({ userId: user.id });
 
     return { accessToken, refreshToken };
+  },
+
+  async refresh(token: string): Promise<any> {
+    throw new Error('Not implemented');
   }
 };

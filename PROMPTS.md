@@ -812,3 +812,5 @@ Requirements:
 
 prompt 40:
 write prompt for antigravity for this feature 1. Booking Confirmation Emails Automatically send an email after a vehicle booking containing: Booking ID Vehicle details Booking amount Dealer information Next steps2. Payment Success Emails After Razorpay verification: Payment ID Amount paid Transaction details Receipt Thank you message
+prompt 41:
+as we know that  razorpay is not working so can you write a note that as there is no real back account as it is just as test mode  please proceed with simulator 

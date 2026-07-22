@@ -1,4 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
+import { emailService } from '../../common/services/email.service';
 
 const prisma = new PrismaClient();
 
@@ -97,6 +98,29 @@ export const orderService = {
               postalCode: delivery.postalCode
             }
           });
+
+          // Fetch user email if available
+          let customerEmail = 'customer@motovra.com';
+          if (validUserId) {
+            const userObj = await tx.user.findUnique({ where: { id: validUserId } });
+            if (userObj?.email) customerEmail = userObj.email;
+          }
+
+          // Trigger Booking Confirmation Email safely
+          try {
+            await emailService.sendBookingConfirmationEmail({
+              orderNumber: order.orderNumber,
+              customerName: order.fullName,
+              customerEmail,
+              make: order.make,
+              model: order.model,
+              bookingAmount: Number(order.totalAmount),
+              dealerPhone: '+1 (800) 555-LUXE',
+              nextSteps: 'Our logistics manager will contact you to confirm delivery scheduling and final paperwork.',
+            });
+          } catch (emailErr) {
+            console.error('[Booking Email Error]', emailErr);
+          }
 
           return {
             ...order,

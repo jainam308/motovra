@@ -11,6 +11,17 @@ export interface CustomerConfirmationEmailPayload {
   subject: string;
 }
 
+export interface BookingConfirmationEmailPayload {
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  make: string;
+  model: string;
+  bookingAmount: number;
+  dealerPhone?: string;
+  nextSteps?: string;
+}
+
 export const emailService = {
   /**
    * Send Brevo REST API email helper
@@ -50,7 +61,6 @@ export const emailService = {
       return data;
     } catch (error) {
       console.error('[Brevo Email Error]', error);
-      // Return fallback object so contact form submission isn't blocked by email outages
       return { error: true };
     }
   },
@@ -125,6 +135,64 @@ export const emailService = {
     return await this.sendBrevoEmail({
       to: [{ email, name }],
       subject: `We've received your inquiry: ${subject}`,
+      htmlContent,
+    });
+  },
+
+  /**
+   * TDD Cycle 1 (Booking Email): Booking Confirmation Email via Brevo
+   */
+  async sendBookingConfirmationEmail(payload: BookingConfirmationEmailPayload) {
+    const {
+      orderNumber,
+      customerName,
+      customerEmail,
+      make,
+      model,
+      bookingAmount,
+      dealerPhone = '+1 (800) 555-LUXE',
+      nextSteps = 'Our logistics manager will contact you to confirm delivery scheduling and final paperwork.',
+    } = payload;
+
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0f0f11; color: #ffffff; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <h2 style="color: #f59e0b; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Booking Confirmation</h2>
+        <p style="font-size: 14px;">Dear <strong>${customerName}</strong>,</p>
+        <p style="font-size: 14px; line-height: 1.6; color: #d4d4d8;">
+          Your vehicle booking has been successfully reserved! Below are your booking and vehicle details:
+        </p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; font-size: 14px; background-color: rgba(255,255,255,0.03); border-radius: 8px;">
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa; width: 130px;"><strong>Booking ID:</strong></td>
+            <td style="padding: 10px; color: #f59e0b; font-weight: bold;">${orderNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Vehicle:</strong></td>
+            <td style="padding: 10px; color: #ffffff;">${make} ${model}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Amount:</strong></td>
+            <td style="padding: 10px; color: #10b981; font-weight: bold;">$${bookingAmount.toLocaleString()}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Dealer Phone:</strong></td>
+            <td style="padding: 10px; color: #ffffff;">${dealerPhone}</td>
+          </tr>
+        </table>
+
+        <div style="margin-top: 20px; background-color: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 12px; border-radius: 4px;">
+          <strong style="color: #60a5fa; display: block; margin-bottom: 4px;">Next Steps:</strong>
+          <span style="font-size: 13px; color: #93c5fd;">${nextSteps}</span>
+        </div>
+
+        <p style="margin-top: 25px; font-size: 12px; color: #71717a;">Motovra Luxury Motors • Concierge Service</p>
+      </div>
+    `;
+
+    return await this.sendBrevoEmail({
+      to: [{ email: customerEmail, name: customerName }],
+      subject: `Booking Confirmed: ${make} ${model} (${orderNumber})`,
       htmlContent,
     });
   },

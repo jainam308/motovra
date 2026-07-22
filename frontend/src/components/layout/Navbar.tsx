@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
-import { LogOut, User } from 'lucide-react';
+import { User, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const Navbar = () => {
@@ -42,8 +42,12 @@ export const Navbar = () => {
                   Dashboard
                 </Link>
               )}
+              <Link to="/orders" className="flex items-center text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                <Package className="w-4 h-4 mr-1.5 text-primary" />
+                My Orders
+              </Link>
               <Link to="/profile" className="flex items-center text-sm font-medium text-gray-300 hover:text-white transition-colors">
-                <User className="w-5 h-5 mr-2 text-primary" />
+                <User className="w-4 h-4 mr-1.5 text-primary" />
                 My Garage
               </Link>
               <Button variant="outline" size="sm" onClick={handleLogout} className="border-border hover:bg-secondary">

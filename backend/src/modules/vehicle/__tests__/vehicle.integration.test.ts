@@ -10,13 +10,21 @@ describe('POST /api/vehicles', () => {
   let customerToken: string;
 
   beforeAll(async () => {
+    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Order" CASCADE;').catch(() => {});
     await prisma.vehicle.deleteMany();
+    await prisma.user.deleteMany();
+
+    await prisma.user.create({ data: { id: 'admin1', email: 'admin1@test.com', role: 'ADMIN' } });
+    await prisma.user.create({ data: { id: 'cust1', email: 'cust1@test.com', role: 'CUSTOMER' } });
+
     adminToken = jwtUtils.generateAccessToken({ userId: 'admin1', role: 'ADMIN' });
     customerToken = jwtUtils.generateAccessToken({ userId: 'cust1', role: 'CUSTOMER' });
   });
 
   afterAll(async () => {
+    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Order" CASCADE;').catch(() => {});
     await prisma.vehicle.deleteMany();
+    await prisma.user.deleteMany();
     await prisma.$disconnect();
   });
 
@@ -59,6 +67,7 @@ describe('GET /api/vehicles', () => {
 
 describe('GET /api/vehicles/search', () => {
   beforeAll(async () => {
+    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Order" CASCADE;').catch(() => {});
     await prisma.vehicle.deleteMany();
     await prisma.vehicle.createMany({
       data: [
@@ -161,8 +170,8 @@ describe('POST /api/vehicles/:id/purchase (Concurrency)', () => {
 
     const statuses = [res1.status, res2.status].sort();
     
-    // RED phase expectation (This will FAIL with naive implementation!)
-    expect(statuses).toEqual([200, 409]);
+    // 201 Created for successful purchase order, 409 Conflict for concurrent purchase
+    expect(statuses).toEqual([201, 409]);
 
     const finalVehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
     expect(finalVehicle?.quantity).toBe(0);

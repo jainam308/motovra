@@ -40,8 +40,9 @@ export const vehicleController = {
 
   async purchase(req: Request, res: Response, next: NextFunction) {
     try {
-      const vehicle = await vehicleService.purchase(req.params.id);
-      res.status(200).json(vehicle);
+      const userId = (req as any).user?.userId || 'guest';
+      const order = await vehicleService.purchase(req.params.id, userId, req.body);
+      res.status(201).json(order);
     } catch (error) {
       next(error);
     }

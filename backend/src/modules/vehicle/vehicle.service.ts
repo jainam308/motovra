@@ -1,5 +1,6 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { vehicleValidation } from './vehicle.validation';
+import { orderService } from '../order/order.service';
 
 const prisma = new PrismaClient();
 
@@ -89,40 +90,13 @@ export const vehicleService = {
     });
   },
 
-  async purchase(id: string): Promise<any> {
-    try {
-      return await prisma.$transaction(
-        async (tx) => {
-          const vehicle = await tx.vehicle.findUnique({ where: { id } });
-          if (!vehicle) {
-            const err: any = new Error('Vehicle not found');
-            err.statusCode = 404;
-            throw err;
-          }
-          
-          if (vehicle.quantity < 1) {
-            const err: any = new Error('Out of stock');
-            err.statusCode = 409;
-            throw err;
-          }
-
-          return tx.vehicle.update({
-            where: { id },
-            data: { quantity: vehicle.quantity - 1 }
-          });
-        },
-        {
-          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-        }
-      );
-    } catch (error: any) {
-      if (error.code === 'P2034') {
-        const err: any = new Error('Concurrency conflict. Please try again.');
-        err.statusCode = 409;
-        throw err;
-      }
-      throw error;
-    }
+  async purchase(id: string, userId: string = 'guest', payload: any = {}): Promise<any> {
+    return orderService.createOrder({
+      vehicleId: id,
+      userId,
+      quantity: payload?.quantity || 1,
+      deliveryInfo: payload?.deliveryInfo
+    });
   },
 
   async restock(id: string, amount: number): Promise<any> {

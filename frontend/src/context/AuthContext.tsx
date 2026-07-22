@@ -42,16 +42,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    try {
-      await api.post('/auth/logout');
-    } catch (e) {
-      // ignore server errors during logout, wipe local state anyway
-    } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      setUser(null);
-    }
+    // Always clear local state first — never block UI on server response
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    setUser(null);
+    // Fire and forget server-side token invalidation
+    api.post('/auth/logout').catch(() => {});
   };
 
   return (

@@ -28,9 +28,12 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token');
 
-        const { data } = await axios.post('/api/auth/refresh', { refreshToken });
+        // The backend reads the refreshToken from the httpOnly cookie, not the body
+        const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
         localStorage.setItem('accessToken', data.accessToken);
-        
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
         // Retry original request
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);

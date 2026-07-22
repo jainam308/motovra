@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { vehicleController } from './vehicle.controller';
+import { savedVehicleController } from './saved.controller';
 import { requireAuth } from '../../common/middlewares/requireAuth';
 import { requireRole } from '../../common/middlewares/requireRole';
 
@@ -60,6 +61,17 @@ router.post('/', requireAuth, requireRole('ADMIN'), vehicleController.create);
  *         description: Paginated list of vehicles
  */
 router.get('/', vehicleController.list);
+
+/**
+ * @swagger
+ * /api/vehicles/saved:
+ *   get:
+ *     summary: Get user's saved vehicles
+ *     tags: [Vehicles]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/saved', requireAuth, savedVehicleController.getSavedVehicles);
 
 /**
  * @swagger
@@ -164,6 +176,17 @@ router.delete('/:id', requireAuth, requireRole('ADMIN'), vehicleController.delet
  *         description: Vehicle not found
  */
 router.post('/:id/purchase', requireAuth, vehicleController.purchase);
+
+/**
+ * @swagger
+ * /api/vehicles/{id}/save:
+ *   post:
+ *     summary: Toggle save status of a vehicle for the user
+ *     tags: [Vehicles]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post('/:id/save', requireAuth, savedVehicleController.toggleSave);
 
 /**
  * @swagger

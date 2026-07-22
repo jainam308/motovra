@@ -1,24 +1,58 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from './auth.service';
-import passport from 'passport';
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import './google.strategy';
 
 export const authController = {
-  async login(req: Request, res: Response, next: NextFunction) {
+  async register(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
+
+      // register creates the user, then login auto-generates tokens
+      await authService.register(email, password);
       const tokens = await authService.login(email, password);
-      
+
       res.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.status(200).json({ accessToken: tokens.accessToken });
+      return res.status(201).json({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        user: tokens.user,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async login(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
+
+      const tokens = await authService.login(email, password);
+
+      res.cookie('refreshToken', tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(200).json({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        user: tokens.user,
+      });
     } catch (error) {
       next(error);
     }
@@ -28,15 +62,19 @@ export const authController = {
     try {
       const token = req.cookies?.refreshToken;
       const tokens = await authService.refresh(token);
-      
+
       res.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.status(200).json({ accessToken: tokens.accessToken });
+      return res.status(200).json({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        user: tokens.user,
+      });
     } catch (error) {
       next(error);
     }
@@ -51,66 +89,42 @@ export const authController = {
       res.clearCookie('refreshToken', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        sameSite: 'lax',
       });
-      res.status(200).json({ message: 'Logged out successfully' });
+      return res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
       next(error);
     }
   },
 
-  async googleAuth(req: Request, res: Response, next: NextFunction) {
-    const nonce = crypto.randomBytes(16).toString('hex');
-    const state = jwt.sign({ nonce }, process.env.JWT_SECRET!, { expiresIn: '5m' });
-    
-    res.cookie('oauth_state', state, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 5 * 60 * 1000,
-      sameSite: 'lax'
-    });
-
-    passport.authenticate('google', { 
-      session: false, 
-      scope: ['profile', 'email'],
-      state
-    })(req, res, next);
-  },
-
+  /**
+   * Google OAuth callback — called AFTER passport.authenticate middleware in auth.routes.ts
+   * has already verified the code and populated req.user with the Google profile.
+   * Do NOT call passport.authenticate again here.
+   */
   async googleCallback(req: Request, res: Response, next: NextFunction) {
-    const returnedState = req.query.state as string;
-    const cookieState = req.cookies?.oauth_state;
-
-    if (!returnedState || !cookieState || returnedState !== cookieState) {
-      return res.status(401).json({ error: 'State mismatch CSRF protection failed' });
-    }
-
     try {
-      jwt.verify(returnedState, process.env.JWT_SECRET!);
-    } catch (e) {
-      return res.status(401).json({ error: 'Invalid or expired state' });
-    }
+      const profile = req.user as any;
 
-    res.clearCookie('oauth_state');
-
-    passport.authenticate('google', { session: false }, async (err: any, profile: any) => {
-      if (err) return next(err);
-      if (!profile) return res.status(401).json({ error: 'Google authentication failed' });
-
-      try {
-        const tokens = await authService.googleLogin(profile);
-
-        res.cookie('refreshToken', tokens.refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: 7 * 24 * 60 * 60 * 1000
-        });
-
-        res.status(200).json({ accessToken: tokens.accessToken });
-      } catch (error) {
-        next(error);
+      if (!profile) {
+        return res.redirect('http://localhost:5173/login?error=google_failed');
       }
-    })(req, res, next);
-  }
+
+      const tokens = await authService.googleLogin(profile);
+
+      res.cookie('refreshToken', tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      const userParam = encodeURIComponent(JSON.stringify(tokens.user));
+      return res.redirect(
+        `http://localhost:5173/oauth-callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&user=${userParam}`
+      );
+    } catch (error) {
+      next(error);
+    }
+  },
 };

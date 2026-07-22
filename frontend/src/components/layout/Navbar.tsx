@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const Navbar = () => {
@@ -31,18 +31,23 @@ export const Navbar = () => {
           <Link to="/showroom" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
             Showroom
           </Link>
+          <Link to="/contact" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
+            Contact
+          </Link>
           
           {isAuthenticated ? (
-            <div className="flex items-center space-x-4 ml-4">
+            <div className="flex items-center space-x-4">
               {user?.role === 'ADMIN' && (
                 <Link to="/admin" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
                   Dashboard
                 </Link>
               )}
-              <div className="h-4 w-px bg-white/10"></div>
-              <span className="text-sm text-muted-foreground">{user?.email}</span>
-              <Button variant="ghost" size="icon" onClick={handleLogout} title="Log out">
-                <LogOut className="h-4 w-4" />
+              <Link to="/profile" className="flex items-center text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                <User className="w-5 h-5 mr-2 text-primary" />
+                My Garage
+              </Link>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="border-border hover:bg-secondary">
+                Sign Out
               </Button>
             </div>
           ) : (

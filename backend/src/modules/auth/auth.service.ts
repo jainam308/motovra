@@ -51,7 +51,7 @@ export const authService = {
       }
     });
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken, user: { id: user.id, email: user.email, role: user.role } };
   },
 
   async refresh(token: string): Promise<any> {
@@ -81,7 +81,7 @@ export const authService = {
         }
       });
 
-      return { accessToken, refreshToken };
+      return { accessToken, refreshToken, user: { id: user.id, email: user.email, role: user.role } };
     } catch (error) {
       throw new UnauthorizedError('Invalid refresh token');
     }
@@ -125,6 +125,6 @@ export const authService = {
       }
     });
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken, user: { id: user.id, email: user.email, role: user.role } };
   }
 };

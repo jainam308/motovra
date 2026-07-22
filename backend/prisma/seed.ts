@@ -4,83 +4,42 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clear existing data for a clean seed
   console.log('Clearing existing data...');
   await prisma.vehicle.deleteMany();
   await prisma.user.deleteMany();
 
-  // Hash password
   const passwordHash = await bcrypt.hash('password123', 12);
 
-  // Users
   console.log('Seeding users...');
   await prisma.user.create({
-    data: {
-      email: 'admin@example.com',
-      passwordHash,
-      role: 'ADMIN',
-    },
+    data: { email: 'admin@motovra.com', passwordHash, role: 'ADMIN' },
   });
 
   await prisma.user.create({
-    data: {
-      email: 'customer@example.com',
-      passwordHash,
-      role: 'CUSTOMER',
-    },
+    data: { email: 'customer@motovra.com', passwordHash, role: 'CUSTOMER' },
   });
 
-  // Vehicles
   console.log('Seeding vehicles...');
   const vehicles = [
-    {
-      make: 'Toyota',
-      model: 'Camry',
-      category: 'Sedan',
-      price: 25000,
-      quantity: 5,
-    },
-    {
-      make: 'Honda',
-      model: 'Civic',
-      category: 'Sedan',
-      price: 22000,
-      quantity: 3,
-    },
-    {
-      make: 'Ford',
-      model: 'F-150',
-      category: 'Truck',
-      price: 45000,
-      quantity: 2,
-    },
-    {
-      make: 'Tesla',
-      model: 'Model 3',
-      category: 'Electric',
-      price: 40000,
-      quantity: 4,
-    },
-    {
-      make: 'BMW',
-      model: 'X5',
-      category: 'SUV',
-      price: 60000,
-      quantity: 1,
-    },
-    {
-      make: 'Porsche',
-      model: '911',
-      category: 'Sports',
-      price: 105000,
-      quantity: 1,
-    },
+    { make: 'Porsche', model: '911 GT3 RS', category: 'SPORTS', price: 223800, quantity: 2 },
+    { make: 'Aston Martin', model: 'DBS Superleggera', category: 'SPORTS', price: 330000, quantity: 1 },
+    { make: 'Bentley', model: 'Continental GT', category: 'LUXURY', price: 235000, quantity: 3 },
+    { make: 'Rolls-Royce', model: 'Phantom', category: 'LUXURY', price: 460000, quantity: 1 },
+    { make: 'Mercedes-Benz', model: 'G63 AMG', category: 'SUV', price: 179000, quantity: 4 },
+    { make: 'Lamborghini', model: 'Urus Performante', category: 'SUV', price: 260000, quantity: 2 },
+    { make: 'Ferrari', model: 'SF90 Stradale', category: 'SPORTS', price: 524000, quantity: 1 },
+    { make: 'McLaren', model: '765LT', category: 'SPORTS', price: 382500, quantity: 1 },
+    { make: 'Range Rover', model: 'SV Autobiography', category: 'SUV', price: 211000, quantity: 5 },
+    { make: 'Tesla', model: 'Model S Plaid', category: 'ELECTRIC', price: 108490, quantity: 8 },
+    { make: 'Lucid', model: 'Air Sapphire', category: 'ELECTRIC', price: 249000, quantity: 2 },
+    { make: 'Rivian', model: 'R1S', category: 'SUV', price: 92000, quantity: 12 },
+    { make: 'Audi', model: 'RS e-tron GT', category: 'ELECTRIC', price: 143900, quantity: 3 },
+    { make: 'BMW', model: 'M8 Competition', category: 'SPORTS', price: 138800, quantity: 4 },
+    { make: 'Lexus', model: 'LC 500', category: 'LUXURY', price: 99050, quantity: 5 },
   ];
 
   for (const v of vehicles) {
-    await prisma.vehicle.create({
-      data: v,
-    });
+    await prisma.vehicle.create({ data: v });
   }
 
   console.log('✅ Database seeded successfully!');

@@ -33,11 +33,38 @@ const router = Router();
  *                 type: string
  *     responses:
  *       200:
- *         description: Login successful, returns access token
+ *         description: Login successful
  *       401:
  *         description: Invalid credentials
  */
 router.post('/login', authController.login);
+
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new account
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Account created, returns tokens
+ *       409:
+ *         description: Email already in use
+ */
+router.post('/register', authController.register);
 
 /**
  * @swagger
@@ -48,7 +75,7 @@ router.post('/login', authController.login);
  *     security: []
  *     responses:
  *       200:
- *         description: New access token generated
+ *         description: New access token
  *       401:
  *         description: Invalid or missing refresh token
  */
@@ -62,7 +89,7 @@ router.post('/refresh', authController.refresh);
  *     tags: [Auth]
  *     security: []
  *     responses:
- *       204:
+ *       200:
  *         description: Logout successful
  */
 router.post('/logout', authController.logout);
@@ -78,7 +105,10 @@ router.post('/logout', authController.logout);
  *       302:
  *         description: Redirects to Google consent screen
  */
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(
+  '/google',
+  passport.authenticate('google', { session: false, scope: ['profile', 'email'] })
+);
 
 /**
  * @swagger
@@ -88,11 +118,18 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
  *     tags: [Auth]
  *     security: []
  *     responses:
- *       200:
- *         description: OAuth successful, returns tokens
+ *       302:
+ *         description: Redirects to frontend with tokens
  *       401:
  *         description: OAuth failed
  */
-router.get('/google/callback', passport.authenticate('google', { session: false }), authController.googleCallback);
+router.get(
+  '/google/callback',
+  passport.authenticate('google', {
+    session: false,
+    failureRedirect: 'http://localhost:5173/login?error=google_failed',
+  }),
+  authController.googleCallback
+);
 
 export default router;

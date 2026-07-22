@@ -15,6 +15,7 @@ model User {
   role         Role     @default(CUSTOMER)
   createdAt    DateTime @default(now())
   refreshTokens RefreshToken[]
+  savedVehicles SavedVehicle[]
 }
 
 enum Role {
@@ -29,8 +30,22 @@ model Vehicle {
   category   String
   price      Decimal
   quantity   Int      @default(0)
+  imageUrl   String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  savedBy    SavedVehicle[]
+}
+
+model SavedVehicle {
+  id        String   @id @default(uuid())
+  userId    String
+  vehicleId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, vehicleId])
 }
 
 model RefreshToken {

@@ -6,7 +6,8 @@ export const vehicleValidation = {
     model: Joi.string().required(),
     category: Joi.string().required(),
     price: Joi.number().positive().required(),
-    quantity: Joi.number().integer().min(0).required()
+    quantity: Joi.number().integer().min(0).required(),
+    imageUrl: Joi.string().uri().allow('', null).optional()
   }).options({ stripUnknown: false, allowUnknown: false, abortEarly: false }),
 
   search: Joi.object({
@@ -29,6 +30,7 @@ export const vehicleValidation = {
     model: Joi.string().optional(),
     category: Joi.string().optional(),
     price: Joi.number().positive().optional(),
-    quantity: Joi.number().integer().min(0).optional()
+    quantity: Joi.number().integer().min(0).optional(),
+    imageUrl: Joi.string().uri().allow('', null).optional()
   }).options({ stripUnknown: false, allowUnknown: false, abortEarly: false })
 };

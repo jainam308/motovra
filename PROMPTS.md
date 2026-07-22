@@ -479,3 +479,10 @@ Do not introduce unnecessary complexity.
 
 prompt 34
 first of all remove this admin direct button and make sure that security should be our priority bee proffesional 
+
+prompt 35:
+twhile testing i found that input cant select , there is one glitch that if user is signup using google auth it will have no pass  will it be okay, does you completed order management because i dont think so why they are putting some random address .add the user input the address and also use leapymap ai which detech user cureent location . please make it as professional ecommerce site interface same like amazon flipkart
+
+prompt 36:
+okay so delivery function is not working and also add map so user can place through itself
+in map keep default address as an current address along with also keep search option of an address

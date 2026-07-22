@@ -26,9 +26,11 @@ export interface RecentActivity {
   recentContactInquiries: any[];
 }
 
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 export const analyticsService = {
   /**
-   * TDD Cycle 1: Dashboard Statistics
+   * TDD Cycle 1: Dashboard Summary Statistics
    */
   async getDashboardStats(): Promise<DashboardStats> {
     const [
@@ -58,97 +60,86 @@ export const analyticsService = {
   },
 
   /**
-   * TDD Cycle 2: Analytics Reports
+   * TDD Cycle 2: Comprehensive Analytics Reports
    */
   async getAnalyticsReports(): Promise<AnalyticsReports> {
-    // 1. Orders by Status
-    const ordersByStatus = await prisma.order.groupBy({
-      by: ['status'],
-      _count: { id: true },
-    });
+    const [
+      ordersByStatus,
+      topVehiclesGroup,
+      bookingAvgAgg,
+      brandGroup,
+      availableCount,
+      soldCount,
+      allOrders,
+      allPayments,
+    ] = await Promise.all([
+      prisma.order.groupBy({
+        by: ['status'],
+        _count: { id: true },
+      }),
+      prisma.order.groupBy({
+        by: ['make', 'model'],
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 5,
+      }),
+      prisma.payment.aggregate({
+        where: { paymentStatus: 'BOOKING_PAID' },
+        _avg: { bookingAmount: true },
+      }),
+      prisma.vehicle.groupBy({
+        by: ['make'],
+        _count: { id: true },
+      }),
+      prisma.vehicle.count({ where: { quantity: { gt: 0 } } }),
+      prisma.vehicle.count({ where: { quantity: 0 } }),
+      prisma.order.findMany({ select: { createdAt: true }, orderBy: { createdAt: 'asc' } }),
+      prisma.payment.findMany({
+        where: { paymentStatus: 'BOOKING_PAID' },
+        select: { paidAt: true, bookingAmount: true },
+        orderBy: { paidAt: 'asc' },
+      }),
+    ]);
 
+    // Format Booking Status Distribution
     const bookingStatusDistribution = ordersByStatus.map(o => ({
       status: o.status,
       count: o._count.id,
     }));
 
-    // 2. Top Booked Vehicles
-    const topVehiclesGroup = await prisma.order.groupBy({
-      by: ['make', 'model'],
-      _count: { id: true },
-      orderBy: {
-        _count: {
-          id: 'desc',
-        },
-      },
-      take: 5,
-    });
-
+    // Format Top Booked Vehicles
     const topBookedVehicles = topVehiclesGroup.map(v => ({
       make: v.make,
       model: v.model,
       count: v._count.id,
     }));
 
-    // 3. Average Booking Value & Total Paid
-    const bookingAvgAgg = await prisma.payment.aggregate({
-      where: { paymentStatus: 'BOOKING_PAID' },
-      _avg: { bookingAmount: true },
-    });
-
-    const averageBookingValue = Number(bookingAvgAgg._avg.bookingAmount || 0);
-
-    // 4. Vehicles by Brand (Make)
-    const brandGroup = await prisma.vehicle.groupBy({
-      by: ['make'],
-      _count: { id: true },
-    });
-
+    // Format Vehicles By Brand
     const vehiclesByBrand = brandGroup.map(b => ({
       brand: b.make,
       count: b._count.id,
     }));
 
-    // 5. Available vs Sold Vehicles
-    const availableCount = await prisma.vehicle.count({
-      where: { quantity: { gt: 0 } },
-    });
-    const soldCount = await prisma.vehicle.count({
-      where: { quantity: 0 },
-    });
-
-    // 6. Monthly Bookings & Monthly Revenue (Last 6 Months)
-    const allOrders = await prisma.order.findMany({
-      select: { createdAt: true, totalAmount: true },
-      orderBy: { createdAt: 'asc' },
-    });
-
-    const allPayments = await prisma.payment.findMany({
-      where: { paymentStatus: 'BOOKING_PAID' },
-      select: { paidAt: true, bookingAmount: true },
-      orderBy: { paidAt: 'asc' },
-    });
-
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    // Format Monthly Bookings
     const monthlyBookingsMap: { [key: string]: number } = {};
-    const monthlyRevenueMap: { [key: string]: number } = {};
-
     allOrders.forEach(o => {
       const date = new Date(o.createdAt);
-      const key = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+      const key = `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
       monthlyBookingsMap[key] = (monthlyBookingsMap[key] || 0) + 1;
-    });
-
-    allPayments.forEach(p => {
-      const date = p.paidAt ? new Date(p.paidAt) : new Date();
-      const key = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-      monthlyRevenueMap[key] = (monthlyRevenueMap[key] || 0) + Number(p.bookingAmount);
     });
 
     const monthlyBookings = Object.keys(monthlyBookingsMap).map(m => ({
       month: m,
       count: monthlyBookingsMap[m],
     }));
+
+    // Format Monthly Revenue
+    const monthlyRevenueMap: { [key: string]: number } = {};
+    allPayments.forEach(p => {
+      const date = p.paidAt ? new Date(p.paidAt) : new Date();
+      const key = `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+      monthlyRevenueMap[key] = (monthlyRevenueMap[key] || 0) + Number(p.bookingAmount);
+    });
 
     const monthlyRevenue = Object.keys(monthlyRevenueMap).map(m => ({
       month: m,
@@ -160,7 +151,7 @@ export const analyticsService = {
       bookingStatusDistribution,
       topBookedVehicles,
       monthlyRevenue,
-      averageBookingValue,
+      averageBookingValue: Number(bookingAvgAgg._avg.bookingAmount || 0),
       vehiclesByBrand,
       availableVsSold: {
         available: availableCount,
@@ -170,7 +161,7 @@ export const analyticsService = {
   },
 
   /**
-   * TDD Cycle 2: Recent Activity Feeds
+   * TDD Cycle 2: Recent Activity Feed
    */
   async getRecentActivity(): Promise<RecentActivity> {
     const [latestBookings, recentPayments, recentContactInquiries] = await Promise.all([

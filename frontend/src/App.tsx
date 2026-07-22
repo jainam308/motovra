@@ -13,6 +13,7 @@ import { Home } from './pages/Home';
 import { Contact } from './pages/Contact';
 import { Profile } from './pages/Profile';
 import { Orders } from './pages/Orders';
+import { BookingSuccess } from './pages/BookingSuccess';
 import { OAuthCallback } from './pages/OAuthCallback';
 import { NotFound } from './pages/NotFound';
 import { Toaster } from 'react-hot-toast';
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/booking-success/:orderId" element={<BookingSuccess />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/login" element={
             !user ? <Login /> : user.role === 'ADMIN' ? <Navigate to="/admin" /> : <Navigate to="/showroom" />

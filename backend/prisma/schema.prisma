@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String?
-  googleId     String?  @unique
-  role         Role     @default(CUSTOMER)
-  createdAt    DateTime @default(now())
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String?
+  googleId      String?        @unique
+  role          Role           @default(CUSTOMER)
+  createdAt     DateTime       @default(now())
   refreshTokens RefreshToken[]
   savedVehicles SavedVehicle[]
-  orders       Order[]
+  orders        Order[]
 }
 
 enum Role {
@@ -25,25 +25,33 @@ enum Role {
 }
 
 enum OrderStatus {
+  PENDING_PAYMENT
+  BOOKING_PAID
   CONFIRMED
-  PROCESSING
+  VERIFIED
   READY_FOR_DELIVERY
   DELIVERED
   CANCELLED
 }
 
+enum PaymentStatus {
+  PENDING
+  BOOKING_PAID
+  FAILED
+}
+
 model Vehicle {
-  id         String   @id @default(uuid())
-  make       String
-  model      String
-  category   String
-  price      Decimal
-  quantity   Int      @default(0)
-  imageUrl   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  savedBy    SavedVehicle[]
-  orders     Order[]
+  id        String         @id @default(uuid())
+  make      String
+  model     String
+  category  String
+  price     Decimal
+  quantity  Int            @default(0)
+  imageUrl  String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  savedBy   SavedVehicle[]
+  orders    Order[]
 }
 
 model SavedVehicle {
@@ -52,8 +60,8 @@ model SavedVehicle {
   vehicleId String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 
   @@unique([userId, vehicleId])
 }
@@ -77,19 +85,36 @@ model Order {
   priceAtPurchase Decimal
   quantity        Int         @default(1)
   totalAmount     Decimal
-  status          OrderStatus @default(CONFIRMED)
+  status          OrderStatus @default(BOOKING_PAID)
 
   // Delivery Information
-  fullName        String
-  phone           String
-  addressLine     String
-  city            String
-  state           String
-  postalCode      String
+  fullName    String
+  phone       String
+  addressLine String
+  city        String
+  state       String
+  postalCode  String
 
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  vehicle         Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  vehicle Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  payment Payment?
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  orderId           String        @unique
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  razorpayOrderId   String
+  razorpayPaymentId String?
+  razorpaySignature String?
+  bookingAmount     Decimal
+  remainingAmount   Decimal
+  paymentMethod     String        @default("RAZORPAY")
+  paymentStatus     PaymentStatus @default(BOOKING_PAID)
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }

@@ -37,7 +37,7 @@ describe('Admin Page & Vehicle Management', () => {
   it('renders the inventory table', async () => {
     renderAdmin();
     await waitFor(() => {
-      expect(screen.getByText(/Porsche/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Porsche/i)[0]).toBeInTheDocument();
     });
   });
 

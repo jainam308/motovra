@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './modules/auth/auth.routes';
 import vehicleRoutes from './modules/vehicle/vehicle.routes';
 import orderRoutes from './modules/order/order.routes';
+import paymentRoutes from './modules/payment/payment.routes';
 import { setupSwagger } from './swagger';
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
 
 setupSwagger(app);
 

@@ -7,7 +7,7 @@ import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Link, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, Calendar, MapPin, ArrowRight, ShoppingBag, Truck } from 'lucide-react';
+import { Package, Calendar, MapPin, ArrowRight, ShoppingBag, Truck, CreditCard } from 'lucide-react';
 import { getVehicleImage } from '../utils/imageMapper';
 
 export const Orders = () => {
@@ -115,16 +115,27 @@ export const Orders = () => {
                         </div>
                       </div>
 
-                      {/* Delivery Address Details */}
-                      {order.deliveryInfo && (
-                        <div className="p-3.5 bg-secondary/30 rounded-lg border border-border/60 text-xs text-gray-300 flex items-start space-x-2">
-                          <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                          <div>
-                            <span className="font-semibold text-white block">{order.deliveryInfo.fullName} • {order.deliveryInfo.phone}</span>
-                            <span>{order.deliveryInfo.addressLine}, {order.deliveryInfo.city}, {order.deliveryInfo.state} {order.deliveryInfo.postalCode}</span>
+                      {/* Payment & Delivery Details */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        {order.deliveryInfo && (
+                          <div className="p-3 bg-secondary/30 rounded-lg border border-border/60 text-gray-300 flex items-start space-x-2">
+                            <MapPin className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-semibold text-white block">{order.deliveryInfo.fullName} • {order.deliveryInfo.phone}</span>
+                              <span>{order.deliveryInfo.addressLine}, {order.deliveryInfo.city}, {order.deliveryInfo.state} {order.deliveryInfo.postalCode}</span>
+                            </div>
                           </div>
+                        )}
+
+                        <div className="p-3 bg-amber-500/5 rounded-lg border border-amber-500/20 text-gray-300 space-y-1">
+                          <span className="font-semibold text-amber-400 block flex items-center gap-1">
+                            <CreditCard className="w-3.5 h-3.5" /> Razorpay Booking Paid ($25,000)
+                          </span>
+                          <span className="text-muted-foreground block">
+                            Remaining Due: <strong className="text-white">${Math.max(0, Number(order.totalAmount || 0) - 25000).toLocaleString()}</strong>
+                          </span>
                         </div>
-                      )}
+                      </div>
                     </div>
 
                   </div>

@@ -2,10 +2,15 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { X, MapPin, Navigation, ChevronRight, Package, Loader2, CheckCircle2, AlertCircle, User, Phone, Home, Building2, Hash, Search } from 'lucide-react';
+import { X, MapPin, Navigation, ChevronRight, Package, Loader2, CheckCircle2, AlertCircle, User, Phone, Home, Building2, Hash, Search, CreditCard, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { getVehicleImage } from '../utils/imageMapper';
+import { useRazorpay } from '../hooks/useRazorpay';
+import { RazorpaySandboxModal } from './RazorpaySandboxModal';
+import api from '../api/axios';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 // Fix broken Leaflet default icon paths in bundler
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -41,8 +46,8 @@ interface CheckoutModalProps {
     category: string;
   };
   onClose: () => void;
-  onConfirm: (deliveryInfo: DeliveryForm) => void;
-  isLoading: boolean;
+  onConfirm?: (deliveryInfo: DeliveryForm) => void;
+  isLoading?: boolean;
 }
 
 const FIELD_CONFIG = [
@@ -54,7 +59,10 @@ const FIELD_CONFIG = [
   { key: 'postalCode',  label: 'Postal Code',    placeholder: '400001',                    icon: Hash,      type: 'text', colSpan: 1 },
 ] as const;
 
-export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, onConfirm, isLoading }) => {
+export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }) => {
+  const navigate = useNavigate();
+  const { isLoaded: isRazorpayLoaded } = useRazorpay();
+
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState<DeliveryForm>({
     fullName: '', phone: '', addressLine: '', city: '', state: '', postalCode: ''
@@ -62,8 +70,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
   const [errors,        setErrors]        = useState<Partial<DeliveryForm>>({});
   const [locating,      setLocating]      = useState(false);
   const [locationError, setLocationError] = useState('');
-  const [coords,        setCoords]        = useState<[number, number]>([20.5937, 78.9629]); // Default center
+  const [coords,        setCoords]        = useState<[number, number]>([20.5937, 78.9629]);
   const [mapTip,        setMapTip]        = useState(true);
+  const [isProcessing,  setIsProcessing]  = useState(false);
+
+  // Razorpay Sandbox state
+  const [sandboxData,   setSandboxData]   = useState<{ orderId: string; amount: number; vehicleName: string } | null>(null);
+
+  // Booking Amounts
+  const BOOKING_AMOUNT = 25000;
+  const totalPrice = Number(vehicle.price);
+  const remainingAmount = Math.max(0, totalPrice - BOOKING_AMOUNT);
 
   // Search states
   const [searchQuery,   setSearchQuery]   = useState('');
@@ -122,14 +139,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
       attributionControl: false,
     });
 
-    // Standard OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
     }).addTo(map);
 
     mapInstanceRef.current = map;
 
-    // Handle map clicks (tap-to-pin)
     map.on('click', (e: L.LeafletMouseEvent) => {
       const { lat, lng } = e.latlng;
       const newCoords: [number, number] = [lat, lng];
@@ -146,7 +161,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
       reverseGeocode(lat, lng);
     });
 
-    // Invalidate map size after modal animation completes
     const timer = setTimeout(() => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.invalidateSize();
@@ -162,7 +176,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-detect current location on mount as default address
+  // Auto-detect current location on mount
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -172,15 +186,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
           updateMapPosition([lat, lng], 15);
           await reverseGeocode(lat, lng);
         },
-        () => {
-          // Fallback silently if user declines browser prompt
-        },
+        () => {},
         { timeout: 8000, enableHighAccuracy: true }
       );
     }
   }, [updateMapPosition, reverseGeocode]);
 
-  // Handle Search Input Change (with debounce)
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
     if (!query.trim()) {
@@ -189,9 +200,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
       return;
     }
 
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
     setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
@@ -211,7 +220,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
     }, 400);
   };
 
-  // Select Search Result
   const handleSelectSearchResult = async (result: SearchResult) => {
     const lat = parseFloat(result.lat);
     const lon = parseFloat(result.lon);
@@ -275,6 +283,98 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
     if (validate()) setStep(2);
   };
 
+  // Razorpay Checkout Trigger & Verification
+  const handlePayBookingAmount = async () => {
+    setIsProcessing(true);
+    try {
+      // 1. Call backend to create Razorpay order
+      const orderRes = await api.post('/payments/create-order', {
+        vehicleId: vehicle.id,
+        bookingAmount: BOOKING_AMOUNT,
+      });
+
+      const { razorpayOrderId, amount, currency, key } = orderRes.data;
+
+      // Helper function to complete backend payment verification
+      const completeVerification = async (paymentData: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      }) => {
+        try {
+          const verifyRes = await api.post('/payments/verify', {
+            ...paymentData,
+            vehicleId: vehicle.id,
+            deliveryInfo: form,
+            bookingAmount: BOOKING_AMOUNT,
+          });
+
+          toast.success('🎉 Booking payment verified successfully!');
+          onClose();
+          navigate(`/booking-success/${verifyRes.data.order?.id || verifyRes.data.order?.orderNumber}`, {
+            state: {
+              order: verifyRes.data.order,
+              payment: verifyRes.data.payment,
+              vehicle,
+            },
+          });
+        } catch (err: any) {
+          toast.error(err.response?.data?.error || 'Payment verification failed');
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      // 2. Open official Razorpay Checkout modal if valid live/test API key is provided
+      const isRealRazorpayKey = key && key.startsWith('rzp_') && !key.includes('mockkey');
+
+      if (isRealRazorpayKey && window.Razorpay && isRazorpayLoaded) {
+        const options = {
+          key,
+          amount: Math.round(amount * 100),
+          currency,
+          name: 'Motovra Luxury Motors',
+          description: `Booking Deposit for ${vehicle.make} ${vehicle.model}`,
+          image: vehicle.imageUrl || getVehicleImage(vehicle.make, vehicle.model, vehicle.category),
+          order_id: razorpayOrderId,
+          prefill: {
+            name: form.fullName,
+            contact: form.phone,
+          },
+          theme: {
+            color: '#d97706',
+          },
+          handler: async (response: any) => {
+            await completeVerification({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+          },
+          modal: {
+            ondismiss: () => {
+              setIsProcessing(false);
+              toast.error('Payment cancelled');
+            },
+          },
+        };
+
+        const razorpayInstance = new window.Razorpay(options);
+        razorpayInstance.open();
+      } else {
+        // Open Sandbox Razorpay Payment Modal
+        setSandboxData({
+          orderId: razorpayOrderId,
+          amount: BOOKING_AMOUNT,
+          vehicleName: `${vehicle.make} ${vehicle.model}`,
+        });
+      }
+    } catch (err: any) {
+      setIsProcessing(false);
+      toast.error(err.response?.data?.error || 'Failed to initiate payment');
+    }
+  };
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -312,7 +412,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
                 ))}
               </div>
               <span className="text-white font-heading font-bold text-lg">
-                {step === 1 ? 'Delivery Address' : 'Confirm Order'}
+                {step === 1 ? 'Delivery Address' : 'Booking Summary & Payment'}
               </span>
             </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5">
@@ -357,9 +457,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
                     ) : null}
                   </div>
 
-                  {/* Search Suggestions Dropdown */}
+                  {/* Suggestions Dropdown */}
                   {showDropdown && searchResults.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-[#18181b] border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-[#18181b] border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto z-[1002]">
                       {searchResults.map(result => (
                         <button
                           key={result.place_id}
@@ -378,7 +478,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
                 <div className="relative rounded-xl overflow-hidden border border-white/10 bg-secondary" style={{ height: 260 }}>
                   <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
 
-                  {/* Tip overlay */}
                   {mapTip && (
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md border border-amber-500/40 text-amber-300 text-xs px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-lg pointer-events-none z-[1000]">
                       <MapPin className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
@@ -445,12 +544,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
                 </div>
 
                 <Button onClick={handleNext} className="w-full py-5 text-base bg-amber-600 hover:bg-amber-700 text-white font-bold">
-                  Continue to Review <ChevronRight className="w-5 h-5 ml-1" />
+                  Continue to Booking Summary <ChevronRight className="w-5 h-5 ml-1" />
                 </Button>
               </motion.div>
             )}
 
-            {/* Step 2: Order Summary */}
+            {/* Step 2: Booking Summary & Razorpay Payment */}
             {step === 2 && (
               <motion.div
                 key="step2"
@@ -471,66 +570,76 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-amber-400 font-semibold uppercase tracking-wider">{vehicle.category}</p>
                     <h3 className="text-xl font-heading font-bold text-white">{vehicle.make} {vehicle.model}</h3>
-                    <p className="text-2xl font-bold font-mono text-amber-500 mt-1">
-                      ${Number(vehicle.price).toLocaleString()}
+                    <p className="text-2xl font-bold font-mono text-white mt-1">
+                      ${totalPrice.toLocaleString()}
                     </p>
                   </div>
                 </div>
 
                 {/* Delivery Address Summary */}
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3">
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-amber-400" /> Delivery Address
+                      <MapPin className="w-4 h-4 text-amber-400" /> Delivery Location
                     </h4>
                     <button onClick={() => setStep(1)} className="text-xs text-amber-400 hover:underline font-semibold">
                       Edit
                     </button>
                   </div>
                   <div className="text-sm text-gray-300 space-y-0.5">
-                    <p className="font-semibold text-white">{form.fullName}</p>
-                    <p className="text-muted-foreground">{form.phone}</p>
-                    <p>{form.addressLine}</p>
-                    <p>{form.city}, {form.state} — {form.postalCode}</p>
+                    <p className="font-semibold text-white">{form.fullName} • {form.phone}</p>
+                    <p>{form.addressLine}, {form.city}, {form.state} {form.postalCode}</p>
                   </div>
                 </div>
 
-                {/* Price Breakdown */}
-                <div className="p-4 bg-amber-500/5 rounded-xl border border-amber-500/20 space-y-2">
+                {/* Razorpay Booking Payment Breakdown */}
+                <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/30 space-y-2.5">
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>Vehicle Price</span>
-                    <span className="text-white font-semibold">${Number(vehicle.price).toLocaleString()}</span>
+                    <span>Full Vehicle Price</span>
+                    <span className="text-white font-semibold">${totalPrice.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>White-Glove Delivery</span>
-                    <span className="text-emerald-400 font-semibold">Complimentary</span>
+                  <div className="flex justify-between text-sm font-semibold text-amber-400">
+                    <span className="flex items-center gap-1.5">
+                      <CreditCard className="w-4 h-4" /> Razorpay Booking Deposit
+                    </span>
+                    <span className="text-base font-mono font-bold">${BOOKING_AMOUNT.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-amber-500/20 text-base font-bold">
-                    <span className="text-white">Total</span>
-                    <span className="text-amber-400">${Number(vehicle.price).toLocaleString()}</span>
+                  <div className="flex justify-between pt-2 border-t border-amber-500/20 text-sm text-muted-foreground">
+                    <span>Remaining Due at Delivery / Financing</span>
+                    <span className="text-white font-mono font-bold">${remainingAmount.toLocaleString()}</span>
                   </div>
                 </div>
 
-                {/* Badges */}
+                {/* Security Badges */}
                 <div className="flex gap-3">
-                  {['Secure Payment', 'Certified Vehicle', 'Enclosed Delivery'].map(badge => (
-                    <div key={badge} className="flex-1 flex items-center gap-1.5 p-2 bg-white/5 rounded-lg border border-white/10">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                      <span className="text-xs text-muted-foreground">{badge}</span>
+                  {[
+                    { text: 'Razorpay Verified', icon: ShieldCheck },
+                    { text: 'Enclosed Delivery', icon: CheckCircle2 },
+                    { text: 'Certified Provenance', icon: CheckCircle2 },
+                  ].map(b => (
+                    <div key={b.text} className="flex-1 flex items-center gap-1.5 p-2 bg-white/5 rounded-lg border border-white/10">
+                      <b.icon className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                      <span className="text-xs text-muted-foreground">{b.text}</span>
                     </div>
                   ))}
                 </div>
 
+                {/* Action Buttons */}
                 <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1 border-white/10 bg-transparent hover:bg-white/5">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep(1)}
+                    disabled={isProcessing}
+                    className="flex-1 border-white/10 bg-transparent hover:bg-white/5"
+                  >
                     Back
                   </Button>
                   <Button
-                    onClick={() => onConfirm(form)}
-                    isLoading={isLoading}
-                    className="flex-[2] py-5 text-base bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                    onClick={handlePayBookingAmount}
+                    isLoading={isProcessing}
+                    className="flex-[2] py-5 text-base bg-amber-600 hover:bg-amber-700 text-white font-bold shadow-lg shadow-amber-500/20"
                   >
-                    <Package className="w-5 h-5 mr-2" /> Place Order
+                    <CreditCard className="w-5 h-5 mr-2" /> Pay ${BOOKING_AMOUNT.toLocaleString()} Booking Deposit
                   </Button>
                 </div>
               </motion.div>
@@ -538,6 +647,47 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose, 
           </AnimatePresence>
         </motion.div>
       </div>
+
+      {/* Razorpay Sandbox Modal */}
+      {sandboxData && (
+        <RazorpaySandboxModal
+          razorpayOrderId={sandboxData.orderId}
+          amount={sandboxData.amount}
+          vehicleName={sandboxData.vehicleName}
+          customerName={form.fullName}
+          customerPhone={form.phone}
+          onSuccess={async (paymentData) => {
+            setSandboxData(null);
+            try {
+              const verifyRes = await api.post('/payments/verify', {
+                ...paymentData,
+                vehicleId: vehicle.id,
+                deliveryInfo: form,
+                bookingAmount: BOOKING_AMOUNT,
+              });
+
+              toast.success('🎉 Booking payment verified successfully!');
+              onClose();
+              navigate(`/booking-success/${verifyRes.data.order?.id || verifyRes.data.order?.orderNumber}`, {
+                state: {
+                  order: verifyRes.data.order,
+                  payment: verifyRes.data.payment,
+                  vehicle,
+                },
+              });
+            } catch (err: any) {
+              toast.error(err.response?.data?.error || 'Payment verification failed');
+            } finally {
+              setIsProcessing(false);
+            }
+          }}
+          onCancel={() => {
+            setSandboxData(null);
+            setIsProcessing(false);
+            toast.error('Payment cancelled');
+          }}
+        />
+      )}
     </AnimatePresence>
   );
 };

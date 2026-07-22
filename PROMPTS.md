@@ -486,3 +486,298 @@ twhile testing i found that input cant select , there is one glitch that if user
 prompt 36:
 okay so delivery function is not working and also add map so user can place through itself
 in map keep default address as an current address along with also keep search option of an address
+
+prompt 37:
+think something about payment need to add but realstic
+
+prompt 38:
+first of all lets complete razorpay give detailed in plan tdd to explain antigravity
+chatgpt prompt:
+Feature: Booking Amount Payment with Razorpay
+Goal
+
+Allow customers to reserve a vehicle by paying a booking amount through Razorpay.
+
+After successful payment:
+
+Create the order.
+Store payment details.
+Mark booking as paid.
+Notify the admin.
+Keep the remaining amount pending for offline payment or financing.
+Functional Requirements
+Customer
+Click Reserve Vehicle
+Enter delivery address
+Select location on map
+Review booking amount
+Pay booking amount using Razorpay
+Receive booking confirmation
+Admin
+View bookings
+View payment status
+View Razorpay transaction details
+Verify booking
+Continue delivery process
+Booking Workflow
+Vehicle Details
+      ↓
+Reserve Vehicle
+      ↓
+Delivery Address
+      ↓
+Map Location
+      ↓
+Booking Summary
+      ↓
+Pay ₹25,000 Booking Amount
+      ↓
+Razorpay Checkout
+      ↓
+Payment Success
+      ↓
+Backend Signature Verification
+      ↓
+Order Created
+      ↓
+Booking Paid
+      ↓
+Confirmation Email
+Database Changes
+Payment Collection
+payment: {
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature,
+
+    bookingAmount,
+    remainingAmount,
+
+    paymentMethod,
+    paymentStatus,
+
+    paidAt
+}
+Order Status
+PENDING_PAYMENT
+
+↓
+
+BOOKING_PAID
+
+↓
+
+VERIFIED
+
+↓
+
+READY_FOR_DELIVERY
+
+↓
+
+DELIVERED
+APIs Required
+Create Razorpay Order
+POST /payments/create-order
+
+Returns
+
+orderId
+amount
+currency
+key
+Verify Payment
+POST /payments/verify
+
+Input
+
+razorpay_order_id
+
+razorpay_payment_id
+
+razorpay_signature
+
+Output
+
+Payment Verified
+Create Booking
+POST /orders
+
+Only after successful verification.
+
+Frontend Pages
+Booking Summary
+
+Shows
+
+Vehicle
+Price
+Booking Amount
+Remaining Amount
+Address
+Map
+Pay Button
+Razorpay Popup
+
+Customer pays
+
+↓
+
+Returns payment information
+
+↓
+
+Calls backend verification API
+
+Success Page
+
+Shows
+
+Booking Successful
+
+Booking ID
+
+Transaction ID
+
+Remaining Amount
+
+Dealer Contact
+Backend Responsibilities
+
+Payment Controller
+
+createOrder()
+verifyPayment()
+
+Payment Service
+
+Create Razorpay Order
+Verify Signature
+Store Transaction
+
+Order Service
+
+Create Order
+Update Inventory
+Send Email
+Security
+
+Never trust frontend.
+
+Backend must verify
+
+razorpay_signature
+
+before
+
+Payment Status = BOOKING_PAID
+Inventory Logic
+
+Don't decrease stock
+
+Reserve
+
+↓
+
+Payment Success
+
+↓
+
+Verification
+
+↓
+
+Decrease Stock
+
+Otherwise people can reserve cars without paying.
+
+Email
+
+Customer
+
+Booking Successful
+
+Booking ID
+
+Transaction ID
+
+Remaining Amount
+
+Admin
+
+New Booking Received
+TDD Plan
+RED 1
+Backend
+
+Write failing tests for:
+
+POST /payments/create-order returns a Razorpay order with the correct amount and currency.
+Invalid booking amount is rejected.
+
+No implementation yet.
+
+GREEN 1
+
+Implement:
+
+Razorpay service.
+Create Order API.
+Return Razorpay order details.
+REFACTOR 1
+Extract payment service.
+Move configuration (API keys, booking amount) to environment variables.
+Clean up validation.
+RED 2
+
+Write failing tests for:
+
+Valid payment signature is accepted.
+Invalid signature is rejected.
+Duplicate verification is prevented.
+GREEN 2
+
+Implement:
+
+Signature verification.
+Payment record storage.
+Update payment status.
+REFACTOR 2
+Improve error handling.
+Extract reusable verification logic.
+RED 3
+
+Write failing tests for:
+
+Order is created only after successful payment verification.
+Stock decreases only after verified payment.
+Payment failure does not create an order.
+GREEN 3
+
+Implement:
+
+Order creation after verified payment.
+Inventory update.
+Order status updates.
+REFACTOR 3
+Simplify order and payment services.
+Remove duplicated logic.
+Improve transaction handling.
+RED 4
+
+Write failing tests for:
+
+Booking summary displays the correct booking amount and remaining amount.
+Razorpay checkout is triggered when "Pay Booking Amount" is clicked.
+Successful payment leads to the success page.
+GREEN 4
+
+Implement:
+
+Booking summary UI.
+Razorpay Checkout integration.
+Success page.
+REFACTOR 4
+Reuse booking components.
+Improve loading and error states.
+Clean up frontend payment flow.

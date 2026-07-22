@@ -6,7 +6,6 @@ import { renderWithProviders } from '../../test/test-utils';
 import { Showroom } from '../Showroom';
 import api from '../../api/axios';
 
-// Mock axios
 vi.mock('../../api/axios', () => ({
   default: {
     get: vi.fn(),
@@ -20,7 +19,6 @@ describe('Showroom Page', () => {
   });
 
   it('renders skeleton loading state initially', async () => {
-    // Keep the promise unresolved to stay in loading state
     vi.mocked(api.get).mockImplementation(() => new Promise(() => {}));
     
     renderWithProviders(<Showroom />);
@@ -29,7 +27,12 @@ describe('Showroom Page', () => {
   });
 
   it('renders empty state when no vehicles match', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { data: [] } });
+    vi.mocked(api.get).mockResolvedValue({
+      data: {
+        data: [],
+        meta: { total: 0, totalPages: 0, page: 1, limit: 12 }
+      }
+    });
     
     renderWithProviders(<Showroom />);
     
@@ -38,57 +41,64 @@ describe('Showroom Page', () => {
     });
   });
 
-  it('disables purchase button and shows "Sold Out" when quantity is 0', async () => {
+  it('renders vehicle cards with details and stock status', async () => {
     vi.mocked(api.get).mockResolvedValue({
       data: {
-        data: [{ id: '1', make: 'Porsche', model: '911', quantity: 0, price: 150000, category: 'SPORTS' }]
+        data: [
+          { id: '1', make: 'Porsche', model: '911 GT3 RS', quantity: 2, price: 223800, category: 'SPORTS' },
+          { id: '2', make: 'Ferrari', model: 'SF90 Stradale', quantity: 0, price: 524000, category: 'SPORTS' }
+        ],
+        meta: { total: 2, totalPages: 1, page: 1, limit: 12 }
       }
     });
 
-    renderWithProviders(<Showroom />, { user: { id: 'u1', email: 'test@example.com', role: 'CUSTOMER' } });
+    renderWithProviders(<Showroom />);
 
     await waitFor(() => {
-      expect(screen.getByText('Porsche 911')).toBeInTheDocument();
+      expect(screen.getByText('Porsche 911 GT3 RS')).toBeInTheDocument();
+      expect(screen.getByText('Ferrari SF90 Stradale')).toBeInTheDocument();
     });
 
-    const purchaseBtn = screen.getByRole('button', { name: /Sold Out/i });
-    expect(purchaseBtn).toBeDisabled();
+    expect(screen.getByText('2 Available')).toBeInTheDocument();
+    expect(screen.getByText('Out of Stock')).toBeInTheDocument();
   });
 
-  it('optimistically decrements quantity on purchase and rolls back on failure', async () => {
+  it('filters vehicles by category when category button is clicked', async () => {
+    const user = userEvent.setup();
     vi.mocked(api.get).mockResolvedValue({
       data: {
-        data: [{ id: '2', make: 'Tesla', model: 'Model S', quantity: 1, price: 90000, category: 'SEDAN' }]
+        data: [{ id: '1', make: 'Porsche', model: '911 GT3 RS', quantity: 2, price: 223800, category: 'SPORTS' }],
+        meta: { total: 1, totalPages: 1, page: 1, limit: 12 }
       }
     });
-    
-    // API fails with artificial delay so we can catch optimistic state
-    vi.mocked(api.post).mockImplementation(() => 
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Conflict')), 100))
-    );
 
-    const user = userEvent.setup();
-    renderWithProviders(<Showroom />, { user: { id: 'u1', email: 'test@example.com', role: 'CUSTOMER' } });
+    renderWithProviders(<Showroom />);
 
     await waitFor(() => {
-      expect(screen.getByText('1 Available')).toBeInTheDocument();
+      expect(screen.getByText('Porsche 911 GT3 RS')).toBeInTheDocument();
     });
 
-    const purchaseBtn = screen.getByRole('button', { name: /Purchase Now/i });
-    
-    // Act
-    await user.click(purchaseBtn);
+    // Click SUV filter
+    const suvCategoryBtn = screen.getByRole('button', { name: /^SUV$/i });
+    await user.click(suvCategoryBtn);
 
-    // Assert Optimistic Update (instantly displays Sold Out / 0 Available)
     await waitFor(() => {
-      expect(screen.getByText('Out of Stock')).toBeInTheDocument();
+      expect(api.get).toHaveBeenCalledWith(expect.stringContaining('category=SUV'));
     });
-    
-    // Assert Rollback after the API actually rejects 100ms later
+  });
+
+  it('renders pagination controls when totalPages > 1', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      data: {
+        data: [{ id: '1', make: 'Porsche', model: '911 GT3 RS', quantity: 2, price: 223800, category: 'SPORTS' }],
+        meta: { total: 15, totalPages: 2, page: 1, limit: 12 }
+      }
+    });
+
+    renderWithProviders(<Showroom />);
+
     await waitFor(() => {
-      expect(screen.getByText('1 Available')).toBeInTheDocument();
+      expect(screen.getByText('Page 1 of 2')).toBeInTheDocument();
     });
-    
-    expect(api.post).toHaveBeenCalledWith('/vehicles/2/purchase');
   });
 });

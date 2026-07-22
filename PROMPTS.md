@@ -276,3 +276,16 @@ prompt 21:
 
  prompt 22:
  first of all pleasecload seed data ,so i can have idea and please change colour , also the website is too small please make it same as ecommerce platfrom include all the page add footer add everything that car ecommerce sits should contain take your time but i want best design and output .do websearch how carselling website are keeping fonts content copy it and i want an real world website . 
+
+ prompt23:
+ 
+now listen carefully website is not working at all opening admin normal page is coming so your task is to first of all check all the functionality in the system you can take acess of screen so you can also see after openong admin there is normal user page . so after you complete that take ss ensure that each functionalty is working after you complete that please check data is not showinf redisgn the whole webiste please make it look like an real world project add contact pages,profile page of user why there is not googl based login we have implemented that and i am gving you freedom lets suppose an ecommerce site contains a thing but it is not in our website imclude that take your time even you take2-4 hours no problem but please givre me real world production ready website
+
+prompt 24:
+done now please remove text box admin email it very improfessional
+prompt25:
+now in each product can you please sutaible car image from the net 
+
+prompt 26:
+Review the entire frontend implementation and identify all critical user flows that require automated tests. Create comprehensive React Testing Library and Vitest tests for authentication, Google OAuth flow, registration, login, logout, protected routes, profile page, admin dashboard, vehicle dashboard, search, pagination, purchase flow, and error states. Run the test suite, fix any failing tests, resolve any bugs uncovered by testing, and continue until all tests pass and the application is stable. For all future prompts, strictly follow the TDD workflow: RED → GREEN → REFACTOR, writing tests before implementation.
+

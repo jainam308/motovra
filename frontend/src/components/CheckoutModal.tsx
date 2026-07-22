@@ -556,30 +556,17 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }
                   ))}
                 </div>
 
-                {/* Razorpay Test Mode Helper & Sandbox Switch */}
-                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2 text-xs">
-                  <div className="flex items-start gap-2 text-amber-300">
+                {/* Test Mode Notice */}
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-1.5 text-xs">
+                  <div className="flex items-start gap-2.5 text-amber-200">
                     <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-amber-200">Razorpay Test Mode Instructions:</p>
-                      <p className="text-amber-300/90 mt-0.5">
-                        In Razorpay Checkout, select <strong>Netbanking (SBI / HDFC)</strong> or <strong>UPI (<span className="underline">success@razorpay</span>)</strong> to complete test payments instantly.
+                      <p className="font-bold text-amber-300 text-sm">Test Mode Notice</p>
+                      <p className="text-gray-300 mt-1 leading-relaxed">
+                        Since this application operates in test mode without a live bank account, please proceed with the <strong>Interactive Payment Simulator</strong> to test the full booking deposit, HMAC signature verification, and Brevo email receipt flow.
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSandboxData({
-                        orderId: `order_sandbox_${Date.now()}`,
-                        amount: BOOKING_AMOUNT,
-                        vehicleName: `${vehicle.make} ${vehicle.model}`,
-                      });
-                    }}
-                    className="w-full text-center py-1.5 px-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-lg text-amber-300 font-semibold transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <CreditCard className="w-3.5 h-3.5" /> Launch In-App Interactive Payment Simulator
-                  </button>
                 </div>
 
                 {/* Action Buttons */}
@@ -597,7 +584,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }
                     isLoading={isProcessing}
                     className="flex-[2] py-5 text-base bg-amber-600 hover:bg-amber-700 text-white font-bold shadow-lg shadow-amber-500/20"
                   >
-                    <CreditCard className="w-5 h-5 mr-2" /> Pay ${BOOKING_AMOUNT.toLocaleString()} Booking Deposit
+                    <CreditCard className="w-5 h-5 mr-2" /> Pay ${BOOKING_AMOUNT.toLocaleString()} via Payment Simulator
                   </Button>
                 </div>
               </motion.div>

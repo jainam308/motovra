@@ -17,3 +17,19 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
     next(new UnauthorizedError('Invalid token'));
   }
 };
+
+export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    req.user = decoded as any;
+  } catch {
+    // Token expired or invalid -> proceed as guest without error
+  }
+  next();
+};

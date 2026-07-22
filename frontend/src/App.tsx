@@ -9,6 +9,7 @@ import { Register } from './pages/Register';
 import { Showroom } from './pages/Showroom';
 import { VehicleDetail } from './pages/VehicleDetail';
 import { Admin } from './pages/Admin';
+import AdminDashboard from './pages/AdminDashboard';
 import { Home } from './pages/Home';
 import { Contact } from './pages/Contact';
 import { Profile } from './pages/Profile';
@@ -56,6 +57,7 @@ const App = () => {
           } />
           <Route path="/register" element={!user ? <Register /> : <Navigate to="/showroom" />} />
           <Route path="/admin" element={user?.role === 'ADMIN' ? <Admin /> : <Navigate to={user ? '/showroom' : '/login'} />} />
+          <Route path="/admin/dashboard" element={user?.role === 'ADMIN' ? <AdminDashboard /> : <Navigate to={user ? '/showroom' : '/login'} />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

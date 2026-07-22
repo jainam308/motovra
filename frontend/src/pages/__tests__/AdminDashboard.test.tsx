@@ -4,9 +4,9 @@ import AdminDashboard from '../AdminDashboard';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../../context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import api from '../../services/api';
+import api from '../../api/axios';
 
-vi.mock('../../services/api', () => ({
+vi.mock('../../api/axios', () => ({
   default: {
     get: vi.fn(),
   },
@@ -93,7 +93,7 @@ describe('TDD Cycle 3 — Admin Dashboard UI (RED)', () => {
       expect(screen.getByText('Total Customers')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Porsche 911 GT3 RS')).toBeInTheDocument();
+    expect(screen.getAllByText('Porsche 911 GT3 RS')[0]).toBeInTheDocument();
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
   });
 });

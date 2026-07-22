@@ -10,21 +10,17 @@ describe('POST /api/vehicles', () => {
   let customerToken: string;
 
   beforeAll(async () => {
-    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Order" CASCADE;').catch(() => {});
-    await prisma.vehicle.deleteMany();
-    await prisma.user.deleteMany();
+    await prisma.user.deleteMany({ where: { id: { in: ['admin1', 'cust1'] } } });
 
-    await prisma.user.create({ data: { id: 'admin1', email: 'admin1@test.com', role: 'ADMIN' } });
-    await prisma.user.create({ data: { id: 'cust1', email: 'cust1@test.com', role: 'CUSTOMER' } });
+    await prisma.user.create({ data: { id: 'admin1', email: 'admin1@test.com', role: 'ADMIN' } }).catch(() => {});
+    await prisma.user.create({ data: { id: 'cust1', email: 'cust1@test.com', role: 'CUSTOMER' } }).catch(() => {});
 
     adminToken = jwtUtils.generateAccessToken({ userId: 'admin1', role: 'ADMIN' });
     customerToken = jwtUtils.generateAccessToken({ userId: 'cust1', role: 'CUSTOMER' });
   });
 
   afterAll(async () => {
-    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Order" CASCADE;').catch(() => {});
-    await prisma.vehicle.deleteMany();
-    await prisma.user.deleteMany();
+    await prisma.user.deleteMany({ where: { id: { in: ['admin1', 'cust1'] } } });
     await prisma.$disconnect();
   });
 
@@ -66,26 +62,27 @@ describe('GET /api/vehicles', () => {
 });
 
 describe('GET /api/vehicles/search', () => {
+  let createdIds: string[] = [];
+
   beforeAll(async () => {
-    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Order" CASCADE;').catch(() => {});
-    await prisma.vehicle.deleteMany();
-    await prisma.vehicle.createMany({
-      data: [
-        { make: 'Honda', model: 'Civic', category: 'SEDAN', price: 20000, quantity: 2 },
-        { make: 'Honda', model: 'Accord', category: 'SEDAN', price: 25000, quantity: 1 },
-        { make: 'Ford', model: 'F150', category: 'TRUCK', price: 35000, quantity: 5 }
-      ]
-    });
+    const v1 = await prisma.vehicle.create({ data: { make: 'HondaTest', model: 'Civic', category: 'SEDAN', price: 20000, quantity: 2 } });
+    const v2 = await prisma.vehicle.create({ data: { make: 'HondaTest', model: 'Accord', category: 'SEDAN', price: 25000, quantity: 1 } });
+    const v3 = await prisma.vehicle.create({ data: { make: 'FordTest', model: 'F150', category: 'TRUCK', price: 35000, quantity: 5 } });
+    createdIds = [v1.id, v2.id, v3.id];
+  });
+
+  afterAll(async () => {
+    await prisma.vehicle.deleteMany({ where: { id: { in: createdIds } } });
   });
 
   it('should filter by a single field (make)', async () => {
-    const res = await request(app).get('/api/vehicles/search?make=Honda');
+    const res = await request(app).get('/api/vehicles/search?make=HondaTest');
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(2);
   });
 
   it('should filter by combined fields (category and price range)', async () => {
-    const res = await request(app).get('/api/vehicles/search?category=SEDAN&minPrice=22000&maxPrice=30000');
+    const res = await request(app).get('/api/vehicles/search?make=HondaTest&category=SEDAN&minPrice=22000&maxPrice=30000');
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
     expect(res.body.data[0].model).toBe('Accord');
@@ -152,6 +149,15 @@ describe('POST /api/vehicles/:id/restock', () => {
 });
 
 describe('POST /api/vehicles/:id/purchase (Concurrency)', () => {
+  let vehicleId: string;
+
+  afterAll(async () => {
+    if (vehicleId) {
+      await prisma.order.deleteMany({ where: { vehicleId } });
+      await prisma.vehicle.deleteMany({ where: { id: vehicleId } });
+    }
+  });
+
   it('should handle concurrent purchases safely and prevent negative quantity', async () => {
     const adminToken = jwtUtils.generateAccessToken({ userId: 'admin1', role: 'ADMIN' });
     const customerToken = jwtUtils.generateAccessToken({ userId: 'cust1', role: 'CUSTOMER' });
@@ -161,11 +167,11 @@ describe('POST /api/vehicles/:id/purchase (Concurrency)', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ make: 'Honda', model: 'Concurrent', category: 'SEDAN', price: 20000, quantity: 1 });
     
-    const vehicleId = vehicleRes.body.id;
+    vehicleId = vehicleRes.body.id;
 
-    const req1 = request(app).post(`/api/vehicles/${vehicleId}/purchase`).set('Authorization', `Bearer ${customerToken}`);
-    const req2 = request(app).post(`/api/vehicles/${vehicleId}/purchase`).set('Authorization', `Bearer ${customerToken}`);
-
+    const deliveryPayload = { deliveryInfo: { fullName: 'Test Buyer', phone: '+1-555-0101', addressLine: '1 Test Ave', city: 'Portland', state: 'OR', postalCode: '97201' } };
+    const req1 = request(app).post(`/api/vehicles/${vehicleId}/purchase`).set('Authorization', `Bearer ${customerToken}`).send(deliveryPayload);
+    const req2 = request(app).post(`/api/vehicles/${vehicleId}/purchase`).set('Authorization', `Bearer ${customerToken}`).send(deliveryPayload);
     const [res1, res2] = await Promise.all([req1, req2]);
 
     const statuses = [res1.status, res2.status].sort();

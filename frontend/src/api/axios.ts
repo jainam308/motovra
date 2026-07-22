@@ -23,6 +23,7 @@ api.interceptors.response.use(
   async (error) => {
     const status = error.response?.status;
     const originalRequest = error.config || {};
+    const requestUrl = originalRequest.url || '';
 
     // 403 Forbidden -> Display permission toast without redirecting
     if (status === 403) {
@@ -30,8 +31,13 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // 401 Unauthorized -> Attempt token refresh once, or redirect to login on failure
-    if (status === 401) {
+    // Skip token refresh logic for auth endpoints (login, register, refresh)
+    const isAuthEndpoint = requestUrl.includes('/auth/login') || 
+                           requestUrl.includes('/auth/register') || 
+                           requestUrl.includes('/auth/refresh');
+
+    // 401 Unauthorized -> Attempt token refresh once for protected resource endpoints
+    if (status === 401 && !isAuthEndpoint) {
       if (!originalRequest._retry) {
         originalRequest._retry = true;
         try {

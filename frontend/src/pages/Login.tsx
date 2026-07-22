@@ -14,8 +14,7 @@ export const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Silently clear any stale tokens on mount — but do NOT call logout()
-  // because logout() calls setUser(null) → triggers App re-render → remounts Login → clears inputs
+  // Silently clear any stale tokens on mount
   useEffect(() => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
@@ -41,6 +40,7 @@ export const Login = () => {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center -mt-8">
       <motion.div
@@ -117,8 +117,6 @@ export const Login = () => {
           <div className="mt-6 text-center text-sm text-muted-foreground">
             Don't have an account? <Link to="/register" className="text-primary hover:underline font-medium">Register here</Link>
           </div>
-
-
         </div>
 
         {/* Right Side: Image/Branding */}

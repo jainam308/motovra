@@ -476,3 +476,6 @@ Keep controllers, services, repositories, and components clean and maintainable.
 Apply SOLID principles where appropriate.
 
 Do not introduce unnecessary complexity.
+
+prompt 34
+first of all remove this admin direct button and make sure that security should be our priority bee proffesional 

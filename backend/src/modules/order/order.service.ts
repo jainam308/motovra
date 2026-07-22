@@ -32,13 +32,21 @@ export const orderService = {
     }
 
     const delivery: DeliveryInfo = {
-      fullName: deliveryInfo?.fullName || 'Motovra Customer',
-      phone: deliveryInfo?.phone || '+1 555-0100',
-      addressLine: deliveryInfo?.addressLine || '100 Luxury Way',
-      city: deliveryInfo?.city || 'Beverly Hills',
-      state: deliveryInfo?.state || 'CA',
-      postalCode: deliveryInfo?.postalCode || '90210'
+      fullName: deliveryInfo?.fullName?.trim() || '',
+      phone: deliveryInfo?.phone?.trim() || '',
+      addressLine: deliveryInfo?.addressLine?.trim() || '',
+      city: deliveryInfo?.city?.trim() || '',
+      state: deliveryInfo?.state?.trim() || '',
+      postalCode: deliveryInfo?.postalCode?.trim() || ''
     };
+
+    // Validate required delivery fields
+    const missingFields = (Object.keys(delivery) as (keyof DeliveryInfo)[]).filter(k => !delivery[k]);
+    if (missingFields.length > 0) {
+      const err: any = new Error(`Missing delivery information: ${missingFields.join(', ')}`);
+      err.statusCode = 400;
+      throw err;
+    }
 
     try {
       return await prisma.$transaction(

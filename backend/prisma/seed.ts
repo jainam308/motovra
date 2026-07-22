@@ -4,19 +4,28 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Clearing existing data...');
-  await prisma.vehicle.deleteMany();
-  await prisma.user.deleteMany();
+  console.log('Seeding seed data (non-destructive for users)...');
 
+  // Only clear orders and vehicles — never wipe all users
+  try {
+    await prisma.order.deleteMany();
+  } catch (e) {}
+  await prisma.vehicle.deleteMany();
+
+  // Upsert admin and customer seed accounts (preserves all other users including Google OAuth users)
   const passwordHash = await bcrypt.hash('password123', 12);
 
-  console.log('Seeding users...');
-  await prisma.user.create({
-    data: { email: 'admin@motovra.com', passwordHash, role: 'ADMIN' },
+  console.log('Upserting seed users...');
+  await prisma.user.upsert({
+    where: { email: 'admin@motovra.com' },
+    update: { passwordHash, role: 'ADMIN' },
+    create: { email: 'admin@motovra.com', passwordHash, role: 'ADMIN' },
   });
 
-  await prisma.user.create({
-    data: { email: 'customer@motovra.com', passwordHash, role: 'CUSTOMER' },
+  await prisma.user.upsert({
+    where: { email: 'customer@motovra.com' },
+    update: { passwordHash, role: 'CUSTOMER' },
+    create: { email: 'customer@motovra.com', passwordHash, role: 'CUSTOMER' },
   });
 
   console.log('Seeding vehicles...');

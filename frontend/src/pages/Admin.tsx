@@ -42,6 +42,8 @@ export const Admin = () => {
     },
   });
 
+  const vehiclesList = Array.isArray(data) ? data : (data?.data || []);
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/vehicles/${id}`),
     onSuccess: () => {
@@ -121,8 +123,8 @@ export const Admin = () => {
       model: formData.model,
       category: formData.category,
       price: parseFloat(formData.price),
-      quantity: parseInt(formData.quantity, 10),
-      ...(formData.imageUrl ? { imageUrl: formData.imageUrl } : {})
+      quantity: parseInt(formData.quantity),
+      imageUrl: formData.imageUrl?.trim() || undefined
     };
 
     const validationErrors = validateVehicle(payload);
@@ -131,7 +133,6 @@ export const Admin = () => {
       return;
     }
 
-    setErrors({});
     saveMutation.mutate(payload);
   };
 
@@ -177,35 +178,39 @@ export const Admin = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border bg-card">
-                  {data?.data?.map((vehicle: any) => (
-                    <tr key={vehicle.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4 font-medium text-white">{vehicle.make} {vehicle.model}</td>
-                      <td className="px-6 py-4">
-                        <Badge variant="outline">{vehicle.category}</Badge>
+                  {vehiclesList.map((vehicle: any) => (
+                    <tr key={vehicle.id} className="hover:bg-secondary/40 transition-colors">
+                      <td className="px-6 py-4 font-medium text-white">
+                        {vehicle.make} {vehicle.model}
                       </td>
-                      <td className="px-6 py-4">${vehicle.price.toLocaleString()}</td>
                       <td className="px-6 py-4">
-                        <Badge variant={vehicle.quantity > 5 ? 'success' : vehicle.quantity > 0 ? 'secondary' : 'destructive'}>
-                          {vehicle.quantity}
+                        <Badge variant="outline" className="border-border">{vehicle.category}</Badge>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-gray-300">
+                        ${Number(vehicle.price).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant={vehicle.quantity > 0 ? 'success' : 'destructive'}>
+                          {vehicle.quantity} Units
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right space-x-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleRestock(vehicle.id)} title="Restock">
-                          <PackagePlus className="w-4 h-4 text-emerald-500" />
+                        <Button variant="ghost" size="sm" onClick={() => handleRestock(vehicle.id)} title="Restock">
+                          <PackagePlus className="w-4 h-4 text-amber-400" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => openModal(vehicle)} title="Edit">
+                        <Button variant="ghost" size="sm" onClick={() => openModal(vehicle)} title="Edit">
                           <Edit className="w-4 h-4 text-blue-400" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(vehicle.id)} title="Delete">
-                          <Trash2 className="w-4 h-4 text-destructive" />
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(vehicle.id)} title="Delete">
+                          <Trash2 className="w-4 h-4 text-red-400" />
                         </Button>
                       </td>
                     </tr>
                   ))}
-                  {data?.data?.length === 0 && (
+                  {vehiclesList.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
-                        No inventory found.
+                      <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                        No vehicles found in inventory.
                       </td>
                     </tr>
                   )}
@@ -216,114 +221,101 @@ export const Admin = () => {
         </CardContent>
       </Card>
 
+      {/* Modal for Add / Edit */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setIsModalOpen(false)}
-            />
-            <motion.div 
-              role="dialog"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-lg bg-card border border-amber-500/30 rounded-xl shadow-2xl p-6 z-10"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-card border border-border rounded-xl max-w-lg w-full p-6 shadow-2xl space-y-6"
             >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-heading font-bold text-white">
+              <div className="flex justify-between items-center border-b border-border pb-4">
+                <h3 className="text-xl font-heading font-bold text-white">
                   {editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}
-                </h2>
-                <Button variant="ghost" size="icon" onClick={() => setIsModalOpen(false)}>
-                  <X className="w-5 h-5 text-muted-foreground" />
+                </h3>
+                <Button variant="ghost" size="sm" onClick={() => setIsModalOpen(false)}>
+                  <X className="w-4 h-4" />
                 </Button>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm text-gray-300">Make</label>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Make</label>
                     <Input 
-                      value={formData.make}
-                      onChange={(e) => setFormData({...formData, make: e.target.value})}
-                      error={!!errors.make}
+                      value={formData.make} 
+                      onChange={e => setFormData({ ...formData, make: e.target.value })} 
+                      placeholder="e.g. Porsche" 
+                      className="mt-1"
                     />
-                    {errors.make && <p className="text-xs text-destructive">{errors.make}</p>}
+                    {errors.make && <p className="text-xs text-red-400 mt-1">{errors.make}</p>}
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-gray-300">Model</label>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Model</label>
                     <Input 
-                      value={formData.model}
-                      onChange={(e) => setFormData({...formData, model: e.target.value})}
-                      error={!!errors.model}
+                      value={formData.model} 
+                      onChange={e => setFormData({ ...formData, model: e.target.value })} 
+                      placeholder="e.g. 911 GT3 RS" 
+                      className="mt-1"
                     />
-                    {errors.model && <p className="text-xs text-destructive">{errors.model}</p>}
+                    {errors.model && <p className="text-xs text-red-400 mt-1">{errors.model}</p>}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    className={`w-full h-10 rounded-md border bg-secondary px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary ${
-                      errors.category ? 'border-destructive' : 'border-border'
-                    }`}
-                  >
-                    <option value="" disabled>Select a category...</option>
-                    <option value="SPORTS">🏎️ Sports</option>
-                    <option value="LUXURY">👑 Luxury</option>
-                    <option value="SUV">🚙 SUV</option>
-                    <option value="ELECTRIC">⚡ Electric</option>
-                    <option value="SEDAN">🚗 Sedan</option>
-                    <option value="CONVERTIBLE">🌞 Convertible</option>
-                    <option value="TRUCK">🛻 Truck</option>
-                  </select>
-                  {errors.category && <p className="text-xs text-destructive">{errors.category}</p>}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase">Category</label>
+                  <Input 
+                    value={formData.category} 
+                    onChange={e => setFormData({ ...formData, category: e.target.value })} 
+                    placeholder="SPORTS, LUXURY, SUV, ELECTRIC" 
+                    className="mt-1"
+                  />
+                  {errors.category && <p className="text-xs text-red-400 mt-1">{errors.category}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm text-gray-300">Price ($)</label>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Price ($)</label>
                     <Input 
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      error={!!errors.price}
+                      type="number" 
+                      value={formData.price} 
+                      onChange={e => setFormData({ ...formData, price: e.target.value })} 
+                      placeholder="223800" 
+                      className="mt-1"
                     />
-                    {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
+                    {errors.price && <p className="text-xs text-red-400 mt-1">{errors.price}</p>}
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm text-gray-300">Quantity</label>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Quantity</label>
                     <Input 
-                      type="number"
-                      value={formData.quantity}
-                      onChange={(e) => setFormData({...formData, quantity: e.target.value})}
-                      error={!!errors.quantity}
+                      type="number" 
+                      value={formData.quantity} 
+                      onChange={e => setFormData({ ...formData, quantity: e.target.value })} 
+                      placeholder="2" 
+                      className="mt-1"
                     />
-                    {errors.quantity && <p className="text-xs text-destructive">{errors.quantity}</p>}
+                    {errors.quantity && <p className="text-xs text-red-400 mt-1">{errors.quantity}</p>}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Image URL (Optional)</label>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase">Image URL (Optional)</label>
                   <Input 
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                    placeholder="https://example.com/image.jpg"
+                    value={formData.imageUrl} 
+                    onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} 
+                    placeholder="https://images.unsplash.com/..." 
+                    className="mt-1"
                   />
                 </div>
 
-                <div className="pt-4 flex justify-end space-x-3">
-                  <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+                <div className="flex justify-end space-x-3 pt-4 border-t border-border">
+                  <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white" isLoading={saveMutation.isPending}>
-                    Save Vehicle
+                  <Button type="submit" isLoading={saveMutation.isPending} className="bg-amber-600 hover:bg-amber-700">
+                    {editingVehicle ? 'Update Vehicle' : 'Create Vehicle'}
                   </Button>
                 </div>
               </form>

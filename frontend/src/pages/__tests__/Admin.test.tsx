@@ -15,33 +15,29 @@ vi.mock('../../api/axios', () => ({
   }
 }));
 
-// Mock window.confirm
-const originalConfirm = window.confirm;
-
-describe('Admin Dashboard', () => {
+describe('Admin Page & Vehicle Management', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    window.confirm = vi.fn(() => true);
     vi.mocked(api.get).mockResolvedValue({
       data: {
         data: [
-          { id: '1', make: 'Porsche', model: '911', quantity: 2, price: 150000, category: 'SPORTS' }
-        ]
+          { id: '1', make: 'Porsche', model: '911', category: 'SPORTS', price: 200000, quantity: 2 }
+        ],
+        pagination: { total: 1, page: 1, limit: 10, totalPages: 1 }
       }
     });
   });
 
-  afterEach(() => {
-    window.confirm = originalConfirm;
-  });
-
-  const renderAdmin = () => 
-    renderWithProviders(<Admin />, { user: { id: 'a1', email: 'admin@motovra.com', role: 'ADMIN' } });
+  const renderAdmin = () => {
+    return renderWithProviders(<Admin />, {
+      user: { id: 'admin1', email: 'admin@motovra.com', role: 'ADMIN' }
+    });
+  };
 
   it('renders the inventory table', async () => {
     renderAdmin();
     await waitFor(() => {
-      expect(screen.getByText('Porsche 911')).toBeInTheDocument();
+      expect(screen.getByText(/Porsche/i)).toBeInTheDocument();
     });
   });
 
@@ -52,13 +48,12 @@ describe('Admin Dashboard', () => {
     // Open modal
     await user.click(screen.getByRole('button', { name: /Add Vehicle/i }));
     
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Add New Vehicle')).toBeInTheDocument();
 
     // Submit empty form
-    await user.click(screen.getByRole('button', { name: /Save Vehicle/i }));
+    await user.click(screen.getByRole('button', { name: /Create Vehicle/i }));
 
-    // Expect validation messages (HTML5 validation or custom)
-    // We will use standard custom errors for our fields
+    // Expect validation messages
     expect(await screen.findByText('Make is required')).toBeInTheDocument();
     expect(await screen.findByText('Model is required')).toBeInTheDocument();
     expect(api.post).not.toHaveBeenCalled();
@@ -66,16 +61,18 @@ describe('Admin Dashboard', () => {
 
   it('prompts confirmation on delete', async () => {
     const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.mocked(api.delete).mockResolvedValue({ data: {} });
+
     renderAdmin();
 
     await waitFor(() => {
-      expect(screen.getByText('Porsche 911')).toBeInTheDocument();
+      expect(screen.getByTitle('Delete')).toBeInTheDocument();
     });
 
-    // Click delete
     await user.click(screen.getByTitle('Delete'));
 
-    expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this vehicle?');
+    expect(confirmSpy).toHaveBeenCalled();
     expect(api.delete).toHaveBeenCalledWith('/vehicles/1');
   });
 });

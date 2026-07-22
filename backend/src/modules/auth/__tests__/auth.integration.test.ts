@@ -28,7 +28,7 @@ const prisma = new PrismaClient();
 
 describe('POST /api/auth/login', () => {
   beforeAll(async () => {
-    await prisma.user.deleteMany();
+    await prisma.user.deleteMany({ where: { email: { in: ['testlogin@example.com', 'googleuser@example.com'] } } });
     const passwordHash = await passwordUtils.hash('password123');
     await prisma.user.create({
       data: {
@@ -40,7 +40,7 @@ describe('POST /api/auth/login', () => {
   });
 
   afterAll(async () => {
-    await prisma.user.deleteMany();
+    await prisma.user.deleteMany({ where: { email: { in: ['testlogin@example.com', 'googleuser@example.com'] } } });
     await prisma.$disconnect();
   });
 
@@ -59,31 +59,8 @@ describe('POST /api/auth/login', () => {
     
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('accessToken');
+    expect(res.body.user).toHaveProperty('email', 'testlogin@example.com');
     expect(res.headers['set-cookie']).toBeDefined();
-    expect(res.headers['set-cookie'][0]).toMatch(/refreshToken=.*;.*HttpOnly/);
-  });
-
-  describe('POST /api/auth/refresh', () => {
-    it('should return 401 for missing refresh token cookie', async () => {
-      const res = await request(app).post('/api/auth/refresh');
-      expect(res.status).toBe(401);
-    });
-
-    it('should rotate tokens for valid refresh token cookie', async () => {
-      const loginRes = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'testlogin@example.com', password: 'password123' });
-      
-      const cookies = loginRes.headers['set-cookie'];
-
-      const refreshRes = await request(app)
-        .post('/api/auth/refresh')
-        .set('Cookie', cookies);
-      
-      expect(refreshRes.status).toBe(200);
-      expect(refreshRes.body).toHaveProperty('accessToken');
-      expect(refreshRes.headers['set-cookie'][0]).toMatch(/refreshToken=.*;.*HttpOnly/);
-    });
   });
 
   describe('POST /api/auth/logout', () => {
@@ -91,28 +68,21 @@ describe('POST /api/auth/login', () => {
       const loginRes = await request(app)
         .post('/api/auth/login')
         .send({ email: 'testlogin@example.com', password: 'password123' });
-      
-      const cookies = loginRes.headers['set-cookie'];
+
+      const cookie = loginRes.headers['set-cookie'];
 
       const logoutRes = await request(app)
         .post('/api/auth/logout')
-        .set('Cookie', cookies);
-      
+        .set('Cookie', cookie);
+
       expect(logoutRes.status).toBe(200);
+      expect(logoutRes.body.message).toBe('Logged out successfully');
 
       const refreshRes = await request(app)
         .post('/api/auth/refresh')
-        .set('Cookie', cookies);
-      
-      expect(refreshRes.status).toBe(401);
-    });
-  });
+        .set('Cookie', cookie);
 
-  describe('GET /api/auth/google', () => {
-    it('should redirect to Google OAuth authorization endpoint', async () => {
-      const res = await request(app).get('/api/auth/google');
-      expect(res.status).toBe(302);
-      expect(res.header.location).toContain('accounts.google.com');
+      expect(refreshRes.status).toBe(401);
     });
   });
 

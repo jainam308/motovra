@@ -48,12 +48,12 @@ describe('VehicleDetail Page & Purchase Flow', () => {
     renderVehicleDetail();
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Porsche 911 GT3 RS/i })).toBeInTheDocument();
+      expect(screen.getByText('Porsche')).toBeInTheDocument();
       expect(screen.getByText('2 In Network')).toBeInTheDocument();
     });
   });
 
-  it('displays "Sign in to Acquire" disabled button when user is unauthenticated', async () => {
+  it('shows "Sign in to Acquire" button when user is unauthenticated', async () => {
     vi.mocked(api.get).mockResolvedValue({
       data: { data: [mockVehicle] }
     });
@@ -61,15 +61,14 @@ describe('VehicleDetail Page & Purchase Flow', () => {
     renderVehicleDetail();
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Porsche 911 GT3 RS/i })).toBeInTheDocument();
+      expect(screen.getByText('Porsche')).toBeInTheDocument();
     });
 
-    const acquireBtn = screen.getByRole('button', { name: /Sign in to Acquire/i });
-    expect(acquireBtn).toBeDisabled();
-    expect(screen.getByText('You must be signed in to an approved account to purchase.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sign in to Acquire/i })).toBeInTheDocument();
+    expect(screen.getByText('You must be signed in to purchase a vehicle.')).toBeInTheDocument();
   });
 
-  it('enables "Acquire Now" button when authenticated and vehicle in stock', async () => {
+  it('enables "Buy Now" button when authenticated and vehicle in stock', async () => {
     vi.mocked(api.get).mockResolvedValue({
       data: { data: [mockVehicle] }
     });
@@ -79,29 +78,29 @@ describe('VehicleDetail Page & Purchase Flow', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Acquire Now/i })).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: /Buy Now/i })).not.toBeDisabled();
     });
   });
 
-  it('executes purchase API call on clicking Acquire Now', async () => {
+  it('opens checkout modal on clicking Buy Now', async () => {
     const user = userEvent.setup();
     vi.mocked(api.get).mockResolvedValue({
       data: { data: [mockVehicle] }
     });
-    vi.mocked(api.post).mockResolvedValue({ data: { id: '1', quantity: 1 } });
 
     renderVehicleDetail({
       user: { id: 'u1', email: 'customer@motovra.com', role: 'CUSTOMER' }
     });
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Acquire Now/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Buy Now/i })).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole('button', { name: /Acquire Now/i }));
+    await user.click(screen.getByRole('button', { name: /Buy Now/i }));
 
+    // Modal should open with the delivery address step
     await waitFor(() => {
-      expect(api.post).toHaveBeenCalledWith('/vehicles/1/purchase');
+      expect(screen.getByText('Delivery Address')).toBeInTheDocument();
     });
   });
 });

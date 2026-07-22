@@ -13,10 +13,8 @@ describe('Order Management & Purchase Flow Integration Tests', () => {
   let vehicleId: string;
 
   beforeAll(async () => {
-    // Clean up
-    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Order" CASCADE;').catch(() => {});
-    await prisma.vehicle.deleteMany();
-    await prisma.user.deleteMany();
+    // Scoped cleanup
+    await prisma.user.deleteMany({ where: { id: { in: [user1Id, user2Id] } } });
 
     // Create test users
     const u1 = await prisma.user.create({
@@ -32,7 +30,7 @@ describe('Order Management & Purchase Flow Integration Tests', () => {
     // Create test vehicle
     const vehicle = await prisma.vehicle.create({
       data: {
-        make: 'Porsche',
+        make: 'PorscheTest',
         model: '911 GT3 RS',
         category: 'SPORTS',
         price: 223800,
@@ -43,9 +41,11 @@ describe('Order Management & Purchase Flow Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Order" CASCADE;').catch(() => {});
-    await prisma.vehicle.deleteMany();
-    await prisma.user.deleteMany();
+    if (vehicleId) {
+      await prisma.order.deleteMany({ where: { vehicleId } });
+      await prisma.vehicle.deleteMany({ where: { id: vehicleId } });
+    }
+    await prisma.user.deleteMany({ where: { id: { in: [user1Id, user2Id] } } });
     await prisma.$disconnect();
   });
 
@@ -63,41 +63,32 @@ describe('Order Management & Purchase Flow Integration Tests', () => {
       const res = await request(app)
         .post(`/api/vehicles/${vehicleId}/purchase`)
         .set('Authorization', `Bearer ${user1Token}`)
-        .send({ deliveryInfo, quantity: 1 });
+        .send({ deliveryInfo });
 
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty('id');
-      expect(res.body.orderNumber).toMatch(/^MV-\d+/);
+      expect(res.body).toHaveProperty('orderNumber');
+      expect(res.body.orderNumber).toMatch(/^MV-/);
       expect(res.body.status).toBe('CONFIRMED');
-      expect(res.body.make).toBe('Porsche');
-      expect(res.body.model).toBe('911 GT3 RS');
-      expect(Number(res.body.priceAtPurchase)).toBe(223800);
-      expect(res.body.quantity).toBe(1);
-      expect(Number(res.body.totalAmount)).toBe(223800);
-      expect(res.body.deliveryInfo).toEqual(deliveryInfo);
+      expect(res.body.make).toBe('PorscheTest');
+      expect(res.body.deliveryInfo.fullName).toBe('Jane Doe');
 
-      // Verify stock decreased from 3 to 2
+      // Verify stock was reduced from 3 to 2
       const updatedVehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
       expect(updatedVehicle?.quantity).toBe(2);
     });
 
     it('should fail to purchase when stock is insufficient', async () => {
+      // Set stock to 0
+      await prisma.vehicle.update({ where: { id: vehicleId }, data: { quantity: 0 } });
+
       const res = await request(app)
         .post(`/api/vehicles/${vehicleId}/purchase`)
         .set('Authorization', `Bearer ${user1Token}`)
-        .send({
-          deliveryInfo: {
-            fullName: 'Jane Doe',
-            phone: '555-0199',
-            addressLine: '123 Main St',
-            city: 'Springfield',
-            state: 'OR',
-            postalCode: '97477'
-          },
-          quantity: 10 // Exceeds available stock of 2
-        });
+        .send({ deliveryInfo: { fullName: 'Test User', phone: '+1-555-0100', addressLine: '1 Test St', city: 'Portland', state: 'OR', postalCode: '97201' } });
 
-      expect([400, 409]).toContain(res.status);
+      expect(res.status).toBe(409);
+      expect(res.body.error).toContain('stock');
     });
   });
 
@@ -107,7 +98,7 @@ describe('Order Management & Purchase Flow Integration Tests', () => {
       expect(res.status).toBe(401);
     });
 
-    it("should return list of authenticated user's orders only", async () => {
+    it('should return list of authenticated user\'s orders only', async () => {
       const res = await request(app)
         .get('/api/orders')
         .set('Authorization', `Bearer ${user1Token}`);
@@ -123,25 +114,16 @@ describe('Order Management & Purchase Flow Integration Tests', () => {
     let createdOrderId: string;
 
     beforeAll(async () => {
-      // Create an order for user1
+      // Reset stock & create a fresh order for user1
+      await prisma.vehicle.update({ where: { id: vehicleId }, data: { quantity: 5 } });
       const orderRes = await request(app)
         .post(`/api/vehicles/${vehicleId}/purchase`)
         .set('Authorization', `Bearer ${user1Token}`)
-        .send({
-          deliveryInfo: {
-            fullName: 'Jane Doe',
-            phone: '555-0199',
-            addressLine: '123 Main St',
-            city: 'Springfield',
-            state: 'OR',
-            postalCode: '97477'
-          },
-          quantity: 1
-        });
+        .send({ deliveryInfo: { fullName: 'Jane Doe', phone: '+1-555-0199', addressLine: '742 Evergreen Terrace', city: 'Springfield', state: 'OR', postalCode: '97477' } });
       createdOrderId = orderRes.body.id;
     });
 
-    it("should allow user to view their own order", async () => {
+    it('should allow user to view their own order', async () => {
       const res = await request(app)
         .get(`/api/orders/${createdOrderId}`)
         .set('Authorization', `Bearer ${user1Token}`);
@@ -150,12 +132,12 @@ describe('Order Management & Purchase Flow Integration Tests', () => {
       expect(res.body.id).toBe(createdOrderId);
     });
 
-    it("should deny access when another user tries to view the order", async () => {
+    it('should deny access when another user tries to view the order', async () => {
       const res = await request(app)
         .get(`/api/orders/${createdOrderId}`)
         .set('Authorization', `Bearer ${user2Token}`);
 
-      expect([403, 404]).toContain(res.status);
+      expect(res.status).toBe(403);
     });
   });
 });

@@ -81,6 +81,57 @@ export const generateBookingConfirmationHtml = (payload: BookingConfirmationEmai
   `;
 };
 
+export const generatePaymentSuccessHtml = (payload: PaymentSuccessEmailPayload): string => {
+  const {
+    razorpayPaymentId,
+    orderNumber,
+    customerName,
+    make,
+    model,
+    amountPaid,
+    remainingAmount,
+  } = payload;
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0f0f11; color: #ffffff; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+      <h2 style="color: #10b981; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Payment Successful</h2>
+      <p style="font-size: 14px;">Dear <strong>${customerName}</strong>,</p>
+      <p style="font-size: 14px; line-height: 1.6; color: #d4d4d8;">
+        Thank you for your payment! We have received your booking deposit. Below is your official payment receipt:
+      </p>
+      
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; font-size: 14px; background-color: rgba(255,255,255,0.03); border-radius: 8px;">
+        <tr>
+          <td style="padding: 10px; color: #a1a1aa; width: 140px;"><strong>Transaction ID:</strong></td>
+          <td style="padding: 10px; color: #60a5fa; font-weight: bold;">${razorpayPaymentId}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; color: #a1a1aa;"><strong>Booking ID:</strong></td>
+          <td style="padding: 10px; color: #f59e0b; font-weight: bold;">${orderNumber}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; color: #a1a1aa;"><strong>Vehicle:</strong></td>
+          <td style="padding: 10px; color: #ffffff;">${make} ${model}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; color: #a1a1aa;"><strong>Amount Paid:</strong></td>
+          <td style="padding: 10px; color: #10b981; font-weight: bold;">$${amountPaid.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; color: #a1a1aa;"><strong>Remaining Due:</strong></td>
+          <td style="padding: 10px; color: #fbbf24; font-weight: bold;">$${remainingAmount.toLocaleString()}</td>
+        </tr>
+      </table>
+
+      <p style="margin-top: 20px; font-size: 14px; color: #d4d4d8;">
+        Our concierge team is finalizing your delivery paperwork. You can track your booking status anytime on your Motovra dashboard.
+      </p>
+
+      <p style="margin-top: 25px; font-size: 12px; color: #71717a;">Motovra Luxury Motors • Payment Receipt</p>
+    </div>
+  `;
+};
+
 export const emailService = {
   /**
    * Send Brevo REST API email helper
@@ -215,59 +266,11 @@ export const emailService = {
    * TDD Cycle 2 (Payment Email): Payment Success Email via Brevo
    */
   async sendPaymentSuccessEmail(payload: PaymentSuccessEmailPayload) {
-    const {
-      razorpayPaymentId,
-      orderNumber,
-      customerName,
-      customerEmail,
-      make,
-      model,
-      amountPaid,
-      remainingAmount,
-    } = payload;
-
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0f0f11; color: #ffffff; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-        <h2 style="color: #10b981; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Payment Successful</h2>
-        <p style="font-size: 14px;">Dear <strong>${customerName}</strong>,</p>
-        <p style="font-size: 14px; line-height: 1.6; color: #d4d4d8;">
-          Thank you for your payment! We have received your booking deposit. Below is your official payment receipt:
-        </p>
-        
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; font-size: 14px; background-color: rgba(255,255,255,0.03); border-radius: 8px;">
-          <tr>
-            <td style="padding: 10px; color: #a1a1aa; width: 140px;"><strong>Transaction ID:</strong></td>
-            <td style="padding: 10px; color: #60a5fa; font-weight: bold;">${razorpayPaymentId}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; color: #a1a1aa;"><strong>Booking ID:</strong></td>
-            <td style="padding: 10px; color: #f59e0b; font-weight: bold;">${orderNumber}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; color: #a1a1aa;"><strong>Vehicle:</strong></td>
-            <td style="padding: 10px; color: #ffffff;">${make} ${model}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; color: #a1a1aa;"><strong>Amount Paid:</strong></td>
-            <td style="padding: 10px; color: #10b981; font-weight: bold;">$${amountPaid.toLocaleString()}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; color: #a1a1aa;"><strong>Remaining Due:</strong></td>
-            <td style="padding: 10px; color: #fbbf24; font-weight: bold;">$${remainingAmount.toLocaleString()}</td>
-          </tr>
-        </table>
-
-        <p style="margin-top: 20px; font-size: 14px; color: #d4d4d8;">
-          Our concierge team is finalizing your delivery paperwork. You can track your booking status anytime on your Motovra dashboard.
-        </p>
-
-        <p style="margin-top: 25px; font-size: 12px; color: #71717a;">Motovra Luxury Motors • Payment Receipt</p>
-      </div>
-    `;
+    const htmlContent = generatePaymentSuccessHtml(payload);
 
     return await this.sendBrevoEmail({
-      to: [{ email: customerEmail, name: customerName }],
-      subject: `Payment Receipt: ${make} ${model} (${razorpayPaymentId})`,
+      to: [{ email: payload.customerEmail, name: payload.customerName }],
+      subject: `Payment Receipt: ${payload.make} ${payload.model} (${payload.razorpayPaymentId})`,
       htmlContent,
     });
   },

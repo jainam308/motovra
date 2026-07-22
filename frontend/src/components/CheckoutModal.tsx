@@ -287,88 +287,20 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }
   const handlePayBookingAmount = async () => {
     setIsProcessing(true);
     try {
-      // 1. Call backend to create Razorpay order
+      // Call backend to create Razorpay order ID
       const orderRes = await api.post('/payments/create-order', {
         vehicleId: vehicle.id,
         bookingAmount: BOOKING_AMOUNT,
       });
 
-      const { razorpayOrderId, amount, currency, key } = orderRes.data;
+      const { razorpayOrderId } = orderRes.data;
 
-      // Helper function to complete backend payment verification
-      const completeVerification = async (paymentData: {
-        razorpay_order_id: string;
-        razorpay_payment_id: string;
-        razorpay_signature: string;
-      }) => {
-        try {
-          const verifyRes = await api.post('/payments/verify', {
-            ...paymentData,
-            vehicleId: vehicle.id,
-            deliveryInfo: form,
-            bookingAmount: BOOKING_AMOUNT,
-          });
-
-          toast.success('🎉 Booking payment verified successfully!');
-          onClose();
-          navigate(`/booking-success/${verifyRes.data.order?.id || verifyRes.data.order?.orderNumber}`, {
-            state: {
-              order: verifyRes.data.order,
-              payment: verifyRes.data.payment,
-              vehicle,
-            },
-          });
-        } catch (err: any) {
-          toast.error(err.response?.data?.error || 'Payment verification failed');
-        } finally {
-          setIsProcessing(false);
-        }
-      };
-
-      // 2. Open official Razorpay Checkout modal if valid live/test API key is provided
-      const isRealRazorpayKey = key && key.startsWith('rzp_') && !key.includes('mockkey');
-
-      if (isRealRazorpayKey && window.Razorpay && isRazorpayLoaded) {
-        const options = {
-          key,
-          amount: Math.round(amount * 100),
-          currency,
-          name: 'Motovra Luxury Motors',
-          description: `Booking Deposit for ${vehicle.make} ${vehicle.model}`,
-          image: vehicle.imageUrl || getVehicleImage(vehicle.make, vehicle.model, vehicle.category),
-          order_id: razorpayOrderId,
-          prefill: {
-            name: form.fullName,
-            contact: form.phone,
-          },
-          theme: {
-            color: '#d97706',
-          },
-          handler: async (response: any) => {
-            await completeVerification({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-          },
-          modal: {
-            ondismiss: () => {
-              setIsProcessing(false);
-              toast.error('Payment cancelled');
-            },
-          },
-        };
-
-        const razorpayInstance = new window.Razorpay(options);
-        razorpayInstance.open();
-      } else {
-        // Open Sandbox Razorpay Payment Modal
-        setSandboxData({
-          orderId: razorpayOrderId,
-          amount: BOOKING_AMOUNT,
-          vehicleName: `${vehicle.make} ${vehicle.model}`,
-        });
-      }
+      // Launch interactive Sandbox Razorpay Modal
+      setSandboxData({
+        orderId: razorpayOrderId,
+        amount: BOOKING_AMOUNT,
+        vehicleName: `${vehicle.make} ${vehicle.model}`,
+      });
     } catch (err: any) {
       setIsProcessing(false);
       toast.error(err.response?.data?.error || 'Failed to initiate payment');
@@ -622,6 +554,32 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }
                       <span className="text-xs text-muted-foreground">{b.text}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* Razorpay Test Mode Helper & Sandbox Switch */}
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2 text-xs">
+                  <div className="flex items-start gap-2 text-amber-300">
+                    <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-amber-200">Razorpay Test Mode Instructions:</p>
+                      <p className="text-amber-300/90 mt-0.5">
+                        In Razorpay Checkout, select <strong>Netbanking (SBI / HDFC)</strong> or <strong>UPI (<span className="underline">success@razorpay</span>)</strong> to complete test payments instantly.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSandboxData({
+                        orderId: `order_sandbox_${Date.now()}`,
+                        amount: BOOKING_AMOUNT,
+                        vehicleName: `${vehicle.make} ${vehicle.model}`,
+                      });
+                    }}
+                    className="w-full text-center py-1.5 px-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 rounded-lg text-amber-300 font-semibold transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <CreditCard className="w-3.5 h-3.5" /> Launch In-App Interactive Payment Simulator
+                  </button>
                 </div>
 
                 {/* Action Buttons */}

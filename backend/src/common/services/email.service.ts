@@ -33,6 +33,21 @@ export interface PaymentSuccessEmailPayload {
   remainingAmount: number;
 }
 
+export interface AdminOrderEmailPayload {
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  addressLine?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  make: string;
+  model: string;
+  amountPaid: number;
+  remainingAmount: number;
+}
+
 export const generateBookingConfirmationHtml = (payload: BookingConfirmationEmailPayload): string => {
   const {
     orderNumber,
@@ -271,6 +286,81 @@ export const emailService = {
     return await this.sendBrevoEmail({
       to: [{ email: payload.customerEmail, name: payload.customerName }],
       subject: `Payment Receipt: ${payload.make} ${payload.model} (${payload.razorpayPaymentId})`,
+      htmlContent,
+    });
+  },
+
+  /**
+   * Admin Order Received Notification Email via Brevo
+   */
+  async sendAdminOrderNotification(payload: AdminOrderEmailPayload) {
+    const {
+      orderNumber,
+      customerName,
+      customerPhone,
+      customerEmail,
+      addressLine,
+      city,
+      state,
+      postalCode,
+      make,
+      model,
+      amountPaid,
+      remainingAmount,
+    } = payload;
+
+    const adminEmail = process.env.DEALERSHIP_EMAIL || 'admin@motovra.com';
+    const addressStr = [addressLine, city, state, postalCode].filter(Boolean).join(', ');
+
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0f0f11; color: #ffffff; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <h2 style="color: #f59e0b; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">🚨 New Vehicle Order Received</h2>
+        <p style="font-size: 14px;">A new luxury vehicle order has been successfully placed & verified on the Motovra platform.</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; font-size: 14px; background-color: rgba(255,255,255,0.03); border-radius: 8px;">
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa; width: 140px;"><strong>Order Number:</strong></td>
+            <td style="padding: 10px; color: #f59e0b; font-weight: bold;">${orderNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Vehicle:</strong></td>
+            <td style="padding: 10px; color: #ffffff;">${make} ${model}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Customer Name:</strong></td>
+            <td style="padding: 10px; color: #ffffff;">${customerName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Customer Phone:</strong></td>
+            <td style="padding: 10px; color: #ffffff;"><a href="tel:${customerPhone}" style="color: #60a5fa;">${customerPhone}</a></td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Customer Email:</strong></td>
+            <td style="padding: 10px; color: #3b82f6;"><a href="mailto:${customerEmail}" style="color: #3b82f6;">${customerEmail}</a></td>
+          </tr>
+          ${addressStr ? `
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Delivery Address:</strong></td>
+            <td style="padding: 10px; color: #e4e4e7;">${addressStr}</td>
+          </tr>
+          ` : ''}
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Deposit Paid:</strong></td>
+            <td style="padding: 10px; color: #10b981; font-weight: bold;">$${amountPaid.toLocaleString()}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; color: #a1a1aa;"><strong>Remaining Due:</strong></td>
+            <td style="padding: 10px; color: #fbbf24; font-weight: bold;">$${remainingAmount.toLocaleString()}</td>
+          </tr>
+        </table>
+
+        <p style="margin-top: 20px; font-size: 12px; color: #71717a;">Motovra Luxury Motors • Admin Operations Alert</p>
+      </div>
+    `;
+
+    return await this.sendBrevoEmail({
+      to: [{ email: adminEmail, name: 'Motovra Admin' }],
+      subject: `[New Order] ${make} ${model} (${orderNumber}) - ${customerName}`,
       htmlContent,
     });
   },

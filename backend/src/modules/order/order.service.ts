@@ -10,6 +10,7 @@ export interface DeliveryInfo {
   city: string;
   state: string;
   postalCode: string;
+  email?: string;
 }
 
 export interface CreateOrderPayload {
@@ -99,14 +100,15 @@ export const orderService = {
             }
           });
 
-          // Fetch user email if available
-          let customerEmail = 'customer@motovra.com';
-          if (validUserId) {
+          // Resolve customer email (prioritize deliveryInfo.email, then registered user email)
+          let customerEmail = deliveryInfo?.email?.trim() || '';
+          if (!customerEmail && validUserId) {
             const userObj = await tx.user.findUnique({ where: { id: validUserId } });
             if (userObj?.email) customerEmail = userObj.email;
           }
+          if (!customerEmail) customerEmail = 'customer@motovra.com';
 
-          // Trigger Booking Confirmation Email safely
+          // Trigger Customer Booking Confirmation Email & Admin Order Notification Email
           try {
             await emailService.sendBookingConfirmationEmail({
               orderNumber: order.orderNumber,
@@ -118,8 +120,23 @@ export const orderService = {
               dealerPhone: '+1 (800) 555-LUXE',
               nextSteps: 'Our logistics manager will contact you to confirm delivery scheduling and final paperwork.',
             });
+
+            await emailService.sendAdminOrderNotification({
+              orderNumber: order.orderNumber,
+              customerName: order.fullName,
+              customerPhone: order.phone,
+              customerEmail,
+              addressLine: order.addressLine,
+              city: order.city,
+              state: order.state,
+              postalCode: order.postalCode,
+              make: order.make,
+              model: order.model,
+              amountPaid: Number(order.totalAmount),
+              remainingAmount: 0,
+            });
           } catch (emailErr) {
-            console.error('[Booking Email Error]', emailErr);
+            console.error('[Booking/Admin Email Error]', emailErr);
           }
 
           return {

@@ -35,6 +35,7 @@ export interface VerifyPaymentPayload {
     city: string;
     state: string;
     postalCode: string;
+    email?: string;
   };
   bookingAmount?: number;
 }
@@ -220,14 +221,15 @@ export const paymentService = {
         },
       });
 
-      // Fetch customer email safely
-      let customerEmail = 'customer@motovra.com';
-      if (validUserId) {
+      // Resolve customer email (prioritize deliveryInfo.email, then registered user email)
+      let customerEmail = deliveryInfo?.email?.trim() || '';
+      if (!customerEmail && validUserId) {
         const userObj = await tx.user.findUnique({ where: { id: validUserId } });
         if (userObj?.email) customerEmail = userObj.email;
       }
+      if (!customerEmail) customerEmail = 'customer@motovra.com';
 
-      // Trigger Payment Success Email safely
+      // Trigger Customer Payment Receipt Email & Admin Order Notification Email
       try {
         await emailService.sendPaymentSuccessEmail({
           razorpayPaymentId: payment.razorpayPaymentId || razorpay_payment_id,
@@ -239,8 +241,23 @@ export const paymentService = {
           amountPaid: Number(payment.bookingAmount),
           remainingAmount: Number(payment.remainingAmount),
         });
+
+        await emailService.sendAdminOrderNotification({
+          orderNumber: order.orderNumber,
+          customerName: order.fullName,
+          customerPhone: order.phone,
+          customerEmail,
+          addressLine: order.addressLine,
+          city: order.city,
+          state: order.state,
+          postalCode: order.postalCode,
+          make: order.make,
+          model: order.model,
+          amountPaid: Number(payment.bookingAmount),
+          remainingAmount: Number(payment.remainingAmount),
+        });
       } catch (emailErr) {
-        console.error('[Payment Email Error]', emailErr);
+        console.error('[Payment/Admin Email Error]', emailErr);
       }
 
       return {

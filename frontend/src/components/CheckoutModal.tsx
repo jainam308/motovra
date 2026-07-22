@@ -22,6 +22,7 @@ L.Icon.Default.mergeOptions({
 
 interface DeliveryForm {
   fullName: string;
+  email: string;
   phone: string;
   addressLine: string;
   city: string;
@@ -51,12 +52,13 @@ interface CheckoutModalProps {
 }
 
 const FIELD_CONFIG = [
-  { key: 'fullName',    label: 'Full Name',      placeholder: 'John Doe',                  icon: User,      type: 'text', colSpan: 2 },
-  { key: 'phone',       label: 'Phone Number',   placeholder: '+91 98765 43210',           icon: Phone,     type: 'tel',  colSpan: 2 },
-  { key: 'addressLine', label: 'Address Line',   placeholder: '123, Park Street, Apt 4B',  icon: Home,      type: 'text', colSpan: 2 },
-  { key: 'city',        label: 'City',           placeholder: 'Mumbai',                    icon: Building2, type: 'text', colSpan: 1 },
-  { key: 'state',       label: 'State',          placeholder: 'Maharashtra',               icon: Building2, type: 'text', colSpan: 1 },
-  { key: 'postalCode',  label: 'Postal Code',    placeholder: '400001',                    icon: Hash,      type: 'text', colSpan: 1 },
+  { key: 'fullName',    label: 'Full Name',      placeholder: 'John Doe',                  icon: User,      type: 'text',  colSpan: 2 },
+  { key: 'email',       label: 'Email Address',  placeholder: 'john@example.com',           icon: User,      type: 'email', colSpan: 2 },
+  { key: 'phone',       label: 'Phone Number',   placeholder: '+91 98765 43210',           icon: Phone,     type: 'tel',   colSpan: 2 },
+  { key: 'addressLine', label: 'Address Line',   placeholder: '123, Park Street, Apt 4B',  icon: Home,      type: 'text',  colSpan: 2 },
+  { key: 'city',        label: 'City',           placeholder: 'Mumbai',                    icon: Building2, type: 'text',  colSpan: 1 },
+  { key: 'state',       label: 'State',          placeholder: 'Maharashtra',               icon: Building2, type: 'text',  colSpan: 1 },
+  { key: 'postalCode',  label: 'Postal Code',    placeholder: '400001',                    icon: Hash,      type: 'text',  colSpan: 1 },
 ] as const;
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }) => {
@@ -65,7 +67,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }
 
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState<DeliveryForm>({
-    fullName: '', phone: '', addressLine: '', city: '', state: '', postalCode: ''
+    fullName: '', email: '', phone: '', addressLine: '', city: '', state: '', postalCode: ''
   });
   const [errors,        setErrors]        = useState<Partial<DeliveryForm>>({});
   const [locating,      setLocating]      = useState(false);
@@ -265,6 +267,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }
   const validate = (): boolean => {
     const e: Partial<DeliveryForm> = {};
     if (!form.fullName.trim())    e.fullName    = 'Full name is required';
+    if (!form.email.trim())       e.email       = 'Email address is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) e.email = 'Invalid email address';
     if (!form.phone.trim())       e.phone       = 'Phone number is required';
     if (!form.addressLine.trim()) e.addressLine = 'Address is required';
     if (!form.city.trim())        e.city        = 'City is required';

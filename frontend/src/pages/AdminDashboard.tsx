@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { StatCard } from '../components/dashboard/StatCard';
+
 interface DashboardStats {
   totalVehicles: number;
   availableVehicles: number;
@@ -144,23 +146,7 @@ export default function AdminDashboard() {
       {/* 5 Summary Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map((card, idx) => (
-          <motion.div
-            key={card.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05 }}
-            className={`p-5 rounded-2xl bg-gradient-to-b ${card.color} border ${card.borderColor} backdrop-blur-md relative overflow-hidden group hover:scale-[1.02] transition-all`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{card.title}</span>
-              <div className={`p-2 rounded-xl bg-white/5 border border-white/10 ${card.textColor}`}>
-                <card.icon className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{card.value}</span>
-            </div>
-          </motion.div>
+          <StatCard key={card.title} {...card} index={idx} />
         ))}
       </div>
 

@@ -30,6 +30,7 @@ describe('Admin Page & Vehicle Management', () => {
 
   const renderAdmin = () => {
     return renderWithProviders(<Admin />, {
+      initialEntries: ['/admin?tab=inventory'],
       user: { id: 'admin1', email: 'admin@motovra.com', role: 'ADMIN' }
     });
   };

@@ -71,7 +71,7 @@ describe('Protected Routes & Navigation', () => {
         initialEntries: ['/admin']
       });
 
-      expect(await screen.findByRole('heading', { name: /Inventory Management/i })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: /Admin Intelligence Dashboard|Inventory Management/i })).toBeInTheDocument();
     });
   });
 });

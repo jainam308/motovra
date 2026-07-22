@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
-import { Loader2, Plus, Edit, Trash2, PackagePlus, X, ShieldAlert } from 'lucide-react';
+import { Loader2, Plus, Edit, Trash2, PackagePlus, X, ShieldAlert, LayoutDashboard, Car } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import AdminDashboard from './AdminDashboard';
 
 const validateVehicle = (data: any) => {
   const errors: Record<string, string> = {};
@@ -21,6 +23,14 @@ const validateVehicle = (data: any) => {
 
 export const Admin = () => {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'inventory' ? 'inventory' : 'dashboard';
+  const [activeTab, setActiveTabState] = useState<'dashboard' | 'inventory'>(initialTab);
+
+  const setActiveTab = (tab: 'dashboard' | 'inventory') => {
+    setActiveTabState(tab);
+    setSearchParams(tab === 'inventory' ? { tab: 'inventory' } : {});
+  };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<any>(null);
   
@@ -140,27 +150,63 @@ export const Admin = () => {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8 relative"
+      className="space-y-6 relative"
     >
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
 
-      <div className="flex justify-between items-center pt-4">
-        <div>
-          <div className="flex items-center text-amber-500 mb-2">
-            <ShieldAlert className="w-5 h-5 mr-2" />
-            <span className="font-semibold tracking-wider text-xs uppercase">Elevated Privileges Active</span>
-          </div>
-          <h1 className="text-3xl font-heading font-bold text-white mb-2">Inventory Management</h1>
-          <p className="text-muted-foreground">Admin dashboard for complete CRUD control.</p>
+      {/* Top Tab Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-4 pt-4">
+        <div className="flex items-center space-x-2 bg-zinc-900/80 p-1.5 rounded-xl border border-white/10">
+          <button
+            type="button"
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              activeTab === 'dashboard'
+                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4" /> Executive Analytics
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('inventory')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              activeTab === 'inventory'
+                ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Car className="w-4 h-4" /> Vehicle Inventory CRUD
+          </button>
         </div>
-        <Button onClick={() => openModal()} className="bg-amber-600 hover:bg-amber-700 text-white">
-          <Plus className="w-4 h-4 mr-2" /> Add Vehicle
-        </Button>
+
+        {activeTab === 'inventory' && (
+          <Button onClick={() => openModal()} className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Plus className="w-4 h-4 mr-2" /> Add Vehicle
+          </Button>
+        )}
       </div>
 
-      <Card className="border-amber-500/10 shadow-[0_0_30px_-15px_rgba(245,158,11,0.15)]">
-        <CardHeader>
-          <CardTitle>Current Inventory</CardTitle>
+      {/* Active Tab Content */}
+      {activeTab === 'dashboard' ? (
+        <AdminDashboard />
+      ) : (
+        <>
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="flex items-center text-amber-500 mb-1">
+                <ShieldAlert className="w-4 h-4 mr-2" />
+                <span className="font-semibold tracking-wider text-xs uppercase">Elevated Privileges Active</span>
+              </div>
+              <h1 className="text-2xl font-heading font-bold text-white mb-1">Inventory Management</h1>
+              <p className="text-sm text-muted-foreground">Admin control for complete vehicle CRUD and restock operations.</p>
+            </div>
+          </div>
+
+          <Card className="border-amber-500/10 shadow-[0_0_30px_-15px_rgba(245,158,11,0.15)]">
+            <CardHeader>
+              <CardTitle>Current Inventory</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -381,6 +427,8 @@ export const Admin = () => {
           </div>
         )}
       </AnimatePresence>
+        </>
+      )}
     </motion.div>
   );
 };

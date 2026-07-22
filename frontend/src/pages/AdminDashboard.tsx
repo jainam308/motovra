@@ -228,11 +228,11 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
-                <p className="text-2xl font-black text-emerald-400">{reports?.availableVsSold.available ?? 0}</p>
+                <p className="text-2xl font-black text-emerald-400">{reports?.availableVsSold?.available ?? 0}</p>
                 <p className="text-xs font-semibold text-emerald-300 mt-1 uppercase tracking-wider">Available</p>
               </div>
               <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-center">
-                <p className="text-2xl font-black text-amber-400">{reports?.availableVsSold.sold ?? 0}</p>
+                <p className="text-2xl font-black text-amber-400">{reports?.availableVsSold?.sold ?? 0}</p>
                 <p className="text-xs font-semibold text-amber-300 mt-1 uppercase tracking-wider">Reserved / Sold</p>
               </div>
             </div>

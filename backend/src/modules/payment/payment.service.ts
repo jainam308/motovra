@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 import Razorpay from 'razorpay';
+import { emailService } from '../../common/services/email.service';
 
 const prisma = new PrismaClient();
 
@@ -210,6 +211,29 @@ export const paymentService = {
           paidAt: new Date(),
         },
       });
+
+      // Fetch customer email safely
+      let customerEmail = 'customer@motovra.com';
+      if (validUserId) {
+        const userObj = await tx.user.findUnique({ where: { id: validUserId } });
+        if (userObj?.email) customerEmail = userObj.email;
+      }
+
+      // Trigger Payment Success Email safely
+      try {
+        await emailService.sendPaymentSuccessEmail({
+          razorpayPaymentId: payment.razorpayPaymentId || razorpay_payment_id,
+          orderNumber: order.orderNumber,
+          customerName: order.fullName,
+          customerEmail,
+          make: order.make,
+          model: order.model,
+          amountPaid: Number(payment.bookingAmount),
+          remainingAmount: Number(payment.remainingAmount),
+        });
+      } catch (emailErr) {
+        console.error('[Payment Email Error]', emailErr);
+      }
 
       return {
         order: {

@@ -781,3 +781,34 @@ REFACTOR 4
 Reuse booking components.
 Improve loading and error states.
 Clean up frontend payment flow.
+
+prompt 39:write anprompt to antigravity for email management in contact form using brevo and also tell that i will provide him brevo keys and also send acknowledgment to the customer
+(chatgpt)
+Feature: Contact Form & Email System
+
+### Prompt
+
+Design and implement a Contact Form & Email System for the Vehicle Inventory Management System following strict Test-Driven Development (TDD).
+
+Requirements:
+- Follow the TDD cycle: RED → GREEN → REFACTOR.
+- Stop after every REFACTOR phase to review the implementation, ensure all tests pass, and create a Git commit before continuing to the next cycle.
+- Create a Contact Us page where customers can submit:
+  - Full Name
+  - Email Address
+  - Phone Number
+  - Subject
+  - Message
+- Validate all required fields on both the frontend and backend.
+- Create a backend API to process contact form submissions.
+- (Optional) Store contact inquiries in the database for future reference.
+- Integrate Brevo for email communication.
+- Send an email notification to the dealership/admin containing all inquiry details after a successful submission.
+- Send an automatic confirmation email to the customer acknowledging receipt of the inquiry.
+- Use reusable email templates and a centralized email service.
+- Ensure proper error handling so failed email delivery does not crash the application.
+- Write comprehensive backend and frontend tests for validation, API behavior, and email service integration.
+- Follow clean architecture with separate controllers, services, validation, and utility layers.
+
+prompt 40:
+write prompt for antigravity for this feature 1. Booking Confirmation Emails Automatically send an email after a vehicle booking containing: Booking ID Vehicle details Booking amount Dealer information Next steps2. Payment Success Emails After Razorpay verification: Payment ID Amount paid Transaction details Receipt Thank you message

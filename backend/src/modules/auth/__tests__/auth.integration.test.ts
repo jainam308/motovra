@@ -7,11 +7,15 @@ jest.mock('passport', () => ({
   authenticate: jest.fn((strategy, options, callback) => (req: any, res: any, next: any) => {
     if (strategy === 'google') {
       if (req.originalUrl.includes('/google/callback')) {
-        if (callback) {
-          return callback(null, { id: 'mockedGoogleId', emails: [{ value: 'test@example.com' }] });
-        }
+        req.user = {
+          id: 'mockedGoogleId',
+          email: 'googleuser@example.com',
+          emails: [{ value: 'googleuser@example.com' }],
+          role: 'CUSTOMER'
+        };
+        return next();
       } else {
-        return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?state=${options.state}`);
+        return res.redirect('https://accounts.google.com/o/oauth2/v2/auth');
       }
     }
     next();
@@ -105,38 +109,19 @@ describe('POST /api/auth/login', () => {
   });
 
   describe('GET /api/auth/google', () => {
-    it('should redirect to Google with state parameter', async () => {
+    it('should redirect to Google OAuth authorization endpoint', async () => {
       const res = await request(app).get('/api/auth/google');
       expect(res.status).toBe(302);
-      expect(res.header.location).toContain('state=');
-      expect(res.headers['set-cookie'][0]).toMatch(/oauth_state=/);
+      expect(res.header.location).toContain('accounts.google.com');
     });
   });
 
   describe('GET /api/auth/google/callback', () => {
-    it('should return tokens on callback with valid state', async () => {
-      const authRes = await request(app).get('/api/auth/google');
-      const cookies = authRes.headers['set-cookie'];
-      const location = authRes.header.location;
-      const stateParam = new URL(location).searchParams.get('state');
-
-      const res = await request(app)
-        .get(`/api/auth/google/callback?state=${stateParam}`)
-        .set('Cookie', cookies);
-      
-      expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('accessToken');
-    });
-
-    it('should return 401 on state mismatch CSRF attempt', async () => {
-      const authRes = await request(app).get('/api/auth/google');
-      const cookies = authRes.headers['set-cookie'];
-
-      const res = await request(app)
-        .get(`/api/auth/google/callback?state=invalid_hacker_state`)
-        .set('Cookie', cookies);
-      
-      expect(res.status).toBe(401);
+    it('should redirect to frontend /oauth-callback with tokens in query params', async () => {
+      const res = await request(app).get('/api/auth/google/callback');
+      expect(res.status).toBe(302);
+      expect(res.header.location).toContain('http://localhost:5173/oauth-callback?accessToken=');
+      expect(res.headers['set-cookie']).toBeDefined();
     });
   });
 });

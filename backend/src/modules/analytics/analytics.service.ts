@@ -11,39 +11,33 @@ export interface DashboardStats {
 }
 
 export const analyticsService = {
+  /**
+   * TDD Cycle 1: Dashboard Statistics
+   * Concurrent aggregations for vehicles, bookings, revenue, and customers
+   */
   async getDashboardStats(): Promise<DashboardStats> {
-    const totalVehicles = await prisma.vehicle.count();
-
-    const availableVehicles = await prisma.vehicle.count({
-      where: {
-        quantity: { gt: 0 },
-      },
-    });
-
-    const totalBookings = await prisma.order.count();
-
-    const revenueAggregate = await prisma.payment.aggregate({
-      where: {
-        paymentStatus: 'BOOKING_PAID',
-      },
-      _sum: {
-        bookingAmount: true,
-      },
-    });
-
-    const totalRevenue = Number(revenueAggregate._sum.bookingAmount || 0);
-
-    const totalCustomers = await prisma.user.count({
-      where: {
-        role: 'CUSTOMER',
-      },
-    });
+    const [
+      totalVehicles,
+      availableVehicles,
+      totalBookings,
+      revenueAggregate,
+      totalCustomers,
+    ] = await Promise.all([
+      prisma.vehicle.count(),
+      prisma.vehicle.count({ where: { quantity: { gt: 0 } } }),
+      prisma.order.count(),
+      prisma.payment.aggregate({
+        where: { paymentStatus: 'BOOKING_PAID' },
+        _sum: { bookingAmount: true },
+      }),
+      prisma.user.count({ where: { role: 'CUSTOMER' } }),
+    ]);
 
     return {
       totalVehicles,
       availableVehicles,
       totalBookings,
-      totalRevenue,
+      totalRevenue: Number(revenueAggregate._sum.bookingAmount || 0),
       totalCustomers,
     };
   },

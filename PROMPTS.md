@@ -817,3 +817,374 @@ as we know that  razorpay is not working so can you write a note that as there i
 
 prompt 42:
 write an prompt for dashboard analytics for antigravity
+# Feature: Admin Dashboard Analytics
+
+Implement a production-ready Admin Dashboard Analytics module for the Vehicle Inventory Management System following strict Test-Driven Development (TDD).
+
+## General Requirements
+
+- Follow the TDD cycle: **RED → GREEN → REFACTOR**.
+- **Stop after every RED, GREEN, and REFACTOR phase.**
+- Before moving to the next phase, provide the Git commit command and commit message.
+- Ensure all tests pass before proceeding.
+- Follow clean architecture using Controllers, Services, Routes, Models, and Utilities.
+- Keep analytics logic inside a dedicated `AnalyticsService`.
+- Use MongoDB Aggregation Pipeline wherever appropriate.
+- Build reusable backend APIs and reusable frontend dashboard components.
+- Do not modify unrelated functionality.
+
+---
+
+# Dashboard Features
+
+## Dashboard Cards
+
+Display:
+
+- Total Vehicles
+- Available Vehicles
+- Total Bookings
+- Total Revenue
+- Total Customers
+
+---
+
+## Booking Analytics
+
+Display:
+
+- Bookings by Month
+- Booking Status Distribution
+- Top Booked Vehicles
+
+---
+
+## Revenue Analytics
+
+Display:
+
+- Monthly Revenue
+- Total Booking Amount
+- Average Booking Value
+
+---
+
+## Vehicle Analytics
+
+Display:
+
+- Vehicles by Brand
+- Available vs Sold
+
+If vehicle views exist, also display:
+
+- Most Viewed Vehicles
+
+Otherwise skip this feature.
+
+---
+
+## Recent Activity
+
+Display:
+
+- Latest Bookings
+- Recent Payments
+- Recent Contact Inquiries
+
+---
+
+# TDD Cycle 1 — Dashboard Statistics
+
+## RED
+
+Write failing tests for:
+
+- Dashboard statistics endpoint
+- Total Vehicles
+- Available Vehicles
+- Total Bookings
+- Total Revenue
+- Total Customers
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "test: add dashboard statistics tests
+
+Used AI assistance to create failing tests for the Admin Dashboard Statistics feature following the RED phase of TDD.
+
+Added tests covering dashboard summary metrics including vehicles, bookings, customers, and revenue.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+## GREEN
+
+Implement:
+
+- Analytics API
+- MongoDB aggregation
+- Dashboard statistics endpoint
+
+Return:
+
+```json
+{
+  "totalVehicles": 0,
+  "availableVehicles": 0,
+  "totalBookings": 0,
+  "totalRevenue": 0,
+  "totalCustomers": 0
+}
+```
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "feat: implement dashboard statistics
+
+Used AI assistance to implement dashboard statistics APIs using MongoDB aggregations.
+
+Added endpoints for vehicle, booking, customer, and revenue metrics with all tests passing.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+## REFACTOR
+
+Improve:
+
+- AnalyticsService
+- Query reuse
+- Code organization
+- Naming
+- Error handling
+
+Keep behavior unchanged.
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "refactor: improve dashboard statistics architecture
+
+Used AI assistance to refactor dashboard analytics implementation.
+
+Extracted reusable analytics services, improved aggregation logic, enhanced code organization, and preserved all existing functionality.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+# TDD Cycle 2 — Analytics
+
+## RED
+
+Write failing tests for:
+
+- Monthly bookings
+- Booking status distribution
+- Top booked vehicles
+- Monthly revenue
+- Average booking value
+- Vehicles by brand
+- Available vs Sold
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "test: add analytics report tests
+
+Used AI assistance to create failing tests for dashboard analytics reports following the RED phase of TDD.
+
+Added tests for booking analytics, revenue analytics, and vehicle analytics.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+## GREEN
+
+Implement:
+
+Booking Analytics
+
+- Monthly bookings
+- Booking status distribution
+- Top booked vehicles
+
+Revenue Analytics
+
+- Monthly revenue
+- Average booking value
+
+Vehicle Analytics
+
+- Vehicles by brand
+- Available vs Sold
+
+Use MongoDB aggregation pipelines.
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "feat: implement dashboard analytics reports
+
+Used AI assistance to implement booking, revenue, and vehicle analytics using MongoDB aggregation pipelines.
+
+Added analytics APIs for reports and ensured all analytics tests pass.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+## REFACTOR
+
+Improve:
+
+- Shared aggregation helpers
+- AnalyticsService
+- Response formatting
+- Code reuse
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "refactor: optimize analytics service
+
+Used AI assistance to refactor dashboard analytics services.
+
+Improved aggregation reuse, simplified analytics logic, enhanced maintainability, and preserved all existing functionality.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+# TDD Cycle 3 — Dashboard UI
+
+## RED
+
+Write failing frontend tests for:
+
+- Dashboard cards
+- Charts
+- Recent activity
+- Loading state
+- Empty state
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "test: add dashboard UI tests
+
+Used AI assistance to create failing frontend tests for the Admin Dashboard Analytics feature following the RED phase of TDD.
+
+Added tests covering dashboard cards, charts, activity lists, loading states, and empty states.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+## GREEN
+
+Implement:
+
+Dashboard Cards
+
+- Total Vehicles
+- Available Vehicles
+- Total Bookings
+- Revenue
+- Customers
+
+Charts
+
+- Monthly Bookings
+- Booking Status
+- Monthly Revenue
+- Vehicle Brand Distribution
+
+Recent Activity
+
+- Latest Bookings
+- Latest Payments
+- Latest Contact Inquiries
+
+Ensure responsive design.
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "feat: implement admin dashboard interface
+
+Used AI assistance to implement the Admin Dashboard Analytics interface.
+
+Added responsive dashboard cards, charts, analytics visualizations, and recent activity components with all tests passing.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+## REFACTOR
+
+Improve:
+
+- Reusable chart components
+- Dashboard layout
+- Component structure
+- API hooks
+- Performance
+
+Keep behavior unchanged.
+
+### Git Commit
+
+```bash
+git add .
+
+git commit -m "refactor: improve dashboard UI architecture
+
+Used AI assistance to refactor the Admin Dashboard Analytics interface.
+
+Extracted reusable dashboard components, improved performance, optimized API usage, and maintained full test coverage.
+
+Co-authored-by: Google Antigravity <antigravity@users.noreply.github.com>"
+```
+
+---
+
+# Final Requirements
+
+- Follow strict RED → GREEN → REFACTOR.
+- Stop after every phase.
+- Provide the Git commit command before continuing.
+- Ensure all tests pass.
+- Use MongoDB aggregation for analytics.
+- Keep backend and frontend modular.
+- Follow existing project coding standards.

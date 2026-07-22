@@ -6,6 +6,7 @@ import vehicleRoutes from './modules/vehicle/vehicle.routes';
 import orderRoutes from './modules/order/order.routes';
 import paymentRoutes from './modules/payment/payment.routes';
 import contactRoutes from './modules/contact/contact.routes';
+import analyticsRoutes from './modules/analytics/analytics.routes';
 import { setupSwagger } from './swagger';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 setupSwagger(app);
 

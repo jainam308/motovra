@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { emailService } from '../../common/services/email.service';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ export interface CreateContactInquiryPayload {
 
 export const contactService = {
   /**
-   * TDD Cycle 1: Create Contact Inquiry
+   * Create Contact Inquiry + Trigger Emails
    */
   async createInquiry(payload: CreateContactInquiryPayload) {
     const { name, email, subject, message } = payload;
@@ -54,6 +55,21 @@ export const contactService = {
         subject: subject.trim(),
         message: message.trim(),
       },
+    });
+
+    // TDD Cycle 2: Send Admin Inquiry Notification
+    await emailService.sendAdminInquiryNotification({
+      name: inquiry.name,
+      email: inquiry.email,
+      subject: inquiry.subject,
+      message: inquiry.message,
+    });
+
+    // TDD Cycle 3: Send Customer Confirmation Email
+    await emailService.sendCustomerConfirmationEmail({
+      name: inquiry.name,
+      email: inquiry.email,
+      subject: inquiry.subject,
     });
 
     return inquiry;

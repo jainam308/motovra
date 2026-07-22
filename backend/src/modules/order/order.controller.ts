@@ -1,10 +1,20 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { orderService } from './order.service';
 
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+    role: string;
+  };
+}
+
 export const orderController = {
-  async getUserOrders(req: Request, res: Response, next: any) {
+  async getUserOrders(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user!.userId;
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
       const orders = await orderService.getUserOrders(userId);
       res.json(orders);
     } catch (error) {
@@ -12,9 +22,12 @@ export const orderController = {
     }
   },
 
-  async getOrderById(req: Request, res: Response, next: any) {
+  async getOrderById(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user!.userId;
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
       const { id } = req.params;
       const order = await orderService.getOrderById(id, userId);
       res.json(order);

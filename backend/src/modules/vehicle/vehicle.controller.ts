@@ -1,6 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { vehicleService } from './vehicle.service';
 
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    userId: string;
+    role: string;
+  };
+}
+
 export const vehicleController = {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
@@ -38,9 +45,9 @@ export const vehicleController = {
     }
   },
 
-  async purchase(req: Request, res: Response, next: NextFunction) {
+  async purchase(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-      const userId = (req as any).user?.userId || 'guest';
+      const userId = req.user?.userId || 'guest';
       const order = await vehicleService.purchase(req.params.id, userId, req.body);
       res.status(201).json(order);
     } catch (error) {

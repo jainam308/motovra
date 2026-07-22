@@ -1,132 +1,214 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { ShieldCheck, Zap, Globe, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ShieldCheck, Zap, Globe, ChevronRight, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getVehicleImage } from '../utils/imageMapper';
+import { AnimatedHeroSection } from '../components/hero/AnimatedHeroSection';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 
 export const Home = () => {
+  const [activeCategory, setActiveCategory] = useState('ALL');
+
+  const featuredVehicles = [
+    { title: 'Porsche 911 GT3 RS', make: 'Porsche', model: '911', category: 'SPORTS', price: '$223,800', hp: '518 HP', topSpeed: '184 mph' },
+    { title: 'Ferrari SF90 Stradale', make: 'Ferrari', model: 'SF90', category: 'SPORTS', price: '$524,000', hp: '986 HP', topSpeed: '211 mph' },
+    { title: 'Lamborghini Urus Performante', make: 'Lamborghini', model: 'Urus', category: 'SUV', price: '$260,000', hp: '657 HP', topSpeed: '190 mph' },
+    { title: 'Aston Martin DBS Superleggera', make: 'Aston Martin', model: 'DBS', category: 'SPORTS', price: '$330,000', hp: '715 HP', topSpeed: '211 mph' },
+    { title: 'Rolls-Royce Phantom', make: 'Rolls-Royce', model: 'Phantom', category: 'LUXURY', price: '$460,000', hp: '563 HP', topSpeed: '155 mph' },
+    { title: 'McLaren 765LT', make: 'McLaren', model: '765LT', category: 'SPORTS', price: '$382,500', hp: '755 HP', topSpeed: '205 mph' },
+  ];
+
+  const filteredVehicles = activeCategory === 'ALL'
+    ? featuredVehicles
+    : featuredVehicles.filter(v => v.category === activeCategory);
+
   return (
-    <div className="-mt-8 -mx-4 md:-mx-8"> {/* Negative margin to offset RootLayout container padding for full width sections */}
+    <div className="-mt-8 -mx-4 md:-mx-8 bg-background">
       
-      {/* Cinematic Hero */}
-      <section className="relative h-[85vh] flex items-center justify-center overflow-hidden bg-black">
-        <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&q=80&w=2000" 
-            alt="Luxury Car Hero" 
-            className="w-full h-full object-cover opacity-60"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-        </div>
-        
-        <div className="relative z-10 text-center space-y-8 px-4 max-w-4xl mx-auto mt-20">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl md:text-7xl font-heading font-bold text-white tracking-tighter"
-          >
-            The Apex of <span className="text-primary italic">Performance.</span>
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg md:text-2xl text-gray-300 max-w-2xl mx-auto font-light"
-          >
-            Curated ultra-luxury and exotic vehicles for the most discerning drivers. 
-            Acquire your dream machine today.
-          </motion.p>
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
-          >
+      {/* 🏎️ Animated Framer Motion Highway Hero */}
+      <AnimatedHeroSection />
+
+      {/* 🌟 Featured Marques Section */}
+      <section className="py-24 px-4 md:px-8 border-b border-border/50">
+        <div className="container mx-auto max-w-7xl space-y-12">
+          
+          {/* Section Header & Filter Tabs */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
+            <div>
+              <div className="flex items-center space-x-2 mb-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-xs font-bold tracking-widest text-primary uppercase">Curated Collection</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-heading font-extrabold text-white">Featured Marques</h2>
+              <p className="text-muted-foreground mt-1">Discover our most sought-after flagship hypercars and luxury sedans.</p>
+            </div>
+
+            {/* Category Pill Filters */}
+            <div className="flex flex-wrap gap-2">
+              {['ALL', 'SPORTS', 'LUXURY', 'SUV'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-all duration-300 ${
+                    activeCategory === cat
+                      ? 'bg-primary text-black shadow-[0_0_20px_rgba(229,169,16,0.4)]'
+                      : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Widescreen Vehicle Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <AnimatePresence mode="wait">
+              {filteredVehicles.map((car) => (
+                <motion.div
+                  key={car.title}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Link to="/showroom">
+                    <div className="group relative rounded-2xl overflow-hidden bg-card border border-border/80 hover:border-primary/50 transition-all duration-500 hover:shadow-[0_15px_40px_-15px_rgba(229,169,16,0.2)]">
+                      {/* Image Container with 16:9 Widescreen Ratio */}
+                      <div className="aspect-[16/10] bg-secondary relative overflow-hidden">
+                        <img
+                          src={getVehicleImage(car.make, car.model)}
+                          alt={car.title}
+                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 opacity-90 group-hover:opacity-100"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent z-10" />
+
+                        {/* Top Badges */}
+                        <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
+                          <Badge variant="secondary" className="backdrop-blur-md bg-black/60 text-xs border border-white/10 text-white font-semibold">
+                            {car.category}
+                          </Badge>
+                          <span className="text-xs font-mono text-gray-300 backdrop-blur-md bg-black/60 px-2.5 py-1 rounded-full border border-white/10">
+                            {car.hp}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Info Box */}
+                      <div className="p-6 space-y-3 relative z-20 -mt-6 pt-0">
+                        <div className="flex justify-between items-baseline">
+                          <h3 className="text-2xl font-heading font-bold text-white group-hover:text-primary transition-colors">
+                            {car.title}
+                          </h3>
+                        </div>
+                        <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                          <span className="text-2xl font-bold font-mono text-primary">{car.price}</span>
+                          <span className="text-xs text-muted-foreground font-semibold flex items-center group-hover:translate-x-1 transition-transform">
+                            Details <ChevronRight className="w-4 h-4 ml-0.5 text-primary" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* View Full Showroom Callout */}
+          <div className="text-center pt-6">
             <Link to="/showroom">
-              <Button size="lg" className="h-14 px-8 text-lg font-semibold shadow-[0_0_40px_-10px_rgba(229,169,16,0.5)]">
-                Explore Inventory
+              <Button size="lg" variant="outline" className="h-13 px-8 text-base border-white/20 hover:bg-white/10">
+                Explore Entire Showroom Inventory ({15} Vehicles)
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Link to="/showroom?category=ELECTRIC">
-              <Button size="lg" variant="outline" className="h-14 px-8 text-lg backdrop-blur-md bg-white/5 border-white/20 hover:bg-white/10">
-                View Electric
-              </Button>
-            </Link>
-          </motion.div>
+          </div>
+
         </div>
       </section>
 
-      {/* Featured Marquee / Categories */}
-      <section className="py-24 bg-background px-4 md:px-8">
+      {/* 👑 The Motovra Distinction / Why Choose Us */}
+      <section className="py-24 px-4 md:px-8 bg-secondary/20 border-b border-border/50">
         <div className="container mx-auto max-w-7xl">
-          <div className="flex justify-between items-end mb-12 border-b border-border pb-6">
-            <div>
-              <h2 className="text-3xl font-heading font-bold text-white mb-2">Featured Marques</h2>
-              <p className="text-muted-foreground">Discover our most sought-after collections.</p>
-            </div>
-            <Link to="/showroom" className="text-primary hover:text-primary/80 flex items-center text-sm font-semibold uppercase tracking-wider">
-              View All <ChevronRight className="w-4 h-4 ml-1" />
-            </Link>
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <span className="text-xs font-bold tracking-widest text-primary uppercase">THE MOTOVRA STANDARD</span>
+            <h2 className="text-3xl md:text-5xl font-heading font-extrabold text-white">Uncompromising Luxury Acquisition</h2>
+            <p className="text-muted-foreground text-base md:text-lg">
+              We eliminate every point of friction between wanting a luxury machine and holding the keys in your hands.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { title: 'Porsche 911 GT3 RS', make: 'Porsche', model: '911', price: '$223,800' },
-              { title: 'Ferrari SF90', make: 'Ferrari', model: 'SF90', price: '$524,000' },
-              { title: 'Rolls-Royce Phantom', make: 'Rolls-Royce', model: 'Phantom', price: '$460,000' }
-            ].map((car, i) => (
-              <Link to="/showroom" key={i}>
-                <motion.div 
-                  whileHover={{ y: -10 }}
-                  className="group relative rounded-2xl overflow-hidden aspect-[4/5] bg-secondary border border-border"
-                >
-                  <img src={getVehicleImage(car.make, car.model)} alt={car.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-8 w-full">
-                    <h3 className="text-2xl font-heading font-bold text-white mb-1">{car.title}</h3>
-                    <p className="text-primary font-semibold">{car.price}</p>
-                  </div>
-                </motion.div>
-              </Link>
-            ))}
+            
+            <div className="p-8 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all duration-300 space-y-4 relative group">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <ShieldCheck className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-heading font-bold text-white">200-Point Inspection</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Every vehicle undergoes rigorous mechanical, structural, and aesthetic authentication by certified marque technicians.
+              </p>
+              <ul className="space-y-2 pt-2 text-xs text-gray-300">
+                <li className="flex items-center"><CheckCircle2 className="w-3.5 h-3.5 mr-2 text-primary" /> Verified Title & History</li>
+                <li className="flex items-center"><CheckCircle2 className="w-3.5 h-3.5 mr-2 text-primary" /> Multi-Point Powertrain Dyno</li>
+              </ul>
+            </div>
+
+            <div className="p-8 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all duration-300 space-y-4 relative group">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <Globe className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-heading font-bold text-white">Enclosed Global Delivery</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Climate-controlled, fully insured white-glove transportation directly to your residence anywhere across the globe.
+              </p>
+              <ul className="space-y-2 pt-2 text-xs text-gray-300">
+                <li className="flex items-center"><CheckCircle2 className="w-3.5 h-3.5 mr-2 text-primary" /> GPS Real-Time Carrier Tracking</li>
+                <li className="flex items-center"><CheckCircle2 className="w-3.5 h-3.5 mr-2 text-primary" /> Zero Mileage Enclosed Transport</li>
+              </ul>
+            </div>
+
+            <div className="p-8 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all duration-300 space-y-4 relative group">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <Zap className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-heading font-bold text-white">Frictionless Settlement</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Seamless digital acquisition supporting wire transfers, crypto payments, or custom tailored multi-year financing.
+              </p>
+              <ul className="space-y-2 pt-2 text-xs text-gray-300">
+                <li className="flex items-center"><CheckCircle2 className="w-3.5 h-3.5 mr-2 text-primary" /> Instant Smart Contract Transfer</li>
+                <li className="flex items-center"><CheckCircle2 className="w-3.5 h-3.5 mr-2 text-primary" /> Dedicated Concierge Specialist</li>
+              </ul>
+            </div>
+
           </div>
+
         </div>
       </section>
 
-      {/* Why Motovra */}
-      <section className="py-24 bg-secondary/30 border-t border-b border-border px-4 md:px-8">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-4">The Motovra Standard</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">We don't just sell cars; we provide an uncompromised acquisition experience tailored to your lifestyle.</p>
+      {/* 🚀 Ready to Drive Callout Banner */}
+      <section className="py-20 px-4 md:px-8 relative overflow-hidden">
+        <div className="container mx-auto max-w-6xl relative z-10 p-12 md:p-16 rounded-3xl bg-gradient-to-r from-primary/20 via-card to-card border border-primary/30 flex flex-col md:flex-row items-center justify-between gap-8 shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+          <div className="space-y-3 max-w-xl text-center md:text-left">
+            <h2 className="text-3xl md:text-4xl font-heading font-extrabold text-white">Ready to Elevate Your Drive?</h2>
+            <p className="text-gray-300 text-base">Browse our verified inventory or contact our concierge to source custom hypercars.</p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-heading font-bold text-white">Verified Provenance</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">Every vehicle undergoes a rigorous 200-point inspection and provenance verification by our master technicians.</p>
-            </div>
-            
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
-                <Globe className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-heading font-bold text-white">White-Glove Delivery</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">Secure, enclosed transport delivery anywhere in the world, straight to your garage door.</p>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
-                <Zap className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-heading font-bold text-white">Frictionless Checkout</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">Crypto, wire transfer, or tailored financing. Complete your multi-million dollar acquisition in minutes.</p>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link to="/showroom">
+              <Button size="lg" className="h-13 px-8 text-base font-bold bg-primary text-black hover:bg-primary/90">
+                Browse Showroom Now
+              </Button>
+            </Link>
+            <Link to="/contact">
+              <Button size="lg" variant="outline" className="h-13 px-8 text-base border-white/30 text-white hover:bg-white/10">
+                Sell Your Vehicle
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

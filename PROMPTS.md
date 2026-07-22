@@ -289,3 +289,44 @@ now in each product can you please sutaible car image from the net
 prompt 26:
 Review the entire frontend implementation and identify all critical user flows that require automated tests. Create comprehensive React Testing Library and Vitest tests for authentication, Google OAuth flow, registration, login, logout, protected routes, profile page, admin dashboard, vehicle dashboard, search, pagination, purchase flow, and error states. Run the test suite, fix any failing tests, resolve any bugs uncovered by testing, and continue until all tests pass and the application is stable. For all future prompts, strictly follow the TDD workflow: RED → GREEN → REFACTOR, writing tests before implementation.
 
+
+prompt27:
+🛠️ Proposed Changes by antigravity
+[Component Name] Backend Integration Test Suite
+Update outdated test assertions in backend/src/modules/auth/__tests__/auth.integration.test.ts to align with the streamlined OAuth flow (removing stale oauth_state session test cases) so the backend Jest test suite passes 100% clean alongside the frontend Vitest suite.
+
+[MODIFY] 
+auth.integration.test.ts i have verified and allowed
+
+prompt28:(written through chatgpt)
+Follow strict TDD (RED → GREEN → REFACTOR) for this prompt.
+
+First write failing tests for:
+401 Unauthorized → automatically redirect to /login, clear authentication state, and display an appropriate notification.
+403 Forbidden → display a clear "You don't have permission" toast without redirecting.
+409 Stock Conflict → display the conflict message inline on the affected vehicle card while keeping the rest of the UI functional.
+Logout flow → verify POST /api/auth/logout is called, client authentication state is cleared, protected data is removed, and the user is redirected appropriately.
+React Error Boundary → verify rendering fallback UI when a child component throws.
+404 Page → verify unknown routes render the custom Not Found page.
+Confirm the tests fail (RED).
+Implement:
+Top-level React Error Boundary.
+Custom 404 page.
+Toast notifications for network failures, 401, and 403 responses.
+Inline 409 stock-conflict message on the affected vehicle card.
+Complete logout flow using POST /api/auth/logout.
+Axios interceptors for centralized API error handling.
+Run the full test suite until all tests pass (GREEN).
+Refactor only if all tests continue to pass (REFACTOR).
+Ensure no regressions by running the entire frontend test suite and verifying all existing tests remain green.
+
+prompt 29:
+Design a premium animated hero section for the Motovra homepage using Framer Motion. Create a highway scene where a modern sports car drives smoothly from the left onto the road with rotating wheels, subtle suspension bounce, and realistic easing. Add animated lane markings moving beneath the car, a parallax mountain or city background, and soft lighting effects. As the car reaches the center, fade in the Motovra headline, supporting text, and CTA buttons. The animation should be responsive, performant (60fps), and respect prefers-reduced-motion. Avoid heavy 3D libraries or excessive visual effects. also add there is no need off tdd in this work
+
+prompt 30:
+suprisingly all car data has been removed only 4 cars showing please solve that issue and can you try to improve home page more it is looking good but rectangle image and background back is very blur means make perfect according to you 
+
+prompts 31:
+background image is not setting with it use which match with design and our car
+
+

@@ -10,4 +10,22 @@ export const analyticsController = {
       next(err);
     }
   },
+
+  async getAnalyticsReports(req: Request, res: Response, next: NextFunction) {
+    try {
+      const reports = await analyticsService.getAnalyticsReports();
+      res.json(reports);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async getRecentActivity(req: Request, res: Response, next: NextFunction) {
+    try {
+      const activity = await analyticsService.getRecentActivity();
+      res.json(activity);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

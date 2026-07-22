@@ -329,4 +329,150 @@ suprisingly all car data has been removed only 4 cars showing please solve that 
 prompts 31:
 background image is not setting with it use which match with design and our car
 
+prompt 32:
 
+suprisingly all car data has been removed only 4 cars showing please solve that issue and can you try to improve home page more it is looking good but rectangle image and background back is very blur means make perfect according to you 
+
+prompt 33:
+give detailed description of order mangement system give it to antigravity tell him to follow tdd after each red ,green,refactor stop and give me only suggestion for git and i will do manualy
+follows:(output of chatgpt)
+Order Management System (Follow Strict TDD)
+
+Our next feature is to implement a complete Order Management System for the Motovra Car Dealership Inventory System.
+
+This feature should extend the existing purchase functionality without breaking any current features.
+
+🚨 TDD Rules (Mandatory)
+
+Follow strict Test-Driven Development.
+
+For every logical step:
+
+RED
+Write failing tests first.
+Explain what functionality is being tested.
+Stop and wait for my approval.
+GREEN
+Implement the minimum code required to make the tests pass.
+Do not refactor.
+Stop and wait for my approval.
+REFACTOR
+Improve code quality while ensuring all tests continue to pass.
+Stop and wait for my approval.
+
+After every RED, GREEN, and REFACTOR phase:
+
+Explain what changed.
+Report test results.
+Suggest only the Git action (for example: "This is a good point to commit."). Do not provide Git commands. I will perform all Git operations manually.
+
+Do not continue automatically to the next phase until I approve.
+
+Objective
+
+Currently purchasing a vehicle only decreases inventory.
+
+Instead, purchasing should create a proper business order.
+
+Order Entity
+
+Create an Order model/entity containing:
+
+Order ID
+Order Number (human-readable and unique, e.g. MV-1001)
+User reference
+Vehicle reference
+Vehicle make
+Vehicle model
+Vehicle price at purchase time
+Quantity purchased
+Total amount
+Order status
+Delivery information
+Created timestamp
+Updated timestamp
+
+Store the vehicle information at the time of purchase so historical orders remain accurate even if vehicle details change later.
+
+Order Status
+
+Initial status:
+
+Confirmed
+
+Design the system so additional statuses can easily be added later, such as:
+
+Processing
+Ready for Delivery
+Delivered
+Cancelled
+
+No need to implement the full workflow yet.
+
+Delivery Information
+
+Collect and store:
+
+Full Name
+Phone Number
+Address Line
+City
+State
+Postal Code
+
+Design the model so it can support future enhancements.
+
+Purchase Flow
+
+Replace the existing purchase flow with:
+
+Validate authenticated user.
+Validate vehicle exists.
+Validate stock availability.
+Create an Order.
+Reduce vehicle inventory.
+Persist both operations safely.
+Return the created order.
+
+If any step fails, inventory must not become inconsistent.
+
+Backend API
+
+Implement user endpoints:
+
+Purchase vehicle (updated to create an order)
+Get logged-in user's orders
+Get a specific order belonging to the logged-in user
+
+Use proper authorization so users cannot access other users' orders.
+
+Business Rules
+Cannot purchase out-of-stock vehicles.
+Cannot purchase more than available quantity.
+Order creation and stock reduction should behave atomically where possible.
+Preserve purchase price even if the vehicle price changes later.
+Frontend
+
+Create a My Orders page.
+
+Each order should display:
+
+Order Number
+Vehicle
+Purchase Date
+Quantity
+Total Amount
+Status
+Delivery Address
+
+Display an appropriate empty state if the user has no orders.
+
+Code Quality
+
+Follow the existing project architecture and coding conventions.
+
+Keep controllers, services, repositories, and components clean and maintainable.
+
+Apply SOLID principles where appropriate.
+
+Do not introduce unnecessary complexity.

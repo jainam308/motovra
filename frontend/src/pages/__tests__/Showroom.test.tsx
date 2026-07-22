@@ -60,7 +60,7 @@ describe('Showroom Page', () => {
     });
 
     expect(screen.getByText('2 Available')).toBeInTheDocument();
-    expect(screen.getByText('Out of Stock')).toBeInTheDocument();
+    expect(screen.getAllByText('Out of Stock')[0]).toBeInTheDocument();
   });
 
   it('filters vehicles by category when category button is clicked', async () => {

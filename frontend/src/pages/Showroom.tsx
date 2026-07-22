@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, AlertCircle, ShoppingBag } from 'lucide-react';
 import { useDebounce } from '../hooks/useDebounce';
 import { getVehicleImage } from '../utils/imageMapper';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -24,7 +24,7 @@ const fetchVehicles = async (searchParams: Record<string, any>) => {
 export const Showroom = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   
   const initialCategory = searchParams.get('category') || '';
   
@@ -33,7 +33,8 @@ export const Showroom = () => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [page, setPage] = useState(1);
-  
+  const [conflictErrors, setConflictErrors] = useState<Record<string, string>>({});
+
   const debouncedMake = useDebounce(make, 300);
   const debouncedMin = useDebounce(minPrice, 300);
   const debouncedMax = useDebounce(maxPrice, 300);
@@ -50,6 +51,23 @@ export const Showroom = () => {
       page, 
       limit: 12 
     }),
+  });
+
+  const purchaseMutation = useMutation({
+    mutationFn: async (vehicleId: string) => {
+      setConflictErrors(prev => ({ ...prev, [vehicleId]: '' }));
+      const { data } = await api.post(`/vehicles/${vehicleId}/purchase`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    },
+    onError: (err: any, vehicleId: string) => {
+      if (err.response?.status === 409) {
+        const message = err.response?.data?.error || 'Stock conflict: Someone else just purchased this vehicle.';
+        setConflictErrors(prev => ({ ...prev, [vehicleId]: message }));
+      }
+    }
   });
 
   const categories = ['ALL', 'SPORTS', 'LUXURY', 'SUV', 'ELECTRIC', 'SEDAN'];
@@ -169,9 +187,9 @@ export const Showroom = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Link to={`/vehicles/${vehicle.id}`}>
-                      <Card className="h-full flex flex-col hover:border-primary/50 transition-all duration-300 group border-border bg-card overflow-hidden cursor-pointer hover:shadow-[0_0_30px_-10px_rgba(229,169,16,0.15)]">
-                        <div className="aspect-[4/3] bg-secondary relative overflow-hidden">
+                    <Card className="h-full flex flex-col hover:border-primary/50 transition-all duration-300 group border-border bg-card overflow-hidden hover:shadow-[0_0_30px_-10px_rgba(229,169,16,0.15)]">
+                      <Link to={`/vehicles/${vehicle.id}`}>
+                        <div className="aspect-[4/3] bg-secondary relative overflow-hidden cursor-pointer">
                           <img 
                             src={vehicle.imageUrl || getVehicleImage(vehicle.make, vehicle.model, vehicle.category)} 
                             alt={`${vehicle.make} ${vehicle.model}`}
@@ -188,12 +206,32 @@ export const Showroom = () => {
                           <CardDescription className="tracking-widest uppercase text-xs font-semibold text-primary/80 drop-shadow-md mb-1">{vehicle.category}</CardDescription>
                           <CardTitle className="text-2xl font-heading text-white">{vehicle.make} {vehicle.model}</CardTitle>
                         </CardHeader>
+                      </Link>
+                      
+                      <CardContent className="flex-1 pt-2 space-y-3">
+                        <div className="text-2xl font-bold text-white tracking-tight">${vehicle.price.toLocaleString()}</div>
                         
-                        <CardContent className="flex-1 pt-2">
-                          <div className="text-2xl font-bold text-white tracking-tight">${vehicle.price.toLocaleString()}</div>
-                        </CardContent>
-                      </Card>
-                    </Link>
+                        {/* Inline 409 Conflict Error Message */}
+                        {conflictErrors[vehicle.id] && (
+                          <div className="p-2.5 bg-destructive/10 border border-destructive/30 rounded-lg flex items-start text-xs text-destructive">
+                            <AlertCircle className="w-4 h-4 mr-1.5 flex-shrink-0 mt-0.5" />
+                            <span>{conflictErrors[vehicle.id]}</span>
+                          </div>
+                        )}
+                      </CardContent>
+
+                      <CardFooter className="pt-0">
+                        <Button 
+                          className="w-full"
+                          variant="secondary"
+                          disabled={vehicle.quantity === 0 || !user}
+                          onClick={() => purchaseMutation.mutate(vehicle.id)}
+                        >
+                          <ShoppingBag className="w-4 h-4 mr-2" />
+                          {vehicle.quantity === 0 ? 'Out of Stock' : !user ? 'Sign in to Acquire' : 'Acquire Now'}
+                        </Button>
+                      </CardFooter>
+                    </Card>
                   </motion.div>
                 ))}
               </AnimatePresence>

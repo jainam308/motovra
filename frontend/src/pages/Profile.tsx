@@ -10,13 +10,13 @@ import { Link, Navigate } from 'react-router-dom';
 export const Profile = () => {
   const { user, isAuthenticated, logout } = useAuth();
 
-  const { data: savedVehicles, isLoading } = useQuery({
+  const { data: savedVehicles = [], isLoading } = useQuery({
     queryKey: ['savedVehicles'],
     queryFn: async () => {
       const { data } = await api.get('/vehicles/saved');
-      return data;
+      return Array.isArray(data) ? data : (data?.data || []);
     },
-    enabled: isAuthenticated
+    enabled: !!user
   });
 
   if (!isAuthenticated || !user) {

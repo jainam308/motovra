@@ -8,15 +8,20 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  passwordHash  String?
-  googleId      String?        @unique
-  role          Role           @default(CUSTOMER)
-  createdAt     DateTime       @default(now())
-  refreshTokens RefreshToken[]
-  savedVehicles SavedVehicle[]
-  orders        Order[]
+  id                      String         @id @default(uuid())
+  email                   String         @unique
+  passwordHash            String?
+  googleId                String?        @unique
+  isVerified              Boolean        @default(false)
+  provider                String         @default("local")
+  verificationToken       String?
+  verificationTokenExpiry DateTime?
+  verifiedAt              DateTime?
+  role                    Role           @default(CUSTOMER)
+  createdAt               DateTime       @default(now())
+  refreshTokens           RefreshToken[]
+  savedVehicles           SavedVehicle[]
+  orders                  Order[]
 }
 
 enum Role {

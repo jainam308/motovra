@@ -180,31 +180,25 @@ router.post('/logout', authController.logout);
  *       302:
  *         description: Redirects to Google consent screen
  */
-router.get(
-  '/google',
-  passport.authenticate('google', { session: false, scope: ['profile', 'email'] })
-);
+const handleGoogleAuth = (req: any, res: any, next: any) => {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return res.status(501).json({ error: 'Google OAuth is not configured on this server.' });
+  }
+  passport.authenticate('google', { session: false, scope: ['profile', 'email'] })(req, res, next);
+};
 
-/**
- * @swagger
- * /api/auth/google/callback:
- *   get:
- *     summary: Google OAuth callback
- *     tags: [Auth]
- *     security: []
- *     responses:
- *       302:
- *         description: Redirects to frontend with tokens
- *       401:
- *         description: OAuth failed
- */
-router.get(
-  '/google/callback',
+const handleGoogleCallback = (req: any, res: any, next: any) => {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return res.status(501).json({ error: 'Google OAuth is not configured on this server.' });
+  }
   passport.authenticate('google', {
     session: false,
-    failureRedirect: 'http://localhost:5173/login?error=google_failed',
-  }),
-  authController.googleCallback
-);
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=google_failed`,
+  })(req, res, next);
+};
+
+router.get('/google', handleGoogleAuth);
+
+router.get('/google/callback', handleGoogleCallback, authController.googleCallback);
 
 export default router;

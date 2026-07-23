@@ -7,6 +7,7 @@ import orderRoutes from './modules/order/order.routes';
 import paymentRoutes from './modules/payment/payment.routes';
 import contactRoutes from './modules/contact/contact.routes';
 import analyticsRoutes from './modules/analytics/analytics.routes';
+import aiMarketAnalysisRoutes from './modules/aiMarketAnalysis/aiMarketAnalysis.routes';
 import { setupSwagger } from './swagger';
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/ai-market-analysis', aiMarketAnalysisRoutes);
 
 setupSwagger(app);
 

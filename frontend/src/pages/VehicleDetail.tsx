@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { getVehicleImage } from '../utils/imageMapper';
 import { CheckoutModal } from '../components/CheckoutModal';
+import { AIMarketAnalysisCard } from '../components/AI/AIMarketAnalysisCard';
 
 const fetchVehicleById = async (id: string) => {
   const { data } = await api.get('/vehicles');
@@ -213,6 +214,9 @@ export const VehicleDetail = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* 🧠 MotoVra AI Market Intelligence Section */}
+        {vehicle && <AIMarketAnalysisCard vehicle={vehicle} />}
       </div>
 
       {/* Checkout Modal */}

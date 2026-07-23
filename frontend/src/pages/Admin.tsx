@@ -6,10 +6,12 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
-import { Loader2, Plus, Edit, Trash2, PackagePlus, X, ShieldAlert, LayoutDashboard, Car } from 'lucide-react';
+import { Loader2, Plus, Edit, Trash2, PackagePlus, X, ShieldAlert, LayoutDashboard, Car, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import AdminDashboard from './AdminDashboard';
+import { regenerateAiMarketAnalysis } from '../services/aiMarketAnalysisApi';
+import { PriceBadge } from '../components/AI/PriceBadge';
 
 const validateVehicle = (data: any) => {
   const errors: Record<string, string> = {};
@@ -219,6 +221,7 @@ export const Admin = () => {
                     <th className="px-6 py-4">Make & Model</th>
                     <th className="px-6 py-4">Category</th>
                     <th className="px-6 py-4">Price</th>
+                    <th className="px-6 py-4">AI Deal Rating</th>
                     <th className="px-6 py-4">Stock</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
@@ -236,11 +239,35 @@ export const Admin = () => {
                         ${Number(vehicle.price).toLocaleString()}
                       </td>
                       <td className="px-6 py-4">
+                        {vehicle.recommendation ? (
+                          <PriceBadge recommendation={vehicle.recommendation} />
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">Pending</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
                         <Badge variant={vehicle.quantity > 0 ? 'success' : 'destructive'}>
                           {vehicle.quantity} Units
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 text-right space-x-2">
+                      <td className="px-6 py-4 text-right space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              toast.loading('Evaluating AI Market Intelligence...', { id: 'ai-eval' });
+                              await regenerateAiMarketAnalysis(vehicle.id);
+                              queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+                              toast.success('AI Market Analysis updated!', { id: 'ai-eval' });
+                            } catch (e) {
+                              toast.error('Failed to update AI analysis', { id: 'ai-eval' });
+                            }
+                          }}
+                          title="Regenerate AI Analysis"
+                        >
+                          <Brain className="w-4 h-4 text-purple-400" />
+                        </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleRestock(vehicle.id)} title="Restock">
                           <PackagePlus className="w-4 h-4 text-amber-400" />
                         </Button>

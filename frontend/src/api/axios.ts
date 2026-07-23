@@ -1,8 +1,11 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -44,7 +47,7 @@ api.interceptors.response.use(
           const refreshToken = localStorage.getItem('refreshToken');
           if (!refreshToken) throw new Error('No refresh token');
 
-          const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+          const { data } = await axios.post(`${baseURL}/auth/refresh`, {}, { withCredentials: true });
           localStorage.setItem('accessToken', data.accessToken);
           if (data.user) {
             localStorage.setItem('user', JSON.stringify(data.user));
@@ -78,7 +81,7 @@ api.interceptors.response.use(
 
     // Network / Server errors (no response from server)
     if (!error.response && error.message) {
-      toast.error('Network error. Please check your internet connection.');
+      toast.error('Network error. Please check your connection to backend.');
     }
 
     return Promise.reject(error);

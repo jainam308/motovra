@@ -42,7 +42,7 @@ export const authController = {
         res.cookie('refreshToken', result.refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
       }
@@ -78,7 +78,7 @@ export const authController = {
       res.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -100,7 +100,7 @@ export const authController = {
       res.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -123,7 +123,7 @@ export const authController = {
       res.clearCookie('refreshToken', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       });
       return res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
@@ -139,9 +139,10 @@ export const authController = {
   async googleCallback(req: Request, res: Response, next: NextFunction) {
     try {
       const profile = req.user as any;
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
       if (!profile) {
-        return res.redirect('http://localhost:5173/login?error=google_failed');
+        return res.redirect(`${frontendUrl}/login?error=google_failed`);
       }
 
       const tokens = await authService.googleLogin(profile);
@@ -149,13 +150,13 @@ export const authController = {
       res.cookie('refreshToken', tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       const userParam = encodeURIComponent(JSON.stringify(tokens.user));
       return res.redirect(
-        `http://localhost:5173/oauth-callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&user=${userParam}`
+        `${frontendUrl}/oauth-callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&user=${userParam}`
       );
     } catch (error) {
       next(error);

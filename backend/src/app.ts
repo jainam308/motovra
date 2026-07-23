@@ -12,10 +12,22 @@ import { setupSwagger } from './swagger';
 
 const app = express();
 
-// Allow requests from the Vite dev server (5173 or 5174)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like curl or postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );

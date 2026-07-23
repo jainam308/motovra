@@ -64,6 +64,7 @@
    | `BREVO_API_KEY` | `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` |
    | `SENDER_EMAIL` | `jvora7990@gmail.com` |
    | `DEALERSHIP_EMAIL` | `king14011977@gmail.com` |
+   | `FRONTEND_URL` | `https://motovra.vercel.app` |
    | `RAZORPAY_KEY_ID` | `rzp_test_TGZbjezWj1I57y` |
    | `RAZORPAY_KEY_SECRET` | `n5YPbMCx25L2oZOLiGLU5HPN` |
 

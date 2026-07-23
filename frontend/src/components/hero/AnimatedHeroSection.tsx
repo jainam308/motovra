@@ -198,13 +198,21 @@ export const AnimatedHeroSection = () => {
 
         {/* Scroll Indicator */}
         <div className="hidden md:flex justify-center pt-1">
-          <motion.div
+          <motion.button
+            type="button"
+            onClick={() => {
+              window.scrollTo({
+                top: window.innerHeight * 0.85,
+                behavior: 'smooth'
+              });
+            }}
             animate={{ y: [0, 6, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+            className="text-gray-400 hover:text-amber-400 transition-colors cursor-pointer p-2 rounded-full hover:bg-white/5 focus:outline-none"
+            aria-label="Scroll down to featured vehicles"
           >
-            <ChevronDown className="w-5 h-5" />
-          </motion.div>
+            <ChevronDown className="w-6 h-6" />
+          </motion.button>
         </div>
 
       </div>

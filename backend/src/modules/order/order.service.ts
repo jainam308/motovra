@@ -50,119 +50,112 @@ export const orderService = {
       throw err;
     }
 
-    try {
-      return await prisma.$transaction(
-        async (tx) => {
-          const vehicle = await tx.vehicle.findUnique({ where: { id: vehicleId } });
-          if (!vehicle) {
-            const err: any = new Error('Vehicle not found');
-            err.statusCode = 404;
-            throw err;
-          }
-
-          if (vehicle.quantity < requestedQty) {
-            const err: any = new Error('Insufficient stock available');
-            err.statusCode = 409;
-            throw err;
-          }
-
-          // Generate unique human-readable order number (e.g. MV-1001 or MV-847291)
-          const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-          const orderNumber = `MV-${Date.now().toString().slice(-4)}${randomSuffix}`;
-
-          const priceAtPurchase = Number(vehicle.price);
-          const totalAmount = priceAtPurchase * requestedQty;
-
-          // Decrement vehicle stock
-          await tx.vehicle.update({
-            where: { id: vehicleId },
-            data: { quantity: vehicle.quantity - requestedQty }
-          });
-
-          // Create Order entity
-          const order = await tx.order.create({
-            data: {
-              orderNumber,
-              userId: validUserId,
-              vehicleId,
-              make: vehicle.make,
-              model: vehicle.model,
-              priceAtPurchase,
-              quantity: requestedQty,
-              totalAmount,
-              status: 'CONFIRMED',
-              fullName: delivery.fullName,
-              phone: delivery.phone,
-              addressLine: delivery.addressLine,
-              city: delivery.city,
-              state: delivery.state,
-              postalCode: delivery.postalCode
-            }
-          });
-
-          // Resolve customer email (prioritize deliveryInfo.email, then registered user email)
-          let customerEmail = deliveryInfo?.email?.trim() || '';
-          if (!customerEmail && validUserId) {
-            const userObj = await tx.user.findUnique({ where: { id: validUserId } });
-            if (userObj?.email) customerEmail = userObj.email;
-          }
-          if (!customerEmail) customerEmail = 'customer@motovra.com';
-
-          // Trigger Customer Booking Confirmation Email & Admin Order Notification Email
-          try {
-            await emailService.sendBookingConfirmationEmail({
-              orderNumber: order.orderNumber,
-              customerName: order.fullName,
-              customerEmail,
-              make: order.make,
-              model: order.model,
-              bookingAmount: Number(order.totalAmount),
-              dealerPhone: '+1 (800) 555-LUXE',
-              nextSteps: 'Our logistics manager will contact you to confirm delivery scheduling and final paperwork.',
-            });
-
-            await emailService.sendAdminOrderNotification({
-              orderNumber: order.orderNumber,
-              customerName: order.fullName,
-              customerPhone: order.phone,
-              customerEmail,
-              addressLine: order.addressLine,
-              city: order.city,
-              state: order.state,
-              postalCode: order.postalCode,
-              make: order.make,
-              model: order.model,
-              amountPaid: Number(order.totalAmount),
-              remainingAmount: 0,
-            });
-          } catch (emailErr) {
-            console.error('[Booking/Admin Email Error]', emailErr);
-          }
-
-          return {
-            ...order,
-            deliveryInfo: {
-              fullName: order.fullName,
-              phone: order.phone,
-              addressLine: order.addressLine,
-              city: order.city,
-              state: order.state,
-              postalCode: order.postalCode
-            }
-          };
-        },
-        {
-          isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+    const result = await prisma.$transaction(
+      async (tx) => {
+        const vehicle = await tx.vehicle.findUnique({ where: { id: vehicleId } });
+        if (!vehicle) {
+          const err: any = new Error('Vehicle not found');
+          err.statusCode = 404;
+          throw err;
         }
-      );
-    } catch (error: any) {
-      if (error.code === 'P2034') {
-        const err: any = new Error('Concurrency conflict. Please try again.');
-        err.statusCode = 409;
-        throw err;
-      }
-      throw error;
+
+        if (vehicle.quantity < requestedQty) {
+          const err: any = new Error('Insufficient stock available');
+          err.statusCode = 409;
+          throw err;
+        }
+
+        // Generate unique human-readable order number (e.g. MV-1001 or MV-847291)
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+        const orderNumber = `MV-${Date.now().toString().slice(-4)}${randomSuffix}`;
+
+        const priceAtPurchase = Number(vehicle.price);
+        const totalAmount = priceAtPurchase * requestedQty;
+
+        // Decrement vehicle stock
+        await tx.vehicle.update({
+          where: { id: vehicleId },
+          data: { quantity: vehicle.quantity - requestedQty }
+        });
+
+        // Create Order entity
+        const order = await tx.order.create({
+          data: {
+            orderNumber,
+            userId: validUserId,
+            vehicleId,
+            make: vehicle.make,
+            model: vehicle.model,
+            priceAtPurchase,
+            quantity: requestedQty,
+            totalAmount,
+            status: 'CONFIRMED',
+            fullName: delivery.fullName,
+            phone: delivery.phone,
+            addressLine: delivery.addressLine,
+            city: delivery.city,
+            state: delivery.state,
+            postalCode: delivery.postalCode
+          }
+        });
+
+        // Resolve customer email (prioritize deliveryInfo.email, then registered user email)
+        let customerEmail = deliveryInfo?.email?.trim() || '';
+        if (!customerEmail && validUserId) {
+          const userObj = await tx.user.findUnique({ where: { id: validUserId } });
+          if (userObj?.email) customerEmail = userObj.email;
+        }
+        if (!customerEmail) customerEmail = 'customer@motovra.com';
+
+        return { order, customerEmail };
+      },
+      { timeout: 15000 }
+    );
+
+    const { order, customerEmail } = result;
+
+    // Trigger Customer Booking Confirmation Email & Admin Order Notification Email outside transaction
+    try {
+      await emailService.sendBookingConfirmationEmail({
+        orderNumber: order.orderNumber,
+        customerName: order.fullName,
+        customerEmail,
+        make: order.make,
+        model: order.model,
+        bookingAmount: Number(order.totalAmount),
+        dealerPhone: '+1 (800) 555-LUXE',
+        nextSteps: 'Our logistics manager will contact you to confirm delivery scheduling and final paperwork.',
+      });
+
+      await emailService.sendAdminOrderNotification({
+        orderNumber: order.orderNumber,
+        customerName: order.fullName,
+        customerPhone: order.phone,
+        customerEmail,
+        addressLine: order.addressLine,
+        city: order.city,
+        state: order.state,
+        postalCode: order.postalCode,
+        make: order.make,
+        model: order.model,
+        amountPaid: Number(order.totalAmount),
+        remainingAmount: 0,
+      });
+    } catch (emailErr) {
+      console.error('[Booking/Admin Email Error]', emailErr);
     }
+
+    return {
+      ...order,
+      deliveryInfo: {
+        fullName: order.fullName,
+        phone: order.phone,
+        addressLine: order.addressLine,
+        city: order.city,
+        state: order.state,
+        postalCode: order.postalCode
+      }
+    };
   },
 
   async getUserOrders(userId: string): Promise<any[]> {

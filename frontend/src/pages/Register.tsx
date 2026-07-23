@@ -49,11 +49,16 @@ export const Register = () => {
         className="w-full max-w-[1000px] h-[640px] bg-card rounded-2xl overflow-hidden flex flex-row-reverse border border-border shadow-2xl"
       >
         {/* Form Panel */}
-        <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-card">
-          <div className="mb-4 flex flex-col items-center sm:items-start">
-            <img src="/motovra-logo.jpg" alt="Motovra Logo" className="h-14 w-auto object-contain rounded-xl border border-white/10 mb-3 shadow-lg shadow-amber-500/10" />
-            <h2 className="text-3xl font-heading font-bold text-white mb-1">Join Motovra</h2>
-            <p className="text-muted-foreground text-xs">Create your executive account to access private supercar reservations.</p>
+        <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-zinc-950/90 backdrop-blur-xl relative z-10 border-l border-white/5">
+          <div className="mb-6 flex flex-col items-center">
+            <motion.img 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              src="/motovra-logo.jpg" 
+              alt="Motovra Emblem" 
+              className="h-16 w-auto object-contain rounded-2xl border border-amber-500/30 shadow-[0_0_25px_-5px_rgba(245,158,11,0.25)] p-1 bg-black" 
+            />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3">
@@ -65,55 +70,58 @@ export const Register = () => {
             )}
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-300">Email address</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Email address</label>
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 required
+                className="bg-black/60 border-white/10 focus:border-amber-500 text-white placeholder:text-gray-600 h-10 text-sm"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-300">Password</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Password</label>
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
+                className="bg-black/60 border-white/10 focus:border-amber-500 text-white placeholder:text-gray-600 h-10 text-sm"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-300">Confirm Password</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Confirm Password</label>
               <Input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 required
+                className="bg-black/60 border-white/10 focus:border-amber-500 text-white placeholder:text-gray-600 h-10 text-sm"
               />
             </div>
 
-            <Button type="submit" className="w-full mt-2 bg-amber-600 hover:bg-amber-700 text-white font-bold" isLoading={isLoading}>
+            <Button type="submit" className="w-full h-10 mt-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-bold tracking-wide shadow-lg shadow-amber-500/20" isLoading={isLoading}>
               Create Account
             </Button>
 
             <div className="relative my-3">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
+                <div className="w-full border-t border-white/10"></div>
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="px-2 bg-card text-muted-foreground">Or continue with</span>
+                <span className="px-2 bg-zinc-950 text-gray-500 uppercase tracking-widest font-semibold">Or continue with</span>
               </div>
             </div>
 
             <Button
               type="button"
               variant="outline"
-              className="w-full bg-secondary hover:bg-secondary/80 border-border text-xs"
+              className="w-full h-10 bg-zinc-900/80 hover:bg-zinc-800 border-white/10 text-white text-xs"
               onClick={() => { window.location.href = 'http://localhost:3000/api/auth/google'; }}
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -126,32 +134,22 @@ export const Register = () => {
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-xs text-muted-foreground">
-            Already have an account? <Link to="/login" className="text-amber-400 hover:underline font-medium">Sign in here</Link>
+          <div className="mt-4 text-center text-xs text-gray-400">
+            Already have an account? <Link to="/login" className="text-amber-400 hover:underline font-semibold ml-1">Sign in here</Link>
           </div>
         </div>
 
         {/* High-Resolution Supercar Hero Branding Panel */}
-        <div 
-          className="hidden md:flex w-1/2 relative flex-col justify-between p-12 bg-cover bg-center"
-          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1600')` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0"></div>
+        <div className="hidden md:flex w-1/2 relative overflow-hidden flex-col justify-between p-12 bg-black">
+          {/* Motion Animated Supercar Background Image */}
+          <motion.div 
+            animate={{ scale: [1, 1.06, 1] }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 bg-cover bg-center z-0 opacity-90"
+            style={{ backgroundImage: `url('https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1600')` }}
+          />
 
-          <div className="relative z-10 flex items-center gap-3">
-            <img src="/motovra-logo.jpg" alt="Motovra Brand" className="h-10 w-auto rounded-lg border border-white/20 shadow-md" />
-            <span className="font-heading font-bold text-2xl tracking-tight text-white">Motovra Exotics</span>
-          </div>
-
-          <div className="relative z-10 space-y-2 bg-black/60 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-            <div className="inline-block px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-full uppercase tracking-wider">
-              Exclusive Member Access
-            </div>
-            <h3 className="font-heading font-extrabold text-3xl text-white">Ferrari SF90 Stradale</h3>
-            <p className="text-gray-300 text-sm leading-relaxed">
-              Join the world's most elite supercar network. Reserved allocations, VIP white-glove transport, and luxury concierge support.
-            </p>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/40 z-10" />
         </div>
       </motion.div>
     </div>

@@ -53,7 +53,7 @@ describe('Protected Routes & Navigation', () => {
     it('redirects unauthenticated user navigating to /admin to /login', async () => {
       renderWithProviders(<App />, { initialEntries: ['/admin'] });
 
-      expect(await screen.findByRole('heading', { name: /Welcome Back/i })).toBeInTheDocument();
+      expect(await screen.findByAltText('Motovra Emblem')).toBeInTheDocument();
     });
 
     it('redirects CUSTOMER user navigating to /admin to /showroom', async () => {

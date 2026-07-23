@@ -7,9 +7,10 @@ import { jwtUtils } from '../../common/utils/jwt';
 const prisma = new PrismaClient();
 
 export const authService = {
-  async register(email: string, password: string): Promise<any> {
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+  async register(rawEmail: string, password: string): Promise<any> {
+    const email = rawEmail?.trim().toLowerCase();
+    const existingUser = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
     });
 
     if (existingUser) {
@@ -29,8 +30,11 @@ export const authService = {
     return user;
   },
 
-  async login(email: string, password: string): Promise<any> {
-    const user = await prisma.user.findUnique({ where: { email } });
+  async login(rawEmail: string, password: string): Promise<any> {
+    const email = rawEmail?.trim().toLowerCase();
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+    });
     if (!user || !user.passwordHash) {
       throw new UnauthorizedError('Invalid credentials');
     }

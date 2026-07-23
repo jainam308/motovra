@@ -26,7 +26,7 @@ describe('Auth User Flows', () => {
   describe('Login Page', () => {
     it('renders the login form with email and password inputs', () => {
       renderWithProviders(<Login />);
-      expect(screen.getByRole('heading', { name: /Welcome Back/i })).toBeInTheDocument();
+      expect(screen.getByAltText('Motovra Emblem')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('name@example.com')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /^Sign In$/i })).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('Auth User Flows', () => {
   describe('Register Page', () => {
     it('renders register form fields including password confirmation', () => {
       renderWithProviders(<Register />);
-      expect(screen.getByRole('heading', { name: /Join Motovra/i })).toBeInTheDocument();
+      expect(screen.getByAltText('Motovra Emblem')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('name@example.com')).toBeInTheDocument();
       const passwordInputs = screen.getAllByPlaceholderText('••••••••');
       expect(passwordInputs).toHaveLength(2);

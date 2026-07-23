@@ -158,122 +158,129 @@ export const paymentService = {
     }
 
     // 3. Execute Transaction: Check Stock -> Reserve Stock -> Create Order -> Create Payment Record
-    return await prisma.$transaction(async (tx) => {
-      const vehicle = await tx.vehicle.findUnique({ where: { id: vehicleId } });
-      if (!vehicle) {
-        const err: any = new Error('Vehicle not found');
-        err.statusCode = 404;
-        throw err;
-      }
+    const result = await prisma.$transaction(
+      async (tx) => {
+        const vehicle = await tx.vehicle.findUnique({ where: { id: vehicleId } });
+        if (!vehicle) {
+          const err: any = new Error('Vehicle not found');
+          err.statusCode = 404;
+          throw err;
+        }
 
-      if (vehicle.quantity < 1) {
-        const err: any = new Error('Insufficient stock available');
-        err.statusCode = 409;
-        throw err;
-      }
+        if (vehicle.quantity < 1) {
+          const err: any = new Error('Insufficient stock available');
+          err.statusCode = 409;
+          throw err;
+        }
 
-      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-      const orderNumber = `MV-${Date.now().toString().slice(-4)}${randomSuffix}`;
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+        const orderNumber = `MV-${Date.now().toString().slice(-4)}${randomSuffix}`;
 
-      const priceAtPurchase = Number(vehicle.price);
-      const totalAmount = priceAtPurchase;
-      const calcRemaining = Math.max(0, totalAmount - bookingAmount);
+        const priceAtPurchase = Number(vehicle.price);
+        const totalAmount = priceAtPurchase;
+        const calcRemaining = Math.max(0, totalAmount - bookingAmount);
 
-      // Decrement vehicle stock ONLY upon verified payment
-      await tx.vehicle.update({
-        where: { id: vehicleId },
-        data: { quantity: vehicle.quantity - 1 },
-      });
-
-      // Create Order
-      const order = await tx.order.create({
-        data: {
-          orderNumber,
-          userId: validUserId,
-          vehicleId,
-          make: vehicle.make,
-          model: vehicle.model,
-          priceAtPurchase,
-          quantity: 1,
-          totalAmount,
-          status: 'BOOKING_PAID',
-          fullName: deliveryInfo.fullName,
-          phone: deliveryInfo.phone,
-          addressLine: deliveryInfo.addressLine,
-          city: deliveryInfo.city,
-          state: deliveryInfo.state,
-          postalCode: deliveryInfo.postalCode,
-        },
-      });
-
-      // Create Payment Record
-      const payment = await tx.payment.create({
-        data: {
-          orderId: order.id,
-          razorpayOrderId: razorpay_order_id,
-          razorpayPaymentId: razorpay_payment_id,
-          razorpaySignature: razorpay_signature,
-          bookingAmount,
-          remainingAmount: calcRemaining,
-          paymentMethod: 'RAZORPAY',
-          paymentStatus: 'BOOKING_PAID',
-          paidAt: new Date(),
-        },
-      });
-
-      // Resolve customer email (prioritize deliveryInfo.email, then registered user email)
-      let customerEmail = deliveryInfo?.email?.trim() || '';
-      if (!customerEmail && validUserId) {
-        const userObj = await tx.user.findUnique({ where: { id: validUserId } });
-        if (userObj?.email) customerEmail = userObj.email;
-      }
-      if (!customerEmail) customerEmail = 'customer@motovra.com';
-
-      // Trigger Customer Payment Receipt Email & Admin Order Notification Email
-      try {
-        await emailService.sendPaymentSuccessEmail({
-          razorpayPaymentId: payment.razorpayPaymentId || razorpay_payment_id,
-          orderNumber: order.orderNumber,
-          customerName: order.fullName,
-          customerEmail,
-          make: order.make,
-          model: order.model,
-          amountPaid: Number(payment.bookingAmount),
-          remainingAmount: Number(payment.remainingAmount),
+        // Decrement vehicle stock ONLY upon verified payment
+        await tx.vehicle.update({
+          where: { id: vehicleId },
+          data: { quantity: vehicle.quantity - 1 },
         });
 
-        await emailService.sendAdminOrderNotification({
-          orderNumber: order.orderNumber,
-          customerName: order.fullName,
-          customerPhone: order.phone,
-          customerEmail,
+        // Create Order
+        const order = await tx.order.create({
+          data: {
+            orderNumber,
+            userId: validUserId,
+            vehicleId,
+            make: vehicle.make,
+            model: vehicle.model,
+            priceAtPurchase,
+            quantity: 1,
+            totalAmount,
+            status: 'BOOKING_PAID',
+            fullName: deliveryInfo.fullName,
+            phone: deliveryInfo.phone,
+            addressLine: deliveryInfo.addressLine,
+            city: deliveryInfo.city,
+            state: deliveryInfo.state,
+            postalCode: deliveryInfo.postalCode,
+          },
+        });
+
+        // Create Payment Record
+        const payment = await tx.payment.create({
+          data: {
+            orderId: order.id,
+            razorpayOrderId: razorpay_order_id,
+            razorpayPaymentId: razorpay_payment_id,
+            razorpaySignature: razorpay_signature,
+            bookingAmount,
+            remainingAmount: calcRemaining,
+            paymentMethod: 'RAZORPAY',
+            paymentStatus: 'BOOKING_PAID',
+            paidAt: new Date(),
+          },
+        });
+
+        // Resolve customer email (prioritize deliveryInfo.email, then registered user email)
+        let customerEmail = deliveryInfo?.email?.trim() || '';
+        if (!customerEmail && validUserId) {
+          const userObj = await tx.user.findUnique({ where: { id: validUserId } });
+          if (userObj?.email) customerEmail = userObj.email;
+        }
+        if (!customerEmail) customerEmail = 'customer@motovra.com';
+
+        return { order, payment, customerEmail };
+      },
+      { timeout: 15000 }
+    );
+
+    const { order, payment, customerEmail } = result;
+
+    // Trigger Customer Payment Receipt Email & Admin Order Notification Email outside transaction
+    try {
+      await emailService.sendPaymentSuccessEmail({
+        razorpayPaymentId: payment.razorpayPaymentId || razorpay_payment_id,
+        orderNumber: order.orderNumber,
+        customerName: order.fullName,
+        customerEmail,
+        make: order.make,
+        model: order.model,
+        amountPaid: Number(payment.bookingAmount),
+        remainingAmount: Number(payment.remainingAmount),
+      });
+
+      await emailService.sendAdminOrderNotification({
+        orderNumber: order.orderNumber,
+        customerName: order.fullName,
+        customerPhone: order.phone,
+        customerEmail,
+        addressLine: order.addressLine,
+        city: order.city,
+        state: order.state,
+        postalCode: order.postalCode,
+        make: order.make,
+        model: order.model,
+        amountPaid: Number(payment.bookingAmount),
+        remainingAmount: Number(payment.remainingAmount),
+      });
+    } catch (emailErr) {
+      console.error('[Payment/Admin Email Error]', emailErr);
+    }
+
+    return {
+      order: {
+        ...order,
+        deliveryInfo: {
+          fullName: order.fullName,
+          phone: order.phone,
           addressLine: order.addressLine,
           city: order.city,
           state: order.state,
           postalCode: order.postalCode,
-          make: order.make,
-          model: order.model,
-          amountPaid: Number(payment.bookingAmount),
-          remainingAmount: Number(payment.remainingAmount),
-        });
-      } catch (emailErr) {
-        console.error('[Payment/Admin Email Error]', emailErr);
-      }
-
-      return {
-        order: {
-          ...order,
-          deliveryInfo: {
-            fullName: order.fullName,
-            phone: order.phone,
-            addressLine: order.addressLine,
-            city: order.city,
-            state: order.state,
-            postalCode: order.postalCode,
-          },
         },
-        payment,
-      };
-    });
+      },
+      payment,
+    };
   },
 };

@@ -123,7 +123,7 @@ describe('Error Handling, Error Boundary & 404 Routes', () => {
 
       expect(localStorage.getItem('user')).toBeNull();
       expect(localStorage.getItem('accessToken')).toBeNull();
-      expect(await screen.findByRole('heading', { name: /Welcome Back/i })).toBeInTheDocument();
+      expect(await screen.findByAltText('Motovra Emblem')).toBeInTheDocument();
     });
   });
 });

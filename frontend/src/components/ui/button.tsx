@@ -9,6 +9,24 @@ export interface ButtonProps extends Omit<HTMLMotionProps<"button">, 'ref'> {
   isLoading?: boolean;
 }
 
+const WheelSpinner = () => (
+  <svg 
+    className="mr-2 h-4 w-4 animate-spin text-current flex-shrink-0" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" strokeDasharray="3 1.5" />
+    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.5" />
+    <circle cx="12" cy="12" r="2" fill="currentColor" />
+    <line x1="12" y1="10" x2="12" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <line x1="13.9" y1="11.4" x2="20.5" y2="9.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <line x1="13.2" y1="13.6" x2="17.3" y2="19.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <line x1="10.8" y1="13.6" x2="6.7" y2="19.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <line x1="10.1" y1="11.4" x2="3.5" y2="9.2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props }, ref) => {
     
@@ -39,7 +57,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         {...props}
       >
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isLoading && <WheelSpinner />}
         {children}
       </motion.button>
     );

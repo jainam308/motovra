@@ -1211,3 +1211,468 @@ If something goes wrong, you can discard the feature branch without affecting th
 Once tested, merge it back into master.
 
 This is a clean, production-style workflow and fits well with the TDD approach you've been following.
+
+prompt 41:
+if user do google based verification then
+
+That's an important design decision. In a production system, Google Sign-In and email verification should work together, not independently.
+
+Recommended Architecture
+1. Email/Password Registration
+
+Flow:
+
+Register
+      │
+Email Verification Required
+      │
+Verified
+      │
+Login
+
+Reason:
+
+Anyone can type any email address.
+You need proof that the user owns that email.
+2. Google Sign-In
+
+Flow:
+
+Continue with Google
+      │
+Google Auth
+      │
+Google verifies email ownership
+      │
+Create/Login User
+
+No additional email verification is needed.
+
+Why?
+
+When Google returns:
+
+{
+  "email": "john@gmail.com",
+  "email_verified": true
+}
+
+Google has already verified that the user owns that email address.
+
+So you can safely create the user as:
+
+{
+    email: "john@gmail.com",
+    provider: "google",
+    isVerified: true
+}
+Database Design
+
+Instead of only:
+
+isVerified
+
+Use something like:
+
+{
+    fullName,
+    email,
+    password,
+
+    provider: "local" | "google",
+
+    isVerified: Boolean,
+
+    googleId: String,
+
+    verificationToken,
+
+    verificationTokenExpiry
+}
+Registration Decision Tree
+                User Registration
+                      │
+        ┌─────────────┴─────────────┐
+        │                           │
+ Email/Password              Continue with Google
+        │                           │
+Create User                Google OAuth
+        │                           │
+isVerified = false          Google says email_verified=true
+        │                           │
+Send Verification Email     isVerified = true
+        │                           │
+Verify Email                Login
+        │
+Login
+Login Flow
+Login Request
+      │
+      ▼
+Find User
+      │
+      ▼
+Provider?
+      │
+ ┌────┴─────┐
+ │          │
+Local     Google
+ │          │
+Check      Verify Google Token
+Password
+ │
+Check isVerified
+ │
+JWT
+Edge Cases
+Case 1
+
+User registers with:
+
+john@gmail.com
+
+but never verifies.
+
+Later they click:
+
+Continue with Google
+
+Since Google confirms ownership of john@gmail.com, you can:
+
+Update the existing account:
+provider = "google" (or allow multiple providers)
+isVerified = true
+Let the user sign in.
+
+This avoids creating duplicate accounts.
+
+Case 2
+
+User already has a verified email/password account and later uses Google with the same email.
+
+A common approach is to link the Google account to the existing user instead of creating a second account.
+
+Case 3
+
+Google reports the email is not verified.
+
+Do not allow login. This is uncommon with Google Sign-In, but it's good practice to check the email_verified claim from the identity token and reject access if it's false.
+
+prompt 43:
+Implement a production-ready Secure Email Verification Authentication module for the MotoVra Vehicle Inventory Management System following strict Test-Driven Development (TDD).
+
+This feature extends the existing authentication system and is considered a core security module, therefore maintainability, security, reliability, and backward compatibility are mandatory.Architecture Requirements
+
+Maintain the existing layered architecture.
+
+Controller
+    ↓
+Service
+    ↓
+Repository / Model
+    ↓
+Database
+
+Business logic must remain inside services.
+
+Do not place business logic inside controllers.
+
+Primary Objective
+
+Implement secure email verification so that:
+
+Email/password users must verify their email before login.
+Google-authenticated users are automatically verified.
+Existing authentication remains backward compatible.
+No existing feature should break.
+Security Requirements
+
+Implement production-grade security.
+
+Must include:
+
+bcrypt password hashing
+JWT authentication
+Secure verification token generation
+Single-use verification tokens
+Token expiration
+Hashed verification tokens in the database
+Email verification before login
+Input validation
+Proper error handling
+Rate limiting compatibility
+Secure environment variable usage
+
+Never store raw verification tokens.
+
+User Model Changes
+
+Extend the existing User model.
+
+Add:
+
+isVerified
+provider
+googleId
+verificationToken
+verificationTokenExpiry
+verifiedAt
+
+Provider values:
+
+local
+google
+Registration Flow
+
+For Email/Password registration:
+
+Validate Input
+        ↓
+Check Duplicate Email
+        ↓
+Hash Password
+        ↓
+Create User
+(isVerified = false)
+        ↓
+Generate Secure Verification Token
+        ↓
+Hash Verification Token
+        ↓
+Store Token
+        ↓
+Send Verification Email
+        ↓
+Return Success Message
+
+The user must not receive a JWT at this stage.
+
+Email Verification Flow
+
+Verification endpoint:
+
+GET /api/auth/verify-email/:token
+
+Flow:
+
+Receive Token
+        ↓
+Hash Token
+        ↓
+Find User
+        ↓
+Check Expiration
+        ↓
+Already Verified?
+        ↓
+Activate Account
+        ↓
+Clear Verification Token
+        ↓
+Set verifiedAt
+        ↓
+Optional Welcome Email
+        ↓
+Return Success
+Login Flow
+
+Existing login remains.
+
+Before JWT generation:
+
+User Exists
+        ↓
+Password Correct
+        ↓
+Email Verified?
+        │
+        ├── No
+        │
+        └── Return
+            "Please verify your email."
+        │
+        ▼
+Generate JWT
+Google Authentication Support
+
+Support Google OAuth users.
+
+Flow:
+
+Google Login
+        ↓
+Google Returns Verified Email
+        ↓
+Create User
+provider = google
+isVerified = true
+        ↓
+Generate JWT
+
+No verification email should be sent to Google users.
+
+Existing Local User + Google Login
+
+If a local account already exists with the same email:
+
+Existing User
+        ↓
+Google Login
+        ↓
+Link Google Account
+        ↓
+provider updated
+isVerified = true
+googleId stored
+
+Avoid duplicate accounts.
+
+Resend Verification
+
+Endpoint:
+
+POST /api/auth/resend-verification
+
+Flow:
+
+Find User
+        ↓
+Already Verified?
+        │
+        ├── Yes
+        │
+        └── Return
+        │
+Generate New Token
+        ↓
+Invalidate Previous Token
+        ↓
+Send Verification Email
+Email Templates
+
+Create reusable templates.
+
+Verification Email
+
+Include:
+
+Welcome message
+Verify button
+Verification link
+Expiration notice
+Ignore message
+Welcome Email
+
+Sent after successful verification.
+
+Include:
+
+Welcome message
+Login button
+Next steps
+Validation
+
+Validate:
+
+Registration
+
+Name
+Email
+Password
+
+Verification
+
+Invalid token
+Expired token
+Already verified
+
+Login
+
+Unverified account
+
+Resend
+
+Invalid email
+Already verified
+Error Handling
+
+Implement centralized error handling.
+
+Handle:
+
+Duplicate email
+Invalid token
+Expired token
+Verification failure
+Email sending failure
+Invalid credentials
+Already verified
+
+Use meaningful HTTP status codes.
+
+Logging
+
+Log:
+
+Registration
+Verification email sent
+Verification success
+Verification failure
+Login blocked
+Verification resend
+Folder Structure
+
+Maintain modularity.
+
+controllers/
+services/
+models/
+routes/
+middlewares/
+templates/
+utils/
+
+Reuse the existing EmailService where possible.
+
+Backward Compatibility
+
+The following features must continue working without modification:
+
+Authentication
+Vehicle browsing
+Vehicle booking
+Razorpay payments
+Order Management
+Contact System
+Email System
+Dashboard Analytics
+Admin Panel
+
+No regression is allowed.
+
+Test Coverage
+
+Create comprehensive tests for:
+
+Registration
+New user
+Duplicate email
+Validation errors
+Verification email generation
+Verification
+Valid token
+Invalid token
+Expired token
+Already verified
+Login
+Verified user
+Unverified user
+Invalid password
+Google Authentication
+New Google user
+Existing local account linking
+Verified Google account
+Resend Verification
+New token generation
+Previous token invalidation
+Already verified

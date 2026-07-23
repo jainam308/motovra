@@ -5,6 +5,7 @@ import api from '../api/axios';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 export const Register = () => {
   const [email, setEmail] = useState('');
@@ -31,9 +32,9 @@ export const Register = () => {
 
     setIsLoading(true);
     try {
-      const { data } = await api.post('/auth/register', { email, password });
-      login(data.accessToken, data.refreshToken, data.user);
-      navigate('/showroom');
+      await api.post('/auth/register', { email, password });
+      toast.success('Registration successful! Check your email for the 6-digit OTP code.');
+      navigate('/verify-email', { state: { email } });
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {

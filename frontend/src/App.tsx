@@ -15,6 +15,7 @@ import { Contact } from './pages/Contact';
 import { Profile } from './pages/Profile';
 import { Orders } from './pages/Orders';
 import { BookingSuccess } from './pages/BookingSuccess';
+import { VerifyEmail } from './pages/VerifyEmail';
 import { OAuthCallback } from './pages/OAuthCallback';
 import { NotFound } from './pages/NotFound';
 import { Toaster } from 'react-hot-toast';
@@ -52,6 +53,7 @@ const App = () => {
           <Route path="/orders" element={<Orders />} />
           <Route path="/booking-success/:orderId" element={<BookingSuccess />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/login" element={
             !user ? <Login /> : user.role === 'ADMIN' ? <Navigate to="/admin" /> : <Navigate to="/showroom" />
           } />

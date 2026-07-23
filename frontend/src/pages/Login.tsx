@@ -63,9 +63,20 @@ export const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-center text-destructive text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2 flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                {error}
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex flex-col gap-2 text-destructive text-sm">
+                <div className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2 flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>{error}</span>
+                </div>
+                {error.toLowerCase().includes('verify') && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/verify-email', { state: { email } })}
+                    className="text-xs text-amber-400 hover:text-amber-300 font-semibold underline text-left pl-6"
+                  >
+                    Enter 6-Digit OTP to verify email →
+                  </button>
+                )}
               </div>
             )}
 

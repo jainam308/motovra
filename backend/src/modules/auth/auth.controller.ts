@@ -10,22 +10,56 @@ export const authController = {
         return res.status(400).json({ error: 'Email and password are required' });
       }
 
-      // register creates the user, then login auto-generates tokens
-      await authService.register(email, password);
-      const tokens = await authService.login(email, password);
-
-      res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      const result = await authService.register(email, password);
 
       return res.status(201).json({
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        user: tokens.user,
+        message: result.message,
+        user: result.user,
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async verifyEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token } = req.params;
+      const result = await authService.verifyEmail(token);
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async verifyOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp } = req.body;
+      if (!email || !otp) {
+        return res.status(400).json({ error: 'Email and 6-digit OTP code are required.' });
+      }
+      const result = await authService.verifyOtp(email, otp);
+      if (result.refreshToken) {
+        res.cookie('refreshToken', result.refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+      }
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async resendVerification(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+      const result = await authService.resendVerification(email);
+      return res.status(200).json(result);
     } catch (error) {
       next(error);
     }

@@ -6,7 +6,7 @@ import { Toaster } from 'react-hot-toast';
 
 export const RootLayout = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
       <Navbar />
       <AnimatePresence mode="wait">
         <motion.main 

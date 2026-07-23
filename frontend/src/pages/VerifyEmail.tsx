@@ -230,7 +230,7 @@ export const VerifyEmail = () => {
             <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3 text-center">
               Enter 6-Digit Verification Code
             </label>
-            <div className="flex justify-between items-center gap-2 md:gap-3">
+            <div className="flex justify-center items-center gap-1.5 sm:gap-2 md:gap-3">
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -242,7 +242,7 @@ export const VerifyEmail = () => {
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
-                  className="w-11 h-14 md:w-14 md:h-16 text-center text-2xl font-black text-amber-400 bg-zinc-950/90 border border-white/10 rounded-2xl focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none transition-all shadow-inner font-mono"
+                  className="w-9 h-12 sm:w-12 sm:h-15 md:w-14 md:h-16 text-center text-lg sm:text-2xl font-black text-amber-400 bg-zinc-950/90 border border-white/10 rounded-xl sm:rounded-2xl focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none transition-all shadow-inner font-mono"
                   autoFocus={index === 0}
                 />
               ))}

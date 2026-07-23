@@ -1681,3 +1681,65 @@ prompt 44:
 there are 8 duplicate honda civic in sedan make it 1, i have noticed that when we open showroom it takes some time to load the page so we should have keep an loading button but the loading button should be an animated wheel button
 
 prompt 45:
+write next task noticed that website is not responsive for mobile please make it also responsive and make sure  that all other functionality keep working
+
+Next Task: Responsive UI Implementation
+
+Implement a production-ready responsive UI for the MotoVra Vehicle Inventory Management System.
+
+Objective
+
+The current application is not fully responsive across different screen sizes. Improve the UI so that every page and component provides an optimal user experience on mobile, tablet, laptop, and desktop devices.
+
+Requirements
+Responsive Design
+
+Review the entire application and make all pages fully responsive, including but not limited to:
+
+Navbar
+Footer
+Home Page
+Authentication Pages
+OTP Verification Page
+Vehicle Listing
+Vehicle Details
+Search & Filters
+Booking Pages
+Orders
+Dashboard
+Admin Dashboard
+Analytics
+Forms
+Cards
+Tables
+Charts
+Modals
+Dialogs
+All reusable components
+Ensure
+No horizontal scrolling.
+Proper spacing and alignment.
+Responsive typography.
+Responsive images.
+Mobile-friendly navigation.
+Responsive tables (scroll or stack where appropriate).
+Responsive charts and analytics.
+Proper touch targets for mobile users.
+Consistent layout across all breakpoints.
+Smooth user experience on:
+Mobile (320px–480px)
+Large Mobile (481px–767px)
+Tablet (768px–1024px)
+Desktop (>1024px)
+Code Quality
+Follow the existing project architecture.
+Reuse existing components where possible.
+Avoid duplicate code.
+Maintain clean, readable, and maintainable code.
+Use responsive utilities and breakpoints consistently.
+Deliverables
+Fully responsive UI across the entire application.
+Consistent experience on all supported screen sizes.
+No layout issues or overflow problems.
+Clean, maintainable implementation following project standards.
+

@@ -22,10 +22,10 @@ export const authService = {
 
     const passwordHash = await passwordUtils.hash(password);
 
-    // Generate secure 32-byte raw token and store SHA-256 hash in DB
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
-    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 Hours
+    // Generate 6-digit numeric OTP code and store SHA-256 hash in DB
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = crypto.createHash('sha256').update(otpCode).digest('hex');
+    const verificationTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 Mins
 
     const user = await prisma.user.create({
       data: {
@@ -33,7 +33,7 @@ export const authService = {
         passwordHash,
         isVerified: false,
         provider: 'local',
-        verificationToken: hashedToken,
+        verificationToken: hashedOtp,
         verificationTokenExpiry,
         role: 'CUSTOMER',
       },
@@ -42,15 +42,76 @@ export const authService = {
     try {
       await emailService.sendVerificationEmail({
         email: user.email,
-        verificationToken: rawToken,
+        verificationToken: otpCode,
       });
     } catch (emailErr) {
       console.error('[Registration Verification Email Error]', emailErr);
     }
 
     return {
-      message: 'Registration successful! Please verify your email.',
+      message: 'Registration successful! Please verify your email with the 6-digit OTP.',
       user: { id: user.id, email: user.email, isVerified: user.isVerified },
+    };
+  },
+
+  async verifyOtp(rawEmail: string, rawOtp: string): Promise<any> {
+    const email = rawEmail?.trim().toLowerCase();
+    const otp = rawOtp?.trim();
+
+    if (!email || !otp || otp.length !== 6) {
+      const err: any = new Error('Invalid or expired OTP code');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: { equals: email, mode: 'insensitive' },
+        verificationToken: hashedOtp,
+        verificationTokenExpiry: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      const err: any = new Error('Invalid or expired OTP code');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isVerified: true,
+        verifiedAt: new Date(),
+        verificationToken: null,
+        verificationTokenExpiry: null,
+      },
+    });
+
+    try {
+      await emailService.sendWelcomeEmail({ email: updatedUser.email });
+    } catch (emailErr) {
+      console.error('[Welcome Email Error]', emailErr);
+    }
+
+    const accessToken = jwtUtils.generateAccessToken({ userId: updatedUser.id, role: updatedUser.role });
+    const refreshToken = jwtUtils.generateRefreshToken({ userId: updatedUser.id });
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: updatedUser.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    return {
+      message: 'Email verified successfully! Welcome to Motovra.',
+      accessToken,
+      refreshToken,
+      user: { id: updatedUser.id, email: updatedUser.email, role: updatedUser.role, isVerified: true },
     };
   },
 
@@ -61,7 +122,9 @@ export const authService = {
       throw err;
     }
 
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const trimmedToken = rawToken.trim();
+
+    const hashedToken = crypto.createHash('sha256').update(trimmedToken).digest('hex');
 
     const user = await prisma.user.findFirst({
       where: {
@@ -121,14 +184,14 @@ export const authService = {
       throw err;
     }
 
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
-    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = crypto.createHash('sha256').update(otpCode).digest('hex');
+    const verificationTokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        verificationToken: hashedToken,
+        verificationToken: hashedOtp,
         verificationTokenExpiry,
       },
     });
@@ -136,14 +199,14 @@ export const authService = {
     try {
       await emailService.sendVerificationEmail({
         email: user.email,
-        verificationToken: rawToken,
+        verificationToken: otpCode,
       });
     } catch (emailErr) {
       console.error('[Resend Verification Email Error]', emailErr);
     }
 
     return {
-      message: 'Verification email sent successfully.',
+      message: 'Verification OTP sent successfully.',
     };
   },
 
@@ -162,9 +225,17 @@ export const authService = {
     }
 
     if (!user.isVerified) {
-      const err: any = new Error('Please verify your email address before logging in.');
-      err.statusCode = 403;
-      throw err;
+      if (user.role === 'ADMIN') {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { isVerified: true, verifiedAt: new Date() },
+        });
+        user.isVerified = true;
+      } else {
+        const err: any = new Error('Please verify your email address before logging in.');
+        err.statusCode = 403;
+        throw err;
+      }
     }
 
     const accessToken = jwtUtils.generateAccessToken({ userId: user.id, role: user.role });

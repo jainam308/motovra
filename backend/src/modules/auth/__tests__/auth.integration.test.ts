@@ -35,6 +35,7 @@ describe('POST /api/auth/login', () => {
         email: 'testlogin@example.com',
         passwordHash,
         role: 'CUSTOMER',
+        isVerified: true,
       }
     });
   });

@@ -244,6 +244,12 @@ export const emailService = {
           to: payload.to,
           subject: payload.subject,
           htmlContent: payload.htmlContent,
+          headers: {
+            'X-Mailin-Priority': '1',
+            'X-Priority': '1',
+            'Importance': 'high',
+          },
+          tags: ['otp-verification'],
         }),
       });
 
@@ -370,21 +376,24 @@ export const emailService = {
   },
 
   async sendVerificationEmail(payload: { email: string; verificationToken: string; name?: string }): Promise<any> {
-    const appUrl = process.env.APP_URL || 'http://localhost:5173';
-    const verifyUrl = `${appUrl}/verify-email?token=${payload.verificationToken}`;
     const name = payload.name || payload.email.split('@')[0];
+    const otpCode = payload.verificationToken; // 6-digit OTP or token
 
     const htmlContent = `
-      <div style="font-family: 'Inter', sans-serif; background-color: #0b0c10; color: #ffffff; padding: 40px 20px; text-align: center;">
-        <div style="max-width: 550px; margin: 0 auto; background: #12141c; border-radius: 16px; padding: 32px; border: 1px solid rgba(255,255,255,0.1);">
-          <img src="https://motovra.com/motovra-logo.jpg" alt="Motovra" style="height: 48px; margin-bottom: 24px;" />
-          <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 12px;">Verify Your Email Address</h2>
-          <p style="color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 28px;">
-            Welcome to Motovra, ${name}! Please confirm your email address to activate your account and start browsing luxury vehicles.
+      <div style="font-family: 'Inter', system-ui, sans-serif; background-color: #0b0c10; color: #ffffff; padding: 40px 20px; text-align: center;">
+        <div style="max-width: 550px; margin: 0 auto; background: #12141c; border-radius: 20px; padding: 40px 32px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+          <img src="https://motovra.com/motovra-logo.jpg" alt="Motovra Emblem" style="height: 52px; width: auto; margin-bottom: 24px; border-radius: 12px;" />
+          <h2 style="color: #ffffff; font-size: 26px; font-weight: 800; margin-bottom: 12px; tracking-tight: -0.5px;">Verify Your Email</h2>
+          <p style="color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
+            Welcome to Motovra, <strong style="color: #ffffff;">${name}</strong>! Use the 6-digit verification code below to activate your account:
           </p>
-          <a href="${verifyUrl}" style="display: inline-block; background-color: #e5a910; color: #000000; font-weight: 700; text-decoration: none; padding: 14px 32px; border-radius: 9999px; font-size: 15px;">Verify Email Address</a>
-          <p style="color: #71717a; font-size: 13px; margin-top: 28px;">
-            This link will expire in 24 hours. If you did not create a Motovra account, you can safely ignore this email.
+          
+          <div style="background: rgba(229, 169, 16, 0.08); border: 2px dashed rgba(229, 169, 16, 0.5); border-radius: 16px; padding: 20px 10px; margin-bottom: 32px; text-align: center;">
+            <span style="font-family: 'Space Grotesk', 'Courier New', monospace; font-size: 38px; font-weight: 800; letter-spacing: 14px; color: #e5a910; display: inline-block; padding-left: 14px;">${otpCode}</span>
+          </div>
+
+          <p style="color: #71717a; font-size: 13px; margin-top: 24px;">
+            This OTP code is valid for <strong>15 minutes</strong>. If you did not create a Motovra account, you can safely ignore this email.
           </p>
         </div>
       </div>
@@ -392,7 +401,7 @@ export const emailService = {
 
     return await this.sendBrevoEmail({
       to: [{ email: payload.email, name }],
-      subject: 'Motovra — Verify Your Email Address',
+      subject: `[${otpCode}] Motovra Email Verification Code`,
       htmlContent,
     });
   },

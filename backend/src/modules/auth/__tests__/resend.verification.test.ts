@@ -51,7 +51,7 @@ describe('Cycle 6 — Resend Verification Email Workflow (TDD)', () => {
       .send({ email: unverifiedEmail });
 
     expect(res.status).toBe(200);
-    expect(res.body.message).toMatch(/verification email sent/i);
+    expect(res.body.message).toMatch(/verification (email|otp) sent/i);
 
     const updatedUser = await prisma.user.findUnique({ where: { id: unverifiedUserId } });
     expect(updatedUser?.verificationToken).not.toBe('old_hashed_token');

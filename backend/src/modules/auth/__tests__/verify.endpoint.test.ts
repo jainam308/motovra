@@ -81,4 +81,45 @@ describe('Cycle 3 — Email Verification Endpoint (TDD)', () => {
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/invalid or expired/i);
   });
+
+  describe('POST /api/auth/verify-otp', () => {
+    const otpEmail = `otp_test_${Date.now()}@example.com`;
+    const rawOtp = '654321';
+    const hashedOtp = crypto.createHash('sha256').update(rawOtp).digest('hex');
+
+    beforeAll(async () => {
+      await prisma.user.create({
+        data: {
+          email: otpEmail,
+          passwordHash: 'hash',
+          isVerified: false,
+          verificationToken: hashedOtp,
+          verificationTokenExpiry: new Date(Date.now() + 15 * 60 * 1000),
+        },
+      });
+    });
+
+    it('should verify user with valid 6-digit OTP and return JWT access/refresh tokens', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-otp')
+        .send({ email: otpEmail, otp: rawOtp });
+
+      expect(res.status).toBe(200);
+      expect(res.body.message).toMatch(/verified successfully/i);
+      expect(res.body.accessToken).toBeDefined();
+      expect(res.body.refreshToken).toBeDefined();
+
+      const user = await prisma.user.findUnique({ where: { email: otpEmail } });
+      expect(user?.isVerified).toBe(true);
+    });
+
+    it('should return 400 for incorrect OTP code', async () => {
+      const res = await request(app)
+        .post('/api/auth/verify-otp')
+        .send({ email: otpEmail, otp: '000000' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/invalid or expired/i);
+    });
+  });
 });

@@ -31,6 +31,27 @@ export const authController = {
     }
   },
 
+  async verifyOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp } = req.body;
+      if (!email || !otp) {
+        return res.status(400).json({ error: 'Email and 6-digit OTP code are required.' });
+      }
+      const result = await authService.verifyOtp(email, otp);
+      if (result.refreshToken) {
+        res.cookie('refreshToken', result.refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+      }
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async resendVerification(req: Request, res: Response, next: NextFunction) {
     try {
       const { email } = req.body;

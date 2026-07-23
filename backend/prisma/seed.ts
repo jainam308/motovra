@@ -11,14 +11,14 @@ async function main() {
   // 1. Ensure seed users exist without touching existing users
   await prisma.user.upsert({
     where: { email: 'admin@motovra.com' },
-    update: { passwordHash, role: 'ADMIN' },
-    create: { email: 'admin@motovra.com', passwordHash, role: 'ADMIN' },
+    update: { passwordHash, role: 'ADMIN', isVerified: true },
+    create: { email: 'admin@motovra.com', passwordHash, role: 'ADMIN', isVerified: true },
   });
 
   await prisma.user.upsert({
     where: { email: 'customer@motovra.com' },
-    update: { passwordHash, role: 'CUSTOMER' },
-    create: { email: 'customer@motovra.com', passwordHash, role: 'CUSTOMER' },
+    update: { passwordHash, role: 'CUSTOMER', isVerified: true },
+    create: { email: 'customer@motovra.com', passwordHash, role: 'CUSTOMER', isVerified: true },
   });
 
   const vehicles = [

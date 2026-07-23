@@ -111,6 +111,12 @@ export const authService = {
       throw new UnauthorizedError('Invalid credentials');
     }
 
+    if (!user.isVerified) {
+      const err: any = new Error('Please verify your email address before logging in.');
+      err.statusCode = 403;
+      throw err;
+    }
+
     const accessToken = jwtUtils.generateAccessToken({ userId: user.id, role: user.role });
     const refreshToken = jwtUtils.generateRefreshToken({ userId: user.id });
 

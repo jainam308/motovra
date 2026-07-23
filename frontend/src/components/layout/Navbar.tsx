@@ -38,7 +38,7 @@ export const Navbar = () => {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden lg:flex items-center space-x-6">
           <Link to="/showroom" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
             Showroom
           </Link>
@@ -77,18 +77,18 @@ export const Navbar = () => {
           )}
         </nav>
 
-        {/* Mobile Hamburger Button */}
+        {/* Mobile & Tablet Hamburger Button */}
         <button
           type="button"
           onClick={toggleMobileMenu}
           aria-label="Toggle Navigation Menu"
-          className="md:hidden p-2.5 text-gray-300 hover:text-white focus:outline-none rounded-lg hover:bg-white/10 transition-colors"
+          className="lg:hidden p-2.5 text-gray-300 hover:text-white focus:outline-none rounded-lg hover:bg-white/10 transition-colors"
         >
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile & Tablet Navigation Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -96,7 +96,7 @@ export const Navbar = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden border-t border-white/10 bg-zinc-950/95 backdrop-blur-2xl px-4 py-6 space-y-4 shadow-2xl"
+            className="lg:hidden border-t border-white/10 bg-zinc-950/95 backdrop-blur-2xl px-4 py-6 space-y-4 shadow-2xl"
           >
             <Link
               to="/showroom"

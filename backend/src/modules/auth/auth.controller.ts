@@ -10,21 +10,11 @@ export const authController = {
         return res.status(400).json({ error: 'Email and password are required' });
       }
 
-      // register creates the user, then login auto-generates tokens
-      await authService.register(email, password);
-      const tokens = await authService.login(email, password);
-
-      res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      const result = await authService.register(email, password);
 
       return res.status(201).json({
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        user: tokens.user,
+        message: result.message,
+        user: result.user,
       });
     } catch (error) {
       next(error);

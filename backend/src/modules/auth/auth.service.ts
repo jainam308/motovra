@@ -6,6 +6,9 @@ import { jwtUtils } from '../../common/utils/jwt';
 
 const prisma = new PrismaClient();
 
+import crypto from 'crypto';
+import { emailService } from '../../common/services/email.service';
+
 export const authService = {
   async register(rawEmail: string, password: string): Promise<any> {
     const email = rawEmail?.trim().toLowerCase();
@@ -19,15 +22,36 @@ export const authService = {
 
     const passwordHash = await passwordUtils.hash(password);
 
+    // Generate secure 32-byte raw token and store SHA-256 hash in DB
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 Hours
+
     const user = await prisma.user.create({
       data: {
         email,
         passwordHash,
+        isVerified: false,
+        provider: 'local',
+        verificationToken: hashedToken,
+        verificationTokenExpiry,
         role: 'CUSTOMER',
       },
     });
 
-    return user;
+    try {
+      await emailService.sendVerificationEmail({
+        email: user.email,
+        verificationToken: rawToken,
+      });
+    } catch (emailErr) {
+      console.error('[Registration Verification Email Error]', emailErr);
+    }
+
+    return {
+      message: 'Registration successful! Please verify your email.',
+      user: { id: user.id, email: user.email, isVerified: user.isVerified },
+    };
   },
 
   async login(rawEmail: string, password: string): Promise<any> {

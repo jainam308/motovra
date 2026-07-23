@@ -43,6 +43,20 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai-market-analysis', aiMarketAnalysisRoutes);
 
+// Health check and root endpoints
+app.get(['/', '/health', '/api/health'], (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'MotoVra API is running' });
+});
+
+// Fallback redirects if user or browser accesses /auth/google directly without /api prefix
+app.get('/auth/google', (req, res) => {
+  res.redirect('/api/auth/google');
+});
+app.get('/auth/google/callback', (req, res) => {
+  const query = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
+  res.redirect(`/api/auth/google/callback${query}`);
+});
+
 setupSwagger(app);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

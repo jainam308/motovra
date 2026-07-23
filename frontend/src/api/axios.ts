@@ -1,10 +1,26 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+export const getApiBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) {
+    if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+      return 'https://motovra.onrender.com/api';
+    }
+    return 'http://localhost:3000/api';
+  }
+  let cleanUrl = envUrl.trim().replace(/\/$/, '');
+  if (!cleanUrl.endsWith('/api')) {
+    cleanUrl = `${cleanUrl}/api`;
+  }
+  return cleanUrl;
+};
+
+const baseURL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL,
+  timeout: 45000, // 45 seconds timeout to accommodate Render free-tier cold starts
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

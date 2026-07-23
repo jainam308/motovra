@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getApiBaseUrl } from '../api/axios';
 import api from '../api/axios';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -124,8 +125,7 @@ export const Register = () => {
               variant="outline"
               className="w-full h-10 bg-zinc-900/80 hover:bg-zinc-800 border-white/10 text-white text-xs"
               onClick={() => {
-                const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
-                window.location.href = `${apiBaseUrl}/auth/google`;
+                window.location.href = `${getApiBaseUrl()}/auth/google`;
               }}
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

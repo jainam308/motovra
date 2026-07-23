@@ -14,7 +14,8 @@ vi.mock('../../api/axios', () => ({
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
-  }
+  },
+  getApiBaseUrl: () => 'http://localhost:3000/api',
 }));
 
 describe('Auth User Flows', () => {

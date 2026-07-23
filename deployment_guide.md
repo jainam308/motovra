@@ -102,7 +102,7 @@ Create a file `frontend/vercel.json` to enable React Router single-page app rewr
 
    | Variable Key | Value |
    | :--- | :--- |
-   | `VITE_API_BASE_URL` | `https://motovra-backend.onrender.com/api` |
+   | `VITE_API_BASE_URL` | `https://motovra.onrender.com/api` |
    | `VITE_RAZORPAY_KEY_ID` | `rzp_test_TGZbjezWj1I57y` |
 
 6. Click **Deploy**. Vercel will build and assign your live domain (e.g. `https://motovra.vercel.app`).

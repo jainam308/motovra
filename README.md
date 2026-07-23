@@ -561,7 +561,7 @@ motovra/
 
 | Variable | Description | Required | Example |
 | :--- | :--- | :---: | :--- |
-| `VITE_API_BASE_URL` | Base URL for backend Express REST API | Yes | `https://motovra-backend.onrender.com/api` |
+| `VITE_API_BASE_URL` | Base URL for backend Express REST API | Yes | `https://motovra.onrender.com/api` |
 | `VITE_RAZORPAY_KEY_ID` | Public Razorpay Key ID for client SDK | Yes | `rzp_test_TGZbjezWj1I57y` |
 
 ---

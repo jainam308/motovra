@@ -28,28 +28,33 @@ export const Navbar = () => {
       className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/80 backdrop-blur-xl"
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link 
-          to="/" 
-          onClick={() => setMobileMenuOpen(false)}
-          className="flex items-center space-x-3 text-white hover:opacity-90 transition-opacity"
-        >
-          <img src="/motovra-logo.jpg" alt="Motovra Logo" className="h-9 w-auto object-contain rounded-md" />
-          <span className="font-heading font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-amber-400">Motovra</span>
-        </Link>
+        {/* Left Side: Brand Logo & Catalog Navigation */}
+        <div className="flex items-center space-x-8">
+          <Link 
+            to="/" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center space-x-3 text-white hover:opacity-90 transition-opacity flex-shrink-0"
+          >
+            <img src="/motovra-logo.jpg" alt="Motovra Logo" className="h-9 w-auto object-contain rounded-md" />
+            <span className="font-heading font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-amber-400">Motovra</span>
+          </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-6">
-          <Link to="/showroom" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
-            Showroom
-          </Link>
-          <Link to="/contact" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
-            Contact
-          </Link>
-          
+          <nav className="hidden lg:flex items-center space-x-6">
+            <Link to="/showroom" className="text-sm font-medium text-gray-300 hover:text-amber-400 transition-colors">
+              Showroom
+            </Link>
+            <Link to="/contact" className="text-sm font-medium text-gray-300 hover:text-amber-400 transition-colors">
+              Contact
+            </Link>
+          </nav>
+        </div>
+
+        {/* Right Side: User Account & Actions */}
+        <div className="hidden lg:flex items-center space-x-5">
           {isAuthenticated ? (
-            <div className="flex items-center space-x-4">
+            <>
               {user?.role === 'ADMIN' && (
-                <Link to="/admin" className="text-sm font-semibold text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
+                <Link to="/admin" className="text-sm font-semibold text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
                   <ShieldAlert className="w-4 h-4" /> Admin Panel
                 </Link>
               )}
@@ -61,12 +66,12 @@ export const Navbar = () => {
                 <User className="w-4 h-4 mr-1.5 text-amber-400" />
                 My Garage
               </Link>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="border-border hover:bg-secondary">
+              <Button variant="outline" size="sm" onClick={handleLogout} className="border-border hover:bg-secondary ml-1">
                 Sign Out
               </Button>
-            </div>
+            </>
           ) : (
-            <div className="flex items-center space-x-3 ml-4">
+            <div className="flex items-center space-x-3">
               <Link to="/login">
                 <Button variant="ghost" size="sm">Sign In</Button>
               </Link>
@@ -75,7 +80,7 @@ export const Navbar = () => {
               </Link>
             </div>
           )}
-        </nav>
+        </div>
 
         {/* Mobile & Tablet Hamburger Button */}
         <button

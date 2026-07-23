@@ -97,6 +97,56 @@ export const authService = {
     };
   },
 
+  async resendVerification(rawEmail: string): Promise<any> {
+    const email = rawEmail?.trim().toLowerCase();
+    if (!email) {
+      const err: any = new Error('Email is required');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+    });
+
+    if (!user) {
+      const err: any = new Error('User not found with provided email address.');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (user.isVerified) {
+      const err: any = new Error('Account is already verified.');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verificationToken: hashedToken,
+        verificationTokenExpiry,
+      },
+    });
+
+    try {
+      await emailService.sendVerificationEmail({
+        email: user.email,
+        verificationToken: rawToken,
+      });
+    } catch (emailErr) {
+      console.error('[Resend Verification Email Error]', emailErr);
+    }
+
+    return {
+      message: 'Verification email sent successfully.',
+    };
+  },
+
   async login(rawEmail: string, password: string): Promise<any> {
     const email = rawEmail?.trim().toLowerCase();
     const user = await prisma.user.findFirst({

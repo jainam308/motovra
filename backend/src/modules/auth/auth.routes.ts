@@ -89,6 +89,33 @@ router.get('/verify-email/:token', authController.verifyEmail);
 
 /**
  * @swagger
+ * /api/auth/resend-verification:
+ *   post:
+ *     summary: Resend verification email to unverified user
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Verification email resent
+ *       400:
+ *         description: Account already verified or missing email
+ *       404:
+ *         description: User not found
+ */
+router.post('/resend-verification', authController.resendVerification);
+
+/**
+ * @swagger
  * /api/auth/refresh:
  *   post:
  *     summary: Refresh access token

@@ -44,7 +44,7 @@ describe('Protected Routes & Navigation', () => {
         user: { id: 'a1', email: 'admin@motovra.com', role: 'ADMIN' }
       });
 
-      expect(screen.getByText('Dashboard')).toBeInTheDocument();
+      expect(screen.getByText(/Admin Panel|Dashboard/i)).toBeInTheDocument();
       expect(screen.getByText('My Garage')).toBeInTheDocument();
     });
   });

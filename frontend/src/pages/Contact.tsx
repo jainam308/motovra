@@ -40,27 +40,27 @@ export const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen py-24 px-6 md:px-12">
+    <div className="min-h-screen py-8 sm:py-16 md:py-24 px-4 sm:px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-16"
         >
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-white mb-4">Contact Us</h1>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-white mb-4">Contact Us</h1>
+          <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto">
             Experience world-class service. Our automotive concierge team is available 24/7 to assist you with inquiries, test drives, and acquisitions.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
             className="space-y-8"
           >
-            <div className="bg-card border border-border p-8 rounded-2xl">
+            <div className="bg-card border border-border p-6 sm:p-8 rounded-2xl">
               <h2 className="text-2xl font-heading font-bold text-white mb-6">Global Offices</h2>
               
               <div className="space-y-6">
@@ -105,7 +105,7 @@ export const Contact = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <form onSubmit={handleSubmit} className="bg-card border border-border p-8 rounded-2xl space-y-5">
+            <form onSubmit={handleSubmit} className="bg-card border border-border p-6 sm:p-8 rounded-2xl space-y-5">
               <h2 className="text-2xl font-heading font-bold text-white mb-4">Send an Inquiry</h2>
               
               <div className="space-y-1.5">

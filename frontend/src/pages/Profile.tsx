@@ -31,21 +31,21 @@ export const Profile = () => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-card border border-border rounded-2xl p-8 flex flex-col md:flex-row items-center md:justify-between"
+          className="bg-card border border-border rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6"
         >
-          <div className="flex items-center space-x-6 mb-6 md:mb-0">
-            <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20">
-              <User className="w-12 h-12 text-primary" />
+          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 text-center sm:text-left">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
+              <User className="w-10 h-10 sm:w-12 sm:h-12 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-heading font-bold text-white mb-2">My Garage</h1>
-              <div className="flex items-center space-x-4 text-sm text-gray-400">
-                <span className="flex items-center">
-                  <Mail className="w-4 h-4 mr-1" />
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-2">My Garage</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
+                <span className="flex items-center justify-center sm:justify-start">
+                  <Mail className="w-4 h-4 mr-1.5 text-amber-500" />
                   {user.email}
                 </span>
-                <span className="flex items-center">
-                  <Shield className="w-4 h-4 mr-1" />
+                <span className="flex items-center justify-center sm:justify-start">
+                  <Shield className="w-4 h-4 mr-1.5 text-amber-500" />
                   {user.role}
                 </span>
               </div>

@@ -43,14 +43,14 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center -mt-8">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-6 px-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[1000px] h-[640px] bg-card rounded-2xl overflow-hidden flex flex-row-reverse border border-border shadow-2xl"
+        className="w-full max-w-[1000px] min-h-[540px] md:h-[640px] bg-card rounded-2xl overflow-hidden flex flex-col md:flex-row-reverse border border-border shadow-2xl"
       >
         {/* Form Panel */}
-        <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-zinc-950/90 backdrop-blur-xl relative z-10 border-l border-white/5">
+        <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col justify-center bg-zinc-950/90 backdrop-blur-xl relative z-10 border-b md:border-b-0 md:border-l border-white/5">
           <div className="mb-6 flex flex-col items-center">
             <motion.img 
               initial={{ scale: 0.9, opacity: 0 }}

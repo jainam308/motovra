@@ -1676,3 +1676,8 @@ Resend Verification
 New token generation
 Previous token invalidation
 Already verified
+
+prompt 44:
+there are 8 duplicate honda civic in sedan make it 1, i have noticed that when we open showroom it takes some time to load the page so we should have keep an loading button but the loading button should be an animated wheel button
+
+prompt 45:

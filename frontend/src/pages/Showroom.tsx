@@ -11,6 +11,7 @@ import { Search, ChevronLeft, ChevronRight, SlidersHorizontal, AlertCircle, Shop
 import { useDebounce } from '../hooks/useDebounce';
 import { getVehicleImage } from '../utils/imageMapper';
 import { Link, useSearchParams } from 'react-router-dom';
+import { WheelSpinner } from '../components/ui/WheelSpinner';
 
 const fetchVehicles = async (searchParams: Record<string, any>) => {
   const params = new URLSearchParams();
@@ -194,19 +195,24 @@ export const Showroom = () => {
         </div>
 
         {isLoading ? (
-          <div data-testid="showroom-skeleton" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse bg-card border-border">
-                <div className="aspect-[4/3] bg-secondary" />
-                <CardHeader className="space-y-2">
-                  <div className="h-6 bg-secondary rounded w-2/3" />
-                  <div className="h-4 bg-secondary rounded w-1/3" />
-                </CardHeader>
-                <CardContent>
-                  <div className="h-8 bg-secondary rounded w-1/2" />
-                </CardContent>
-              </Card>
-            ))}
+          <div data-testid="showroom-skeleton" className="space-y-8">
+            <div className="flex flex-col items-center justify-center py-12 bg-card/40 rounded-3xl border border-white/5 backdrop-blur-xl">
+              <WheelSpinner size="xl" label="Loading Showroom Inventory..." />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="animate-pulse bg-card border-border">
+                  <div className="aspect-[4/3] bg-secondary" />
+                  <CardHeader className="space-y-2">
+                    <div className="h-6 bg-secondary rounded w-2/3" />
+                    <div className="h-4 bg-secondary rounded w-1/3" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-8 bg-secondary rounded w-1/2" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         ) : (
           <>

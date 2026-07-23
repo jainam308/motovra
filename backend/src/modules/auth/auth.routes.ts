@@ -68,6 +68,27 @@ router.post('/register', authController.register);
 
 /**
  * @swagger
+ * /api/auth/verify-email/{token}:
+ *   get:
+ *     summary: Verify email address with single-use token
+ *     tags: [Auth]
+ *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *       400:
+ *         description: Invalid or expired verification token
+ */
+router.get('/verify-email/:token', authController.verifyEmail);
+
+/**
+ * @swagger
  * /api/auth/refresh:
  *   post:
  *     summary: Refresh access token

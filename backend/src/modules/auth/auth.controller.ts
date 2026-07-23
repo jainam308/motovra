@@ -21,6 +21,16 @@ export const authController = {
     }
   },
 
+  async verifyEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token } = req.params;
+      const result = await authService.verifyEmail(token);
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;

@@ -54,6 +54,49 @@ export const authService = {
     };
   },
 
+  async verifyEmail(rawToken: string): Promise<any> {
+    if (!rawToken || typeof rawToken !== 'string') {
+      const err: any = new Error('Invalid or expired verification token');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    const user = await prisma.user.findFirst({
+      where: {
+        verificationToken: hashedToken,
+        verificationTokenExpiry: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      const err: any = new Error('Invalid or expired verification token');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isVerified: true,
+        verifiedAt: new Date(),
+        verificationToken: null,
+        verificationTokenExpiry: null,
+      },
+    });
+
+    try {
+      await emailService.sendWelcomeEmail({ email: updatedUser.email });
+    } catch (emailErr) {
+      console.error('[Welcome Email Error]', emailErr);
+    }
+
+    return {
+      message: 'Email verified successfully! You can now sign in.',
+    };
+  },
+
   async login(rawEmail: string, password: string): Promise<any> {
     const email = rawEmail?.trim().toLowerCase();
     const user = await prisma.user.findFirst({

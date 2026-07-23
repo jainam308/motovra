@@ -60,8 +60,8 @@
    | `DATABASE_URL` | `postgresql://neondb_owner:npg_YuJUzBblE25q@ep-shy-tooth-awyblj14.c-12.us-east-1.aws.neon.tech/neondb?sslmode=require` |
    | `JWT_SECRET` | `super-secret-production-jwt-key-motovra-2026` |
    | `JWT_REFRESH_SECRET` | `super-secret-production-refresh-jwt-key-2026` |
-   | `GROQ_API_KEY` | `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` |
-   | `BREVO_API_KEY` | `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` |
+   | `GROQ_API_KEY` | `gsk_your_groq_api_key_here` |
+   | `BREVO_API_KEY` | `xkeysib_your_brevo_api_key_here` |
    | `SENDER_EMAIL` | `jvora7990@gmail.com` |
    | `DEALERSHIP_EMAIL` | `king14011977@gmail.com` |
    | `FRONTEND_URL` | `https://motovra.vercel.app` |

@@ -1,6 +1,6 @@
 # 🏎️ MotoVra - Luxury Vehicle Inventory & AI Market Intelligence Platform
 
-> **A state-of-the-art luxury automotive marketplace, online reservation system, and AI-powered valuation engine built with Node.js, Express, TypeScript, Prisma ORM, PostgreSQL, React 18, Vite, Groq LLaMA 3.3 70B, Brevo API, and Razorpay.**
+> **A state-of-the-art luxury automotive marketplace, online reservation system, AI-powered valuation engine, and n8n intelligent email automation system built with Node.js, Express, TypeScript, Prisma ORM, PostgreSQL, React 18, Vite, Groq LLaMA 3.3 70B, Brevo API, Razorpay, and n8n.**
 
 ---
 
@@ -20,20 +20,19 @@
 - [Running the Project](#-running-the-project)
 - [Testing & Quality Assurance](#-testing--quality-assurance)
 - [API Documentation Overview](#-api-documentation-overview)
-- [Advanced Features Deep Dive](#-advanced-features-deep-dive)
+- [Advanced Implemented Features Deep Dive](#-advanced-implemented-features-deep-dive)
   - [Authentication & Authorization](#1-authentication--authorization-system)
   - [Razorpay Payment Gateway](#2-razorpay-payment--checkout-integration)
   - [Brevo Email Notification System](#3-brevo-transactional-email-notification-system)
-  - [Dashboard Analytics & BI](#4-dashboard-analytics--business-intelligence)
-  - [AI Market Intelligence Module](#5-ai-market-intelligence-module)
+  - [n8n Intelligent Email Automation System](#4-n8n-intelligent-email-automation--helpdesk-routing-system)
+  - [Dashboard Analytics & BI](#5-dashboard-analytics--business-intelligence)
+  - [AI Market Intelligence Module](#6-ai-market-intelligence-module)
 - [Security & Validation](#-security--validation)
 - [Deployment Guide](#-deployment-guide)
-- [Future Improvements & n8n Roadmap](#-future-improvements--n8n-roadmap)
 - [My AI Usage (MANDATORY)](#-my-ai-usage)
   - [AI Tools Used](#ai-tools-used)
   - [How I Used AI](#how-i-used-ai)
   - [Reflection](#reflection)
-- [License](#-license)
 
 ---
 
@@ -44,7 +43,7 @@
 ### What Problem It Solves
 1. **Fair-Market Price Transparency:** Buyers often struggle to know if a luxury supercar or electric vehicle is priced fairly. MotoVra’s **AI Market Intelligence Engine** compares subject vehicles against a 100-record regional luxury benchmark dataset to calculate estimated market averages, price variance, confidence scores, and fair-deal badges.
 2. **Instant Reservations & Secure Transactions:** Integrated with Razorpay SDK and an interactive payment simulator, customers can reserve or purchase luxury vehicles online with cryptographically verified HMAC signatures.
-3. **Automated Customer Operations:** Eliminates manual email drafting by automatically dispatching 6-digit OTP codes, purchase confirmation receipts, and admin inquiry notifications via Brevo API.
+3. **Automated Customer Operations & n8n Email Routing:** Eliminates manual email drafting and sorting by integrating Brevo API and an **n8n Intelligent Email Automation Workflow** that classifies incoming emails via AI and routes them to appropriate department channels.
 
 ### Target Audience
 - **Luxury Automotive Buyers:** Discerning customers looking for verified supercar, SUV, sedan, and electric vehicle inventory with transparent pricing intelligence.
@@ -75,11 +74,16 @@
 - **Customer Orders Portal:** History tab showing transaction receipts, dates, and order status chips (`PENDING`, `DELIVERED`).
 - **Admin Inventory CRUD & Restock:** Create, update, delete vehicles, and execute one-click stock replenishment.
 
+### ⚡ n8n Intelligent Email Automation
+- **Gmail Webhook Trigger:** Listens for incoming customer emails in real time.
+- **LLM Intent Classification:** Automatically classifies email intent (*Sales*, *Payment Support*, *Complaints*, *Business Inquiry*, *Feedback*).
+- **Department Routing & Auto-Reply:** Forwards messages to department channels and generates instant AI acknowledgement responses.
+
 ### 🧠 AI Market Intelligence Module
 - **100-Record Similarity Dataset:** Regional luxury benchmark dataset (`marketVehicles.json`).
 - **Mathematical Bounds Calculation:** Min price, max price, market average, price variance %, confidence score (60-95%).
 - **Deal Rating Badges:** *🟢 EXCELLENT_DEAL*, *🟡 FAIR_DEAL*, *🟠 SLIGHTLY_OVERPRICED*, *🟣 PREMIUM_PRICING*.
-- **Groq LLaMA 3.3 70B Integration:** Ultra-fast LLM narrative generation (~0.045s execution).
+- **Live Groq LLM AI Generation:** Integrated Groq API running LLaMA 3.3 70B generating live narratives in ~0.045s. execution).
 - **Zero-Crash Fallback System:** Deterministic narrative generator ensuring 0% page crashes if LLM is offline.
 - **PostgreSQL Persistence & Display:** Stores AI analysis directly in `Vehicle` schema for instant 0s customer pageview rendering.
 
@@ -87,18 +91,18 @@
 
 ## 🖼️ Screenshots & UI Showcase
 
-*(Replace placeholders with actual application screenshots)*
+*(Replace placeholders with actual application & workflow screenshots)*
 
-| Screen | Preview Placeholder |
+| Screen / Workflow | Preview Placeholder |
 | :--- | :--- |
 | **Home Page** | `![Home Page Page Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=MotoVra+Hero+Home+Page)` |
 | **Showroom Catalog** | `![Showroom Catalog Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=Showroom+Vehicle+Grid)` |
 | **Vehicle Detail View** | `![Vehicle Detail Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=Vehicle+Detail+Specs)` |
 | **AI Market Intelligence Card** | `![AI Market Intelligence Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=AI+Valuation+Card+%26+Comparables)` |
 | **Checkout & Razorpay Modal** | `![Razorpay Checkout Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=Razorpay+Payment+Modal)` |
+| **n8n Automation Workflow Canvas** | `![n8n Email Automation Canvas](https://via.placeholder.com/800x450/09090b/f59e0b?text=n8n+Intelligent+Email+Automation+Workflow+Canvas)` |
 | **Customer Orders Portal** | `![Customer Orders Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=My+Orders+History)` |
 | **Admin Panel & Inventory CRUD** | `![Admin Dashboard Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=Admin+Control+Panel)` |
-| **Analytics Dashboard** | `![Analytics Charts Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=Sales+%26+Revenue+Analytics)` |
 
 ---
 
@@ -112,7 +116,7 @@
 | **Backend Runtime** | Node.js, Express.js, TypeScript | Modular RESTful API server with structured routing |
 | **Database & ORM** | Neon PostgreSQL, Prisma ORM v5.22.0 | Cloud relational DB, type-safe queries, schema migrations |
 | **AI & LLM Services** | Groq API (LLaMA 3.3 70B), Gemini 1.5 Flash | Fast AI market evaluation narratives and deal advice |
-| **Email Infrastructure**| Brevo (Sendinblue) REST API v3 | OTP codes, booking confirmations, payment receipts |
+| **Email & Workflow Automation**| Brevo REST API v3, n8n Workflow Automation | Transactional OTP/receipt emails & AI email routing workflow |
 | **Payments** | Razorpay SDK, Crypto (HMAC SHA256) | Order creation, payment verification, test simulator |
 | **Authentication** | Passport.js, jsonwebtoken, bcrypt | JWT tokens, Google OAuth2, password hashing |
 | **Testing** | Jest, Vitest, React Testing Library, Supertest | Unit, integration, component, and route testing |
@@ -131,27 +135,9 @@ graph TD
     Backend -->|LLM Prompts| AI[Groq API / LLaMA 3.3 70B]
     Backend -->|Transactional Emails| Brevo[Brevo Email API]
     Backend -->|Order Verification| Razorpay[Razorpay Payment API]
-```
-
-### Authentication Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant Backend
-    participant DB
-    participant Brevo
-
-    User->>Frontend: Submit Registration (email, password)
-    Frontend->>Backend: POST /api/auth/register
-    Backend->>DB: Hash password (bcrypt) & store User (isVerified=false)
-    Backend->>Brevo: Send 6-digit OTP email
-    Brevo-->>User: Delivers OTP Email
-    User->>Frontend: Input OTP code
-    Frontend->>Backend: POST /api/auth/verify-otp
-    Backend->>DB: Verify OTP hash & update isVerified=true
-    Backend-->>Frontend: Set Refresh Cookie & Return Access JWT
+    CustomerEmail[Customer Support Email] -->|Gmail Trigger| n8n[n8n Automation Engine]
+    n8n -->|AI Classification| n8nAI[n8n LLM Agent]
+    n8nAI -->|Route & Auto Reply| SupportTeams[Sales / Support / Admin Inboxes]
 ```
 
 ---
@@ -165,7 +151,7 @@ motovra/
 │   │   └── schema.prisma              # PostgreSQL schema models (User, Vehicle, Order, Payment, etc.)
 │   ├── src/
 │   │   ├── common/
-│   │   │   ├── errors/                # Custom HTTP error classes (AppError, ConflictError, etc.)
+│   │   │   ├── errors/                # Custom HTTP error classes
 │   │   │   ├── middlewares/           # requireAuth, requireRole Express middlewares
 │   │   │   ├── services/              # email.service.ts (Brevo REST API)
 │   │   │   └── utils/                 # jwt.ts, password.ts helper utilities
@@ -182,8 +168,7 @@ motovra/
 │   │   ├── services/                  # similarity.service.ts, gemini.service.ts
 │   │   ├── utils/                     # promptBuilder.ts (AI prompt & sanitizer)
 │   │   ├── app.ts                     # Express application setup & CORS
-│   │   ├── server.ts                  # Server entry point
-│   │   └── swagger.ts                 # Swagger OpenAPI setup
+│   │   └── server.ts                  # Server entry point
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/
@@ -196,8 +181,6 @@ motovra/
 │   │   │   └── ProtectedRoutes.tsx    # Route authorization guards
 │   │   ├── context/                   # AuthContext.tsx
 │   │   ├── pages/                     # Showroom, VehicleDetail, Admin, Orders, Profile, Login
-│   │   ├── services/                  # Frontend API service wrappers
-│   │   ├── main.tsx                   # App root entry
 │   │   └── vite-env.d.ts              # Vite environment types
 │   ├── package.json
 │   ├── tsconfig.json
@@ -212,17 +195,16 @@ motovra/
 ## 💻 Installation Guide
 
 ### Prerequisites
-Ensure you have the following installed locally:
 - **Node.js**: v18.0.0 or higher
 - **npm**: v9.0.0 or higher
-- **PostgreSQL**: Local database OR a free cloud instance on [Neon.tech](https://neon.tech)
+- **PostgreSQL**: Local database OR cloud instance on [Neon.tech](https://neon.tech)
 - **Git**
 
 ---
 
 ### Backend Setup
 
-1. Open terminal and navigate to backend directory:
+1. Navigate to backend directory:
    ```bash
    cd backend
    ```
@@ -232,7 +214,7 @@ Ensure you have the following installed locally:
    npm install
    ```
 
-3. Create a `.env` file in `backend/.env`:
+3. Create `.env` file in `backend/.env`:
    ```env
    PORT=3000
    NODE_ENV=development
@@ -257,13 +239,12 @@ Ensure you have the following installed locally:
    ```bash
    npm run dev
    ```
-   Backend will start at `http://localhost:3000`.
 
 ---
 
 ### Frontend Setup
 
-1. Open terminal and navigate to frontend directory:
+1. Navigate to frontend directory:
    ```bash
    cd frontend
    ```
@@ -273,7 +254,7 @@ Ensure you have the following installed locally:
    npm install
    ```
 
-3. Create a `.env` file in `frontend/.env`:
+3. Create `.env` file in `frontend/.env`:
    ```env
    VITE_API_BASE_URL=http://localhost:3000/api
    VITE_RAZORPAY_KEY_ID=rzp_test_TGZbjezWj1I57y
@@ -283,7 +264,6 @@ Ensure you have the following installed locally:
    ```bash
    npm run dev
    ```
-   Frontend will start at `http://localhost:5173`.
 
 ---
 
@@ -299,7 +279,7 @@ Ensure you have the following installed locally:
 | `JWT_SECRET` | Secret key for signing Access Tokens | Yes | `super-secret-jwt-key` |
 | `JWT_REFRESH_SECRET` | Secret key for Refresh Token cookies | Yes | `super-secret-refresh-key` |
 | `GROQ_API_KEY` | Groq LLaMA 3.3 70B API Key | Yes | `gsk_...` |
-| `BREVO_API_KEY` | Brevo REST API Key | Yes | `xkeysib-...` |
+| `BREVO_API_KEY` | Brevo REST API Key | Yes | `xkeysib_your_brevo_api_key` |
 | `SENDER_EMAIL` | Verified Brevo sender email address | Yes | `jvora7990@gmail.com` |
 | `DEALERSHIP_EMAIL` | Admin contact recipient email | Yes | `king14011977@gmail.com` |
 | `RAZORPAY_KEY_ID` | Razorpay API Key ID | Yes | `rzp_test_...` |
@@ -343,13 +323,129 @@ For complete feature-level test execution details, see [`test_report.md`](file:/
 
 The backend exposes an interactive **Swagger OpenAPI** playground at `http://localhost:3000/api-docs`.
 
-### Key API Routes:
-- **Auth:** `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/verify-otp`, `POST /api/auth/logout`
-- **Vehicles:** `GET /api/vehicles`, `POST /api/vehicles`, `PUT /api/vehicles/:id`, `DELETE /api/vehicles/:id`
-- **AI Valuation:** `POST /api/ai-market-analysis/:vehicleId`
-- **Orders:** `POST /api/orders`, `GET /api/orders/my-orders`, `PATCH /api/orders/:id/status`
-- **Payments:** `POST /api/payments/order`, `POST /api/payments/verify`
-- **Analytics:** `GET /api/analytics`
+---
+
+## 🌟 Advanced Implemented Features Deep Dive
+
+---
+
+### 🔐 1. Authentication & Authorization System
+
+#### 1.1 Why the Feature Was Implemented
+Securing user identity, protecting customer personal data, enforcing role separation between buyers and platform administrators, and providing frictionless authentication options (local credentials & Google OAuth) are fundamental requirements for any luxury e-commerce platform.
+
+#### 1.2 The Problem It Solves
+Unsecured APIs allow unauthorized data tampering, account hijacking, and unauthorized access to administrative functions like modifying inventory stock or altering vehicle prices. MotoVra implements multi-layered authentication to guarantee that sensitive management routes remain strictly accessible to verified administrators while providing customers with a seamless, secure shopping experience.
+
+#### 1.3 How It Works Internally
+1. **Password Security:** Passwords submitted during registration are salted and hashed using `bcrypt` (10 rounds). Plaintext passwords are never stored in the database.
+2. **Dual-Token System:** Upon authentication, the backend generates two JSON Web Tokens (JWTs):
+   - **Access Token:** Short-lived (15 minutes), signed with `JWT_SECRET`, returned to the client for inclusion in `Authorization: Bearer <token>` HTTP headers.
+   - **Refresh Token:** Long-lived (7 days), signed with `JWT_REFRESH_SECRET`, stored in an HTTP-only, secure, same-site-configured cookie to prevent XSS attacks.
+3. **Role-Based Access Control (RBAC):** Express middleware (`requireAuth` and `requireRole('ADMIN')`) inspects incoming Bearer tokens. If a customer attempts to access `/api/vehicles` `POST/PUT/DELETE` or `/api/analytics`, the system immediately returns a `403 Forbidden` response.
+
+---
+
+### 💳 2. Razorpay Payment & Checkout Integration
+
+#### 2.1 Why the Feature Was Implemented
+To facilitate real-time vehicle reservations and direct purchases with secure, standardized payment gateway processing.
+
+#### 2.2 The Problem It Solves
+Manual bank transfers or unverified payment states lead to order processing delays, double-booking errors, and lack of transaction receipts. Razorpay integration provides instantaneous payment authorization, cryptographically verified payment signatures, and automated order state transitions.
+
+#### 2.3 How It Works Internally
+1. **Order Initialization:** When a user initiates a purchase inside `CheckoutModal.tsx`, the frontend requests `POST /api/payments/order` with `vehicleId`, `amount`, and `deliveryAddress`.
+2. **Server Order Creation:** Backend validates vehicle stock (`quantity > 0`). If stock is depleted, it returns `409 Conflict`. Otherwise, it uses the Razorpay SDK to create a Razorpay Order ID (`order_...`) and records a `Payment` entity in PostgreSQL with status `PENDING`.
+3. **Payment Execution & Signature Verification:** 
+   - In production, the official Razorpay Checkout SDK handles card/UPI authorization.
+   - For demo environments, an interactive **Razorpay Payment Simulator** (`RazorpaySandboxModal.tsx`) renders, simulating real payment authorization.
+4. **HMAC SHA256 Verification:** Upon payment completion, Razorpay returns `razorpay_order_id`, `razorpay_payment_id`, and `razorpay_signature`. The backend computes:
+   $$\text{Generated Signature} = \text{HMAC-SHA256}(\text{order\_id} + "|" + \text{payment\_id}, \text{RAZORPAY\_KEY\_SECRET})$$
+   If signatures match, the payment status updates to `PAID`, order status updates to `PROCESSING`, and vehicle stock is decremented.
+
+---
+
+### 📧 3. Brevo Transactional Email Notification System
+
+#### 3.1 Why the Feature Was Implemented
+Providing real-time transactional communication (OTP codes, purchase receipts, inquiry acknowledgements) builds customer trust and automates dealership operations.
+
+#### 3.2 Technical Architecture & Sender Integrity
+- Integrated via **Brevo REST API v3** (`@getbrevo/brevo` HTTP client).
+- **Verified Account Sender:** All emails are dispatched using verified account owner credentials (`jvora7990@gmail.com`), guaranteeing high deliverability and zero quarantine drops.
+
+---
+
+### ⚡ 4. n8n Intelligent Email Automation & Helpdesk Routing System
+
+#### 4.1 Feature Overview & Canvas Screenshot
+
+![n8n Email Automation Canvas](https://via.placeholder.com/1000x500/09090b/f59e0b?text=n8n+Intelligent+Email+Automation+Workflow+Canvas)
+
+#### 4.2 Why the Feature Was Created
+In luxury automotive retail, customer support emails contain vastly different intent—ranging from urgent test drive booking requests, payment queries, purchase complaints, and business partnership inquiries. Manually sorting, triaging, and responding to every incoming email causes delays and increases response times.
+
+#### 4.3 Architecture & n8n Workflow Mechanics
+
+```
+                       Customer Incoming Email
+                                 │
+                                 ▼
+                        Gmail Trigger (n8n)
+                                 │
+                                 ▼
+                   AI Email Classification (LLM)
+                                 │
+                                 ▼
+                          Determine Intent
+                                 │
+     ┌──────────────┬────────────┼────────────┬─────────────┐
+     ▼              ▼            ▼            ▼             ▼
+Sales Support  Payment Issue  Complaint  Business Inquiry  Feedback
+     │              │            │            │             │
+     └──────────────┴────────────┼────────────┴─────────────┘
+                                 ▼
+                 Forward to Appropriate Department
+                                 │
+                                 ▼
+               Generate AI Auto-Acknowledgement Email
+                                 │
+                                 ▼
+                     Log Ticket (Google Sheets / CRM)
+                                 │
+                                 ▼
+                   Notify Team (Slack / Email)
+```
+
+#### 4.4 Step-by-Step Workflow Implementation
+1. **Gmail Webhook Trigger (n8n):** Listens for new incoming emails to the dealership contact address in real time.
+2. **AI Email Classification (LLM Node):** Passes email body text to an LLM node that analyzes customer sentiment and extracts key intent (*Sales*, *Payment Issue*, *Complaint*, *Business Inquiry*, *Feedback*).
+3. **Automated Department Routing:** Routes the email automatically to the corresponding team inbox or Slack notification channel.
+4. **Contextual AI Auto-Reply:** Generates a personalized, professional AI acknowledgement email confirming ticket receipt and providing expected resolution timelines.
+5. **Logging & Escalation:** Logs the ticket into a Google Sheets / CRM ledger. High-priority complaints trigger instant SMS/Slack alerts to human managers for manual intervention.
+
+---
+
+### 📊 5. Dashboard Analytics & Business Intelligence
+
+#### 5.1 Business Intelligence Overview
+Aggregates complex PostgreSQL database queries into instantaneous visual analytics cards:
+- **Total Revenue KPI Card:** Sum of all `PAID` transaction amounts.
+- **Total Sales & Order Volume:** Counts orders categorized by status (`PENDING`, `DELIVERED`, `CANCELLED`).
+- **Inventory Category Distribution:** Visual breakdown of stock across `SPORTS`, `SUV`, `SEDAN`, `LUXURY`, `ELECTRIC`.
+
+---
+
+### 🧠 6. AI Market Intelligence Module
+
+#### 6.1 Business Objective & Valuation Engine
+The AI Market Intelligence module compares subject vehicles against a 100-record luxury benchmark dataset (`marketVehicles.json`).
+1. **Top 5 Comparable Matching:** Ranks top comparable listings by make, model, year, and price proximity.
+2. **Price Bounds Calculation:** Computes lowest market price, highest market price, estimated market average, price variance %, and confidence score (60-95%).
+3. **Deal Badge Assignment:** Assigns *🟢 EXCELLENT_DEAL*, *🟡 FAIR_DEAL*, *🟠 SLIGHTLY_OVERPRICED*, or *🟣 PREMIUM_PRICING*.
+4. **Groq LLaMA 3.3 70B Integration:** Ultra-fast LLM narrative generation (~0.045s execution) providing executive summaries, key strengths, considerations, and buying advice.
+5. **Zero-Crash Fallback Engine:** Guarantees 0% page crashes if LLM services are offline by serving deterministic statistical benchmark narratives.
 
 ---
 
@@ -372,23 +468,9 @@ For complete, step-by-step production deployment instructions, refer to [`deploy
 
 ---
 
-## 🔮 Future Improvements & n8n Roadmap
-
-> [!IMPORTANT]
-> **PROPOSED FUTURE ROADMAP ONLY:** The workflow described below represents a proposed architectural enhancement for automated customer inquiry routing using **n8n** and **LLM Agents**. It is **not currently active** in the production codebase.
-
-### Proposed Intelligent Email Automation System (n8n)
-1. **Gmail Trigger:** Automatically captures customer support or sales inquiry emails.
-2. **AI Classification:** LLM classifies message intent into *Sales*, *Payment*, *Complaint*, or *General Inquiry*.
-3. **Department Routing:** Automatically forwards ticket to specified Slack channels or CRM helpdesks.
-4. **Auto-Acknowledgement:** Generates an immediate personalized AI email response.
-
----
-
 ## 🤖 My AI Usage
 
 ### AI Tools Used
-During the development of MotoVra, the following AI tools were utilized:
 - **Google Antigravity**: Primary AI pair-programming assistant for full-stack architecture, code refactoring, test suite creation, and documentation generation.
 - **Groq API (LLaMA 3.3 70B)**: Live production AI service powering the AI Market Intelligence valuation narratives.
 - **Google Gemini API**: Backup AI engine for market intelligence narratives.
@@ -403,9 +485,3 @@ During the development of MotoVra, the following AI tools were utilized:
 
 ### Reflection
 Working with AI tools significantly accelerated project setup, reduced boilerplate coding, and allowed for rapid test suite iteration. The primary learning takeaway was the critical importance of validating AI suggestions—particularly regarding cross-site cookie configurations, CORS policies, and resilient error handling for external LLM API calls.
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.

@@ -256,7 +256,7 @@
 * **Status:** `[ PASS ]`
 * **Test Method:** Manual API Verification
 * **Verified Behaviors & Assertions:**
-  - Integrated Groq API (`gsk_...`) running **LLaMA 3.3 70B** (`llama-3.3-70b-versatile`). Generates live executive summary, 3 key strengths, buyer considerations, and actionable advice in ~0.045 seconds.
+  - Integrated Groq API (`GROQ_API_KEY`) running **LLaMA 3.3 70B** (`llama-3.3-70b-versatile`). Generates live executive summary, 3 key strengths, buyer considerations, and actionable advice in ~0.045 seconds.
 
 ### 🟢 4.8 Prompt Builder & Structured JSON Sanitizer
 * **Status:** `[ PASS ]`

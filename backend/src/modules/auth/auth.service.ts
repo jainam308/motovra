@@ -170,25 +170,41 @@ export const authService = {
   },
 
   async googleLogin(profile: any): Promise<any> {
-    const email = profile.emails?.[0].value;
+    const email = profile.emails?.[0]?.value?.trim().toLowerCase();
     if (!email) throw new Error('No email found in Google profile');
 
-    let user = await prisma.user.findUnique({ where: { googleId: profile.id } });
-    if (!user) {
-      user = await prisma.user.findUnique({ where: { email } });
-      if (user) {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: { googleId: profile.id }
-        });
-      } else {
-        user = await prisma.user.create({
-          data: {
-            email,
-            googleId: profile.id,
-          }
-        });
-      }
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { googleId: profile.id },
+          { email: { equals: email, mode: 'insensitive' } },
+        ],
+      },
+    });
+
+    if (user) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          googleId: profile.id,
+          provider: 'google',
+          isVerified: true,
+          verifiedAt: user.verifiedAt || new Date(),
+          verificationToken: null,
+          verificationTokenExpiry: null,
+        },
+      });
+    } else {
+      user = await prisma.user.create({
+        data: {
+          email,
+          googleId: profile.id,
+          provider: 'google',
+          isVerified: true,
+          verifiedAt: new Date(),
+          role: 'CUSTOMER',
+        },
+      });
     }
 
     const accessToken = jwtUtils.generateAccessToken({ userId: user.id, role: user.role });
@@ -202,6 +218,6 @@ export const authService = {
       }
     });
 
-    return { accessToken, refreshToken, user: { id: user.id, email: user.email, role: user.role } };
+    return { accessToken, refreshToken, user: { id: user.id, email: user.email, role: user.role, isVerified: user.isVerified } };
   }
 };

@@ -565,9 +565,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ vehicle, onClose }
                   <div className="flex items-start gap-2.5 text-amber-200">
                     <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-bold text-amber-300 text-sm">Test Mode Notice</p>
+                      <p className="font-bold text-amber-300 text-sm">Note:</p>
                       <p className="text-gray-300 mt-1 leading-relaxed">
-                        Since this application operates in test mode without a live bank account, please proceed with the <strong>Interactive Payment Simulator</strong> to test the full booking deposit, HMAC signature verification, and Brevo email receipt flow.
+                        Razorpay has been successfully integrated into the application. However, to facilitate demonstration and testing without processing real transactions, a payment simulator has been implemented in place of live payment execution.
                       </p>
                     </div>
                   </div>

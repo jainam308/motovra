@@ -139,6 +139,7 @@ describe('Auth User Flows', () => {
 
       expect(window.location.href).toBe('http://localhost:3000/api/auth/google');
 
+      // @ts-ignore
       window.location = originalLocation;
     });
 

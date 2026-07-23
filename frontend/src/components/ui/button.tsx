@@ -3,10 +3,11 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { Loader2 } from 'lucide-react';
 
-export interface ButtonProps extends Omit<HTMLMotionProps<"button">, 'ref'> {
+export interface ButtonProps extends Omit<HTMLMotionProps<"button">, 'ref' | 'children'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'glass';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   isLoading?: boolean;
+  children?: React.ReactNode;
 }
 
 const WheelSpinner = () => (

@@ -1743,3 +1743,568 @@ Consistent experience on all supported screen sizes.
 No layout issues or overflow problems.
 Clean, maintainable implementation following project standards.
 
+prompt 42
+You are Google Antigravity.
+
+Implement a production-ready **AI Market Intelligence Module** for the MotoVra Vehicle Inventory Management System.
+
+IMPORTANT:
+Do NOT start writing code immediately.
+
+Follow the complete Google Antigravity workflow from planning to implementation and verification.
+
+====================================================================
+PHASE 1 — PROJECT ANALYSIS
+====================================================================
+
+First analyze the existing codebase before making any changes.
+
+Understand:
+
+• Existing folder structure
+• Existing architecture
+• Current routing
+• Existing controllers
+• Existing services
+• Existing database schema
+• Existing TypeScript configuration
+• Existing reusable components
+• Existing UI design
+• Existing API patterns
+• Existing coding conventions
+• Existing admin workflow
+• Existing vehicle workflow
+
+Do NOT assume anything.
+
+Reuse existing utilities, services, helpers and components whenever possible.
+
+Avoid duplicate implementations.
+
+Stop after analysis and wait for approval.
+
+====================================================================
+PHASE 2 — IMPLEMENTATION PLAN
+====================================================================
+
+Generate a detailed Implementation Plan artifact.
+
+Include:
+
+1. Feature Overview
+
+2. Current Architecture Analysis
+
+3. Proposed Architecture
+
+4. Folder Structure
+
+5. Files to Create
+
+6. Files to Modify
+
+7. Database Schema Changes
+
+8. API Design
+
+9. Backend Architecture
+
+10. Frontend Architecture
+
+11. Service Layer Design
+
+12. Data Flow Diagram
+
+13. Component Hierarchy
+
+14. Error Handling Strategy
+
+15. Testing Strategy
+
+16. Risks
+
+17. Alternative Designs Considered
+
+18. Why this architecture was selected
+
+Do not write any implementation code.
+
+Stop and wait for approval.
+
+====================================================================
+PHASE 3 — TASK BREAKDOWN
+====================================================================
+
+After approval generate a detailed task breakdown.
+
+Split work into logical milestones.
+
+For every task include:
+
+• Objective
+• Description
+• Files affected
+• Dependencies
+• Expected outcome
+
+Order tasks from smallest dependency to largest.
+
+Stop and wait for approval.
+
+====================================================================
+PHASE 4 — TEST DRIVEN DEVELOPMENT
+====================================================================
+
+Follow strict TDD.
+
+For every milestone:
+
+RED
+
+• Write tests first
+• Explain why they fail
+• Stop
+
+Wait for approval.
+
+GREEN
+
+• Implement only enough code to make tests pass
+• Stop
+
+Wait for approval.
+
+REFACTOR
+
+• Improve code quality
+• Improve naming
+• Remove duplication
+• Improve maintainability
+• Ensure no behavior changes
+
+Stop.
+
+Wait for approval.
+
+Repeat until feature is complete.
+
+====================================================================
+PHASE 5 — CODE REVIEW
+====================================================================
+
+Perform a complete self review.
+
+Verify:
+
+• TypeScript types
+• Folder organization
+• Architecture consistency
+• SOLID principles
+• Error handling
+• Performance
+• Security
+• Readability
+• Maintainability
+• Naming conventions
+• Reusability
+
+Suggest improvements if needed.
+
+====================================================================
+PHASE 6 — VERIFICATION REPORT
+====================================================================
+
+Generate a verification artifact.
+
+Include:
+
+• Files created
+• Files modified
+• Database changes
+• APIs created
+• Components added
+• Services added
+• Tests executed
+• Test results
+• Remaining limitations
+• Future improvements
+
+====================================================================
+PHASE 7 — IMPLEMENTATION WALKTHROUGH
+====================================================================
+
+Generate a detailed walkthrough explaining:
+
+• Overall architecture
+• Backend workflow
+• Frontend workflow
+• Database workflow
+• AI workflow
+• Request lifecycle
+• Service interactions
+• Error handling
+• Design decisions
+• Future scalability
+
+====================================================================
+PROJECT INFORMATION
+====================================================================
+
+Project Name:
+MotoVra
+
+Existing Stack:
+
+Frontend
+• React
+• TypeScript
+• Material UI
+
+Backend
+• Node.js
+• Express
+• TypeScript
+
+Database
+• PostgreSQL
+• Prisma ORM (or the project's existing ORM if different)
+
+AI
+• Google Gemini API
+
+Do not change the existing architecture.
+
+Follow existing project conventions.
+
+====================================================================
+FEATURE REQUIREMENTS
+====================================================================
+
+Implement an AI-powered Market Intelligence module.
+
+This is NOT a chatbot.
+
+The AI should analyze a vehicle and provide intelligent buying insights.
+
+The AI should classify vehicles as:
+
+• Excellent Deal
+• Fair Deal
+• Slightly Overpriced
+• Premium Pricing
+
+The recommendation should be based on statistical comparison with a curated demonstration dataset.
+
+====================================================================
+AI GENERATION STRATEGY
+====================================================================
+
+Do NOT generate AI every time a customer opens the vehicle page.
+
+Instead:
+
+Generate AI analysis when
+
+• Admin creates a vehicle
+• Admin updates a vehicle
+• Admin manually clicks "Regenerate AI Analysis"
+
+Store the generated AI analysis in the database.
+
+Customers should only view stored analysis.
+
+Never expose the Gemini API key to the frontend.
+
+Gemini must only be called from the backend.
+
+====================================================================
+FOLDER STRUCTURE
+====================================================================
+
+Follow the existing project structure.
+
+Only create files when necessary.
+
+Suggested structure:
+
+backend/src
+
+config/
+    gemini.ts
+
+controllers/
+    aiMarketAnalysis.controller.ts
+
+services/
+    aiMarketAnalysis.service.ts
+    gemini.service.ts
+    similarity.service.ts
+
+utils/
+    promptBuilder.ts
+
+routes/
+    aiMarketAnalysis.routes.ts
+
+data/
+    marketVehicles.json
+
+Frontend
+
+components/
+
+AI/
+
+AIMarketAnalysisCard.tsx
+
+AIInsights.tsx
+
+ComparableVehiclesTable.tsx
+
+PriceBadge.tsx
+
+services/
+
+aiMarketAnalysisApi.ts
+
+Modify existing Vehicle Details page instead of creating unnecessary pages.
+
+====================================================================
+DEMO MARKET DATASET
+====================================================================
+
+Do NOT scrape websites.
+
+Do NOT use:
+
+• CarDekho
+• Cars24
+• Spinny
+• OLX
+
+Create a local demonstration dataset.
+
+backend/src/data/marketVehicles.json
+
+Generate approximately 100 realistic vehicle records.
+
+Each record should include:
+
+• Brand
+• Model
+• Variant
+• Year
+• Fuel Type
+• Transmission
+• Mileage
+• Ownership
+• Condition
+• Price
+• Marketplace
+
+Use this only for similarity comparison.
+
+====================================================================
+DATABASE CHANGES
+====================================================================
+
+Extend the existing Vehicle model.
+
+Store:
+
+• Estimated Market Price
+• Lowest Market Price
+• Highest Market Price
+• Confidence Score
+• Recommendation
+• Summary
+• Strengths
+• Concerns
+• Buyer Advice
+• Comparable Vehicles
+• Generated Timestamp
+
+Use the project's existing PostgreSQL schema conventions.
+
+====================================================================
+SIMILARITY ENGINE
+====================================================================
+
+Create a Similarity Service.
+
+Responsibilities:
+
+• Find similar vehicles
+• Rank comparable vehicles
+• Return Top 5 matches
+
+Calculate:
+
+• Average Price
+• Lowest Price
+• Highest Price
+• Price Difference
+• Confidence Score
+
+Use deterministic calculations.
+
+Do NOT use AI for calculations.
+
+====================================================================
+GEMINI SERVICE
+====================================================================
+
+Create a dedicated Gemini service.
+
+Gemini receives only:
+
+• Vehicle Details
+• Market Statistics
+• Comparable Vehicles
+
+Gemini should ONLY generate:
+
+• Recommendation
+• Summary
+• Strengths
+• Concerns
+• Buyer Advice
+
+Gemini should never calculate numerical values.
+
+====================================================================
+PROMPT BUILDER
+====================================================================
+
+Create a reusable Prompt Builder.
+
+The prompt must instruct Gemini to return valid JSON only.
+
+Expected response:
+
+{
+  "recommendation":"",
+  "summary":"",
+  "strengths":[],
+  "concerns":[],
+  "buyerAdvice":""
+}
+
+Handle malformed responses gracefully.
+
+====================================================================
+API
+====================================================================
+
+Create:
+
+POST /api/ai-market-analysis/:vehicleId
+
+Responsibilities:
+
+• Retrieve vehicle
+• Load dataset
+• Calculate market statistics
+• Generate AI explanation
+• Save analysis
+• Return updated data
+
+Also regenerate analysis automatically after vehicle updates.
+
+====================================================================
+FRONTEND
+====================================================================
+
+On the Vehicle Details page add a premium Material UI section titled:
+
+🧠 MotoVra AI Market Intelligence
+
+Display:
+
+• Estimated Market Price
+• Current Price
+• Price Difference
+• Recommendation
+• Confidence Score
+• AI Summary
+
+Below that display:
+
+Key Strengths
+
+Buyer Advice
+
+Below that display:
+
+Comparable Vehicles
+
+Create a responsive Material UI table showing:
+
+• Marketplace
+• Year
+• Mileage
+• Price
+• Difference
+
+Add loading state, empty state and error state.
+
+Follow existing design language.
+
+====================================================================
+ERROR HANDLING
+====================================================================
+
+Handle:
+
+• Vehicle not found
+• Empty dataset
+• Gemini timeout
+• Invalid JSON
+• API failure
+• Database failure
+
+If AI fails,
+
+still return calculated market statistics.
+
+====================================================================
+TESTING
+====================================================================
+
+Create:
+
+Unit Tests
+
+• Similarity Service
+• Prompt Builder
+• Gemini Response Parser
+
+Integration Tests
+
+• AI API
+• Database updates
+• Error handling
+
+Frontend Tests
+
+• Loading
+• Success
+• Empty state
+• Error state
+
+====================================================================
+GENERAL REQUIREMENTS
+====================================================================
+
+• Follow the existing architecture.
+• Use TypeScript everywhere.
+• Write clean, strongly typed code.
+• Reuse existing utilities whenever possible.
+• Follow SOLID principles where appropriate.
+• Keep functions small and reusable.
+• Avoid unnecessary dependencies.
+• Avoid overengineering.
+• Maintain consistency with the current codebase.
+• Do not modify unrelated features.
+• Explain important architectural decisions.
+• After every major phase, stop and wait for approval before continuing.

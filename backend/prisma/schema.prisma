@@ -57,6 +57,19 @@ model Vehicle {
   updatedAt DateTime       @updatedAt
   savedBy   SavedVehicle[]
   orders    Order[]
+
+  // 🧠 AI Market Intelligence Fields
+  estimatedMarketPrice Decimal?
+  lowestMarketPrice    Decimal?
+  highestMarketPrice   Decimal?
+  confidenceScore      Int?
+  recommendation       String?
+  summary              String?   @db.Text
+  strengths            Json?
+  concerns             Json?
+  buyerAdvice          String?   @db.Text
+  comparableVehicles   Json?
+  aiGeneratedAt        DateTime?
 }
 
 model SavedVehicle {

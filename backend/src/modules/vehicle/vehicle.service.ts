@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { vehicleValidation } from './vehicle.validation';
 import { orderService } from '../order/order.service';
+import { generateAndStoreMarketAnalysis } from '../../services/aiMarketAnalysis.service';
 
 const prisma = new PrismaClient();
 
@@ -13,9 +14,17 @@ export const vehicleService = {
       throw err;
     }
 
-    return prisma.vehicle.create({
+    const created = await prisma.vehicle.create({
       data: value
     });
+
+    // Auto-generate AI Market Intelligence Baseline
+    try {
+      return await generateAndStoreMarketAnalysis(created.id);
+    } catch (e) {
+      console.error('[VehicleService] Warning: Failed to auto-generate AI analysis on create:', e);
+      return created;
+    }
   },
 
   async list(query: any): Promise<any> {
@@ -71,10 +80,18 @@ export const vehicleService = {
       throw err;
     }
 
-    return prisma.vehicle.update({
+    const updated = await prisma.vehicle.update({
       where: { id },
       data: value
     });
+
+    // Auto-regenerate AI Market Intelligence Baseline on update
+    try {
+      return await generateAndStoreMarketAnalysis(id);
+    } catch (e) {
+      console.error('[VehicleService] Warning: Failed to auto-generate AI analysis on update:', e);
+      return updated;
+    }
   },
 
   async delete(id: string): Promise<any> {

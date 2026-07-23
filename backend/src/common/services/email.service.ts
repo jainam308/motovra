@@ -222,7 +222,7 @@ export const emailService = {
     htmlContent: string;
   }) {
     const apiKey = process.env.BREVO_API_KEY;
-    const senderEmail = process.env.SENDER_EMAIL || 'concierge@motovra.com';
+    const senderEmail = process.env.SENDER_EMAIL || 'jvora7990@gmail.com';
     const senderName = 'Motovra Luxury Motors';
 
     if (!apiKey) {

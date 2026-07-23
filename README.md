@@ -618,18 +618,10 @@ For complete, step-by-step production deployment instructions, refer to [`deploy
 
 ## 🤖 My AI Usage
 
-### AI Tools Used
-- **Google Antigravity**: Primary AI pair-programming assistant for full-stack architecture, code refactoring, test suite creation, and documentation generation.
-- **Groq API (LLaMA 3.3 70B)**: Live production AI service powering the AI Market Intelligence valuation narratives.
-- **Google Gemini API**: Backup AI engine for market intelligence narratives.
+I actively use AI as a productivity and learning assistant while ensuring I understand, verify, and test all generated outputs before integrating them into my projects.
 
-### How I Used AI
-- **Architecture & Database Design:** Assisting in schema design for Prisma models and dual-token JWT security flows.
-- **AI Market Engine Development:** Building the deterministic similarity engine, prompt builder, markdown response sanitizer, and zero-crash fallback system.
-- **Test Automation:** Writing 77 Jest and Vitest automated test cases covering backend REST APIs and React frontend components.
-- **Documentation & UI Design:** Creating comprehensive Markdown test reports, deployment guides, and luxury Tailwind UI layouts.
-
-> **Developer Control Note:** While AI served as an intelligent assistant for code generation, testing, and brainstorming, all architectural decisions, security controls, debugging, integration testing, and final code reviews remained strictly under manual developer control.
-
-### Reflection
-Working with AI tools significantly accelerated project setup, reduced boilerplate coding, and allowed for rapid test suite iteration. The primary learning takeaway was the critical importance of validating AI suggestions—particularly regarding cross-site cookie configurations, CORS policies, and resilient error handling for external LLM API calls.
+- **ChatGPT & Antigravity AI** – Used for brainstorming solutions, prompt engineering, understanding complex concepts, generating boilerplate code, debugging, creating and refining test cases, and improving technical documentation.
+- **Claude** – Used for project planning, designing scalable project structures, reviewing code organization, and suggesting clean and maintainable implementations.
+- **Perplexity AI** – Used for technical research, comparing technologies, exploring best practices, and quickly finding relevant documentation and implementation approaches.
+- **Groq API** – Integrated into AI-powered applications to build and experiment with LLM-based features, conversational workflows, and intelligent automation.
+- **n8n AI Agent** – Used to create AI-driven automation workflows such as email classification, intelligent routing, notification systems, and business process automation.

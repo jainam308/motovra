@@ -8,8 +8,11 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="text-2xl font-heading font-bold text-white tracking-tighter">
-              MOTOVRA<span className="text-primary">.</span>
+            <Link to="/" className="flex items-center space-x-3 text-white hover:opacity-90 transition-opacity">
+              <img src="/motovra-logo.jpg" alt="Motovra Logo" className="h-10 w-auto object-contain rounded-md" />
+              <span className="text-2xl font-heading font-bold text-white tracking-tighter">
+                MOTOVRA<span className="text-amber-500">.</span>
+              </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
               The world's most exclusive marketplace for ultra-luxury and high-performance vehicles. Redefining automotive excellence.

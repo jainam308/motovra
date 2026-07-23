@@ -48,23 +48,24 @@ export const Register = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-[1000px] h-[640px] bg-card rounded-2xl overflow-hidden flex flex-row-reverse border border-border shadow-2xl"
       >
-        {/* Right Side: Form */}
-        <div className="w-full md:w-1/2 p-12 flex flex-col justify-center">
-          <div className="mb-8">
-            <h2 className="text-3xl font-heading font-bold text-white mb-2">Join Motovra</h2>
-            <p className="text-muted-foreground text-sm">Create an account to browse and purchase vehicles.</p>
+        {/* Form Panel */}
+        <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-card">
+          <div className="mb-4 flex flex-col items-center sm:items-start">
+            <img src="/motovra-logo.jpg" alt="Motovra Logo" className="h-14 w-auto object-contain rounded-xl border border-white/10 mb-3 shadow-lg shadow-amber-500/10" />
+            <h2 className="text-3xl font-heading font-bold text-white mb-1">Join Motovra</h2>
+            <p className="text-muted-foreground text-xs">Create your executive account to access private supercar reservations.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {error && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-center text-destructive text-sm">
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-center text-destructive text-xs">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-2 flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 {error}
               </div>
             )}
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Email address</label>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-300">Email address</label>
               <Input
                 type="email"
                 value={email}
@@ -74,8 +75,8 @@ export const Register = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Password</label>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-300">Password</label>
               <Input
                 type="password"
                 value={password}
@@ -85,8 +86,8 @@ export const Register = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Confirm Password</label>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-300">Confirm Password</label>
               <Input
                 type="password"
                 value={confirmPassword}
@@ -96,15 +97,15 @@ export const Register = () => {
               />
             </div>
 
-            <Button type="submit" className="w-full mt-2" isLoading={isLoading}>
+            <Button type="submit" className="w-full mt-2 bg-amber-600 hover:bg-amber-700 text-white font-bold" isLoading={isLoading}>
               Create Account
             </Button>
 
-            <div className="relative my-4">
+            <div className="relative my-3">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
+              <div className="relative flex justify-center text-xs">
                 <span className="px-2 bg-card text-muted-foreground">Or continue with</span>
               </div>
             </div>
@@ -112,10 +113,10 @@ export const Register = () => {
             <Button
               type="button"
               variant="outline"
-              className="w-full bg-secondary hover:bg-secondary/80 border-border"
+              className="w-full bg-secondary hover:bg-secondary/80 border-border text-xs"
               onClick={() => { window.location.href = 'http://localhost:3000/api/auth/google'; }}
             >
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -125,23 +126,31 @@ export const Register = () => {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account? <Link to="/login" className="text-primary hover:underline font-medium">Sign in here</Link>
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            Already have an account? <Link to="/login" className="text-amber-400 hover:underline font-medium">Sign in here</Link>
           </div>
         </div>
 
-        {/* Left Side: Branding */}
-        <div className="hidden md:flex w-1/2 bg-secondary relative flex-col justify-between p-12">
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-black/80 z-0"></div>
+        {/* High-Resolution Supercar Hero Branding Panel */}
+        <div 
+          className="hidden md:flex w-1/2 relative flex-col justify-between p-12 bg-cover bg-center"
+          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1600')` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0"></div>
 
-          <div className="relative z-10 flex items-center text-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 mr-2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-            <span className="font-heading font-bold text-2xl tracking-tight text-white">Motovra</span>
+          <div className="relative z-10 flex items-center gap-3">
+            <img src="/motovra-logo.jpg" alt="Motovra Brand" className="h-10 w-auto rounded-lg border border-white/20 shadow-md" />
+            <span className="font-heading font-bold text-2xl tracking-tight text-white">Motovra Exotics</span>
           </div>
 
-          <div className="relative z-10">
-            <h3 className="font-heading font-bold text-4xl text-white mb-4">Start your engine.</h3>
-            <p className="text-gray-300 leading-relaxed">Join thousands of enthusiasts who trust Motovra for their automotive needs.</p>
+          <div className="relative z-10 space-y-2 bg-black/60 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+            <div className="inline-block px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-full uppercase tracking-wider">
+              Exclusive Member Access
+            </div>
+            <h3 className="font-heading font-extrabold text-3xl text-white">Ferrari SF90 Stradale</h3>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Join the world's most elite supercar network. Reserved allocations, VIP white-glove transport, and luxury concierge support.
+            </p>
           </div>
         </div>
       </motion.div>

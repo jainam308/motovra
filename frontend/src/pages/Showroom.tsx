@@ -124,23 +124,57 @@ export const Showroom = () => {
 
             {/* Price Range */}
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground font-semibold uppercase tracking-wider">Price Range</label>
+              <label className="text-sm text-muted-foreground font-semibold uppercase tracking-wider flex items-center justify-between">
+                <span>Price Range ($ USD)</span>
+              </label>
+
+              {/* Quick USD Range Buttons */}
+              <div className="grid grid-cols-2 gap-1.5 mb-2">
+                <button
+                  type="button"
+                  onClick={() => { setMinPrice(''); setMaxPrice('250000'); setPage(1); }}
+                  className="text-xs py-1 px-2 rounded bg-zinc-800/80 hover:bg-amber-500/20 hover:text-amber-300 text-gray-300 transition-colors border border-white/5"
+                >
+                  &lt; $250,000
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMinPrice('250000'); setMaxPrice('500000'); setPage(1); }}
+                  className="text-xs py-1 px-2 rounded bg-zinc-800/80 hover:bg-amber-500/20 hover:text-amber-300 text-gray-300 transition-colors border border-white/5"
+                >
+                  $250k - $500k
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMinPrice('500000'); setMaxPrice(''); setPage(1); }}
+                  className="text-xs py-1 px-2 rounded bg-zinc-800/80 hover:bg-amber-500/20 hover:text-amber-300 text-gray-300 transition-colors border border-white/5 col-span-2"
+                >
+                  $500,000+
+                </button>
+              </div>
+
               <div className="flex items-center space-x-2">
-                <Input 
-                  type="number"
-                  placeholder="Min" 
-                  className="bg-secondary/50 border-border h-9 text-sm"
-                  value={minPrice}
-                  onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
-                />
+                <div className="relative flex-1">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-amber-500 font-bold">$</span>
+                  <Input 
+                    type="number"
+                    placeholder="Min USD" 
+                    className="bg-secondary/50 border-border h-9 text-sm pl-6"
+                    value={minPrice}
+                    onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
+                  />
+                </div>
                 <span className="text-muted-foreground">-</span>
-                <Input 
-                  type="number"
-                  placeholder="Max" 
-                  className="bg-secondary/50 border-border h-9 text-sm"
-                  value={maxPrice}
-                  onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
-                />
+                <div className="relative flex-1">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-amber-500 font-bold">$</span>
+                  <Input 
+                    type="number"
+                    placeholder="Max USD" 
+                    className="bg-secondary/50 border-border h-9 text-sm pl-6"
+                    value={maxPrice}
+                    onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
+                  />
+                </div>
               </div>
             </div>
 

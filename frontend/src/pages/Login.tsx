@@ -49,10 +49,11 @@ export const Login = () => {
         className="w-full max-w-[1000px] h-[620px] bg-card rounded-2xl overflow-hidden flex border border-border shadow-2xl"
       >
         {/* Left Side: Form */}
-        <div className="w-full md:w-1/2 p-12 flex flex-col justify-center">
-          <div className="mb-8">
-            <h2 className="text-3xl font-heading font-bold text-white mb-2">Welcome Back</h2>
-            <p className="text-muted-foreground text-sm">Sign in to access your garage and the showroom.</p>
+        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-card">
+          <div className="mb-6 flex flex-col items-center sm:items-start">
+            <img src="/motovra-logo.jpg" alt="Motovra Logo" className="h-16 w-auto object-contain rounded-xl border border-white/10 mb-4 shadow-lg shadow-amber-500/10" />
+            <h2 className="text-3xl font-heading font-bold text-white mb-1">Welcome Back</h2>
+            <p className="text-muted-foreground text-sm">Sign in to access your garage and executive showroom.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -85,7 +86,7 @@ export const Login = () => {
               />
             </div>
 
-            <Button type="submit" className="w-full mt-4" isLoading={isLoading}>
+            <Button type="submit" className="w-full mt-4 bg-amber-600 hover:bg-amber-700 text-white font-bold" isLoading={isLoading}>
               Sign In
             </Button>
 
@@ -115,22 +116,30 @@ export const Login = () => {
           </form>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
-            Don't have an account? <Link to="/register" className="text-primary hover:underline font-medium">Register here</Link>
+            Don't have an account? <Link to="/register" className="text-amber-400 hover:underline font-medium">Register here</Link>
           </div>
         </div>
 
-        {/* Right Side: Image/Branding */}
-        <div className="hidden md:flex w-1/2 bg-secondary relative flex-col justify-between p-12">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-black/80 z-0"></div>
+        {/* Right Side: High-Resolution Supercar Hero Image */}
+        <div 
+          className="hidden md:flex w-1/2 relative flex-col justify-between p-12 bg-cover bg-center"
+          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=1600')` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0"></div>
 
-          <div className="relative z-10 flex items-center text-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 mr-2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-            <span className="font-heading font-bold text-2xl tracking-tight text-white">Motovra</span>
+          <div className="relative z-10 flex items-center gap-3">
+            <img src="/motovra-logo.jpg" alt="Motovra Brand" className="h-10 w-auto rounded-lg border border-white/20 shadow-md" />
+            <span className="font-heading font-bold text-2xl tracking-tight text-white">Motovra Exotics</span>
           </div>
 
-          <div className="relative z-10">
-            <h3 className="font-heading font-bold text-4xl text-white mb-4">Drive the Future.</h3>
-            <p className="text-gray-300 leading-relaxed">Experience a seamless, premium automotive marketplace designed for enthusiasts and professionals alike.</p>
+          <div className="relative z-10 space-y-2 bg-black/60 backdrop-blur-md p-6 rounded-2xl border border-white/10">
+            <div className="inline-block px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-full uppercase tracking-wider">
+              Featured Supercar
+            </div>
+            <h3 className="font-heading font-extrabold text-3xl text-white">Porsche 911 GT3 RS</h3>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Drive beyond limits. Experience the peak of track-ready automotive performance and luxury provenance.
+            </p>
           </div>
         </div>
       </motion.div>

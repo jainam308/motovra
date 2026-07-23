@@ -347,17 +347,33 @@ export const Admin = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase">Make</label>
-                    <Input 
-                      value={formData.make} 
-                      onChange={e => setFormData({ ...formData, make: e.target.value })} 
-                      placeholder="e.g. Porsche" 
-                      className="mt-1"
-                    />
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Make / Brand</label>
+                    <select
+                      value={formData.make}
+                      onChange={e => setFormData({ ...formData, make: e.target.value })}
+                      className="w-full bg-secondary/80 border border-border text-white rounded-md h-10 px-3 text-sm font-medium mt-1 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="" disabled className="bg-zinc-900 text-gray-400">Select Brand...</option>
+                      <option value="Porsche" className="bg-zinc-900 text-white">Porsche</option>
+                      <option value="Aston Martin" className="bg-zinc-900 text-white">Aston Martin</option>
+                      <option value="Bentley" className="bg-zinc-900 text-white">Bentley</option>
+                      <option value="Rolls-Royce" className="bg-zinc-900 text-white">Rolls-Royce</option>
+                      <option value="Mercedes-Benz" className="bg-zinc-900 text-white">Mercedes-Benz</option>
+                      <option value="Lamborghini" className="bg-zinc-900 text-white">Lamborghini</option>
+                      <option value="Ferrari" className="bg-zinc-900 text-white">Ferrari</option>
+                      <option value="McLaren" className="bg-zinc-900 text-white">McLaren</option>
+                      <option value="Range Rover" className="bg-zinc-900 text-white">Range Rover</option>
+                      <option value="Tesla" className="bg-zinc-900 text-white">Tesla</option>
+                      <option value="Lucid" className="bg-zinc-900 text-white">Lucid</option>
+                      <option value="Rivian" className="bg-zinc-900 text-white">Rivian</option>
+                      <option value="Audi" className="bg-zinc-900 text-white">Audi</option>
+                      <option value="BMW" className="bg-zinc-900 text-white">BMW</option>
+                      <option value="Lexus" className="bg-zinc-900 text-white">Lexus</option>
+                    </select>
                     {errors.make && <p className="text-xs text-red-400 mt-1">{errors.make}</p>}
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase">Model</label>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Model Name</label>
                     <Input 
                       value={formData.model} 
                       onChange={e => setFormData({ ...formData, model: e.target.value })} 
@@ -370,12 +386,18 @@ export const Admin = () => {
 
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase">Category</label>
-                  <Input 
-                    value={formData.category} 
-                    onChange={e => setFormData({ ...formData, category: e.target.value })} 
-                    placeholder="SPORTS, LUXURY, SUV, ELECTRIC" 
-                    className="mt-1"
-                  />
+                  <select
+                    value={formData.category}
+                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full bg-secondary/80 border border-border text-white rounded-md h-10 px-3 text-sm font-medium mt-1 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  >
+                    <option value="" disabled className="bg-zinc-900 text-gray-400">Select Category...</option>
+                    <option value="SPORTS" className="bg-zinc-900 text-white">SPORTS (High Performance Supercars)</option>
+                    <option value="LUXURY" className="bg-zinc-900 text-white">LUXURY (Ultra Luxury Saloons)</option>
+                    <option value="SUV" className="bg-zinc-900 text-white">SUV (Performance Luxury SUVs)</option>
+                    <option value="ELECTRIC" className="bg-zinc-900 text-white">ELECTRIC (High-End EVs)</option>
+                    <option value="SEDAN" className="bg-zinc-900 text-white">SEDAN (Executive GT Sedans)</option>
+                  </select>
                   {errors.category && <p className="text-xs text-red-400 mt-1">{errors.category}</p>}
                 </div>
 

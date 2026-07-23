@@ -368,4 +368,12 @@ export const emailService = {
       htmlContent,
     });
   },
+
+  async sendVerificationEmail(payload: { email: string; verificationToken: string; name?: string }): Promise<any> {
+    throw new Error('Not implemented');
+  },
+
+  async sendWelcomeEmail(payload: { email: string; name?: string }): Promise<any> {
+    throw new Error('Not implemented');
+  },
 };

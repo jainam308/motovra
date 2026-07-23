@@ -1,38 +1,36 @@
 # 🏎️ MotoVra - Luxury Vehicle Inventory & AI Market Intelligence Platform
 
-> **A state-of-the-art luxury automotive marketplace, online reservation system, AI-powered valuation engine, and n8n intelligent email automation system built with Node.js, Express, TypeScript, Prisma ORM, PostgreSQL, React 18, Vite, Groq LLaMA 3.3 70B, Brevo API, Razorpay, and n8n.**
+> **An enterprise-grade luxury automotive marketplace, online reservation system, AI-powered valuation engine, and n8n intelligent email automation system built with Node.js, Express, TypeScript, Prisma ORM, PostgreSQL, React 18, Vite, Groq LLaMA 3.3 70B, Brevo API, Razorpay, and n8n.**
 
 ---
 
 ## 📋 Table of Contents
 
 - [Project Overview](#-project-overview)
-- [Key Features](#-key-features)
-- [Screenshots & UI Showcase](#-screenshots--ui-showcase)
+- [System Architecture & Flowchart Diagrams](#-system-architecture--flowchart-diagrams)
+  - [High-Level Data Flow](#1-high-level-system-data-flow)
+  - [Authentication & 6-Digit OTP Flow](#2-authentication--6-digit-otp-verification-flow)
+  - [Order System & Razorpay HMAC Signature Verification](#3-order-system--razorpay-hmac-signature-verification-flow)
+  - [24/7 Concierge Support & n8n Email Routing](#4-247-concierge-support--n8n-email-routing-flow)
+  - [AI Market Valuation Calculation Engine](#5-ai-market-valuation-calculation-engine-flow)
+- [Complete Visual Application Walkthrough](#-complete-visual-application-walkthrough)
+  - [1. Homepage & Showroom Catalog Experience](#1-homepage--showroom-catalog-experience)
+  - [2. Dual-Option Authentication & Email Verification](#2-dual-option-authentication--email-verification)
+  - [3. Vehicle Details & My Garage Wishlist](#3-vehicle-details--my-garage-wishlist)
+  - [4. Checkout, Razorpay Payment & Order Receipts](#4-checkout-razorpay-payment--order-receipts)
+  - [5. 24/7 Concierge Contact & Brevo Email Dispatch](#5-247-concierge-contact--brevo-email-dispatch)
+  - [6. AI Market Intelligence & Pricing Insights](#6-ai-market-intelligence--pricing-insights)
+  - [7. Admin Control Panel, Inventory CRUD & Executive Analytics](#7-admin-control-panel-inventory-crud--executive-analytics)
+- [Key Features Matrix](#-key-features-matrix)
 - [Technology Stack](#-technology-stack)
-- [Project Architecture](#-project-architecture)
-- [Folder Structure](#-folder-structure)
-- [Installation Guide](#-installation-guide)
-  - [Prerequisites](#prerequisites)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Setup](#frontend-setup)
-- [Environment Variables](#-environment-variables)
-- [Running the Project](#-running-the-project)
+- [Project Folder Structure](#-project-folder-structure)
+- [Installation & Setup Guide](#-installation--setup-guide)
+- [Environment Variables Reference](#-environment-variables-reference)
 - [Testing & Quality Assurance](#-testing--quality-assurance)
 - [API Documentation Overview](#-api-documentation-overview)
-- [Advanced Implemented Features Deep Dive](#-advanced-implemented-features-deep-dive)
-  - [Authentication & Authorization](#1-authentication--authorization-system)
-  - [Razorpay Payment Gateway](#2-razorpay-payment--checkout-integration)
-  - [Brevo Email Notification System](#3-brevo-transactional-email-notification-system)
-  - [n8n Intelligent Email Automation System](#4-n8n-intelligent-email-automation--helpdesk-routing-system)
-  - [Dashboard Analytics & BI](#5-dashboard-analytics--business-intelligence)
-  - [AI Market Intelligence Module](#6-ai-market-intelligence-module)
 - [Security & Validation](#-security--validation)
 - [Deployment Guide](#-deployment-guide)
 - [My AI Usage (MANDATORY)](#-my-ai-usage)
-  - [AI Tools Used](#ai-tools-used)
-  - [How I Used AI](#how-i-used-ai)
-  - [Reflection](#reflection)
 
 ---
 
@@ -51,78 +49,349 @@
 
 ---
 
-## ✨ Key Features
-
-### 🔐 Authentication & Authorization
-- **Local Credentials Auth:** Password hashing via `bcrypt` (10 rounds) and 6-digit email OTP verification.
-- **Google OAuth2 Authentication:** Social sign-in via Passport.js Google Strategy.
-- **Dual-Token JWT Security:** Short-lived access tokens (15 mins) and HTTP-only, secure, same-site refresh cookies (7 days).
-- **Role-Based Access Control (RBAC):** Middleware guarding admin endpoints (`CUSTOMER` vs `ADMIN` roles).
-- **Protected Navigation Guards:** Frontend `ProtectedRoute` guarding `/admin`, `/orders`, and `/profile`.
-
-### 🏎️ Inventory & Catalog Management
-- **Paginated Showroom:** Responsive vehicle grid with category chips (`SPORTS`, `SUV`, `SEDAN`, `LUXURY`, `ELECTRIC`).
-- **Real-Time Substring Search:** Filter catalog dynamically by make and model.
-- **Supercar Alloy Wheel Loading State:** Custom 5-spoke supercar alloy wheel CSS keyframe spinner (`WheelSpinner.tsx`).
-- **Vehicle Details Page:** Specs, high-res image mapper, stock count, and market valuation drawer.
-- **Saved Vehicles / My Garage:** Bookmark favorite inventory items to user profile.
-
-### 💳 Payments & Booking Lifecycle
-- **Checkout Modal:** Collects delivery address, phone, and payment method choice.
-- **Stock Conflict Prevention:** Backend returns `409 Conflict` if vehicle stock is 0.
-- **Razorpay Integration & Payment Simulator:** Cryptographic HMAC SHA256 signature verification and interactive test payment simulator.
-- **Customer Orders Portal:** History tab showing transaction receipts, dates, and order status chips (`PENDING`, `DELIVERED`).
-- **Admin Inventory CRUD & Restock:** Create, update, delete vehicles, and execute one-click stock replenishment.
-
-### ⚡ n8n Intelligent Email Automation
-- **Gmail Webhook Trigger:** Listens for incoming customer emails in real time.
-- **LLM Intent Classification:** Automatically classifies email intent (*Sales*, *Payment Support*, *Complaints*, *Business Inquiry*, *Feedback*).
-- **Department Routing & Auto-Reply:** Forwards messages to department channels and generates instant AI acknowledgement responses.
-
-### 🧠 AI Market Intelligence Module
-- **100-Record Similarity Dataset:** Regional luxury benchmark dataset (`marketVehicles.json`).
-- **Mathematical Bounds Calculation:** Min price, max price, market average, price variance %, confidence score (60-95%).
-- **Deal Rating Badges:** *🟢 EXCELLENT_DEAL*, *🟡 FAIR_DEAL*, *🟠 SLIGHTLY_OVERPRICED*, *🟣 PREMIUM_PRICING*.
-- **Live Groq LLM AI Generation:** Integrated Groq API running LLaMA 3.3 70B generating live narratives in ~0.045s. execution).
-- **Zero-Crash Fallback System:** Deterministic narrative generator ensuring 0% page crashes if LLM is offline.
-- **PostgreSQL Persistence & Display:** Stores AI analysis directly in `Vehicle` schema for instant 0s customer pageview rendering.
+## 📐 System Architecture & Flowchart Diagrams
 
 ---
 
-## 🖼️ Screenshots & UI Showcase
+### 1. High-Level System Data Flow
 
-### 🌟 Live Homepage Design Showcase
-
-![MotoVra Hero Homepage Section](docs/images/homepage_hero.png)
-
-![MotoVra Featured Marques Collection](docs/images/homepage_featured.png)
-
-![MotoVra Luxury Concierge & Footer](docs/images/homepage_footer.png)
+```mermaid
+graph TD
+    User([Customer / Admin]) -->|HTTPS Requests| Frontend[React 18 + Vite Frontend]
+    Frontend -->|REST API / Bearer Token| Backend[Express + TypeScript Backend]
+    Backend -->|Prisma Client| DB[(Neon PostgreSQL Cloud)]
+    Backend -->|LLM Prompts| AI[Groq API / LLaMA 3.3 70B]
+    Backend -->|Transactional Emails| Brevo[Brevo Email API]
+    Backend -->|Order Verification| Razorpay[Razorpay Payment API]
+    CustomerEmail[Customer Support Email] -->|Gmail Webhook| n8n[n8n Automation Engine]
+    n8n -->|AI Classification| n8nAI[n8n LLM Agent]
+    n8nAI -->|Route & Auto Reply| SupportTeams[Sales / Support / Billing Inboxes]
+```
 
 ---
 
-### 📊 Full Application Interface Previews
+### 2. Authentication & 6-Digit OTP Verification Flow
 
-| Screen / Feature | Interface Preview |
+```mermaid
+flowchart TD
+    Start([User Authentication Request]) --> Choice{Select Authentication Method}
+
+    %% Branch 1: Manual Credentials Flow
+    Choice -->|Option 1: Manual Email & Password| ManualReg[Enter Email & Password]
+    ManualReg --> HashPass[Hash Password with bcrypt 10 rounds]
+    HashPass --> GenOTP[Generate 6-Digit Numeric OTP & Store Hash in DB]
+    GenOTP --> SendBrevo[Dispatch Verification Email via Brevo REST API]
+    SendBrevo --> OTPInbox[User Receives 6-Digit OTP Code in Email Inbox]
+    OTPInbox --> EnterOTP[User Inputs 6-Digit Code on /verify-email]
+    EnterOTP --> VerifyCheck{Backend Validates OTP Hash & 15-Min Expiry}
+    VerifyCheck -->|Valid OTP| VerifyDB[Update User: isVerified = true]
+    VerifyCheck -->|Invalid / Expired| ErrOTP[Return 400 Bad Request & Allow Resend OTP]
+    ErrOTP --> EnterOTP
+    VerifyDB --> IssueTokens[Issue Access JWT & HTTP-Only Refresh Cookie]
+
+    %% Branch 2: Google OAuth Social Flow
+    Choice -->|Option 2: Google OAuth| ClickGoogle[Click 'Continue with Google']
+    ClickGoogle --> PassportAuth[Redirect to Google OAuth Consent Screen]
+    PassportAuth --> GoogleConsent[User Selects Google Account]
+    GoogleConsent --> OAuthCallback[Backend Passport Strategy Verifies Profile]
+    OAuthCallback --> IssueTokens
+
+    IssueTokens --> Success([Authenticated Session Active / Access Granted])
+```
+
+---
+
+### 3. Order System & Razorpay HMAC Signature Verification Flow
+
+```mermaid
+flowchart TD
+    Start([User Selects Vehicle & Clicks 'Buy Now']) --> Step1Address{Step 1: Select Delivery Address}
+    
+    %% Address Options
+    Step1Address -->|Option A: Live Location| GPSLoc[Detect GPS Latitude & Longitude]
+    Step1Address -->|Option B: Interactive Map| PinMap[Pin Location on OpenStreetMap Leaflet Map]
+    Step1Address -->|Option C: Manual Entry| ManualForm[Fill Address Form: Name, Phone, City, State]
+    
+    GPSLoc & PinMap & ManualForm --> Step2Summary[Step 2: Review Booking Summary & Deposit Breakdown]
+    
+    %% Order Initialization
+    Step2Summary -->|Click 'Pay Deposit'| BackendCreate[Step 3: Backend Order API Request]
+    BackendCreate -->|Check Stock > 0| CheckStock{Stock Available?}
+    CheckStock -->|No Stock| Err409[Return 409 Conflict Error]
+    CheckStock -->|Stock OK| CallRazorpay[Call Razorpay Order API with Secret Key]
+    CallRazorpay --> GenOrderID[Razorpay Creates Order ID: order_TH1LKhuDQNPWjr]
+    GenOrderID --> Step3Checkout[Step 4: Frontend Opens Razorpay Checkout Modal]
+    
+    %% Payment Methods
+    Step3Checkout --> PayChoice{Customer Selects Payment Method}
+    PayChoice -->|UPI / QR| PayUPI[Google Pay, PhonePe, Paytm]
+    PayChoice -->|Cards| PayCard[Visa, MasterCard, Amex]
+    PayChoice -->|NetBanking| PayBank[All Major Banks]
+    PayChoice -->|Wallets| PayWallet[Paytm, Mobikwik]
+    
+    %% Signature Generation & Transmission
+    PayUPI & PayCard & PayBank & PayWallet --> RazorpayGen[Step 5: Razorpay Processes & Generates Signatures]
+    RazorpayGen --> ReturnSign[Return order_id, payment_id, razorpay_signature]
+    ReturnSign --> SendBackend[Step 6: Frontend Transmits Signatures to POST /api/payments/verify]
+    
+    %% Backend Security Verification
+    SendBackend --> BackendCompute[Step 7: Backend Computes Server-Side HMAC-SHA256 Hash]
+    BackendCompute --> ComputeFormula["generated_signature = HMAC_SHA256(order_id + '|' + payment_id, RAZORPAY_KEY_SECRET)"]
+    ComputeFormula --> CompareSign{Compare Signatures}
+    
+    CompareSign -->|Mismatched / Tampered| FailBlock[Reject Payment & Flag Fraud Warning]
+    CompareSign -->|Signatures Match ✅| VerifySuccess[Payment Authenticated & Genuine]
+    
+    %% Database Update & Dual Email Dispatch
+    VerifySuccess --> DBUpdate[Update Payment: PAID, Order: PROCESSING, Decrement Stock]
+    DBUpdate --> SuccessUI[Render Vehicle Reserved Successfully Page]
+    SuccessUI --> DualEmail{Dispatch Dual Transactional Emails}
+    DualEmail --> MailCust[Email 1: Customer Inbox Payment Receipt]
+    DualEmail --> MailAdmin[Email 2: Dealership Admin Inbox Order Alert]
+    MailCust & MailAdmin --> CompleteOrder([Order Lifecycle Fully Executed])
+```
+
+---
+
+### 4. 24/7 Concierge Support & n8n Email Routing Flow
+
+```mermaid
+flowchart TD
+    Customer([Customer / Website Visitor]) -->|1. Submits Inquiry Form| WebForm[MotoVra Frontend Concierge Form]
+    WebForm -->|POST /api/contact| Backend[Express REST API Backend]
+    
+    %% Dual Immediate Brevo Email Dispatch
+    Backend -->|2. Dispatches via Brevo REST API| DualMail{Dual Email Dispatch}
+    DualMail -->|Mail 1: Instant Receipt| CustAck[Customer Inbox: Auto-Acknowledgement Email]
+    DualMail -->|Mail 2: Admin Alert| AdminMail[Admin Inbox: New Inquiry Alert]
+    
+    %% n8n Intelligent Agent Processing
+    Backend -->|3. Passes Mail / Webhook Payload| n8nAgent[n8n Intelligent AI Agent]
+    n8nAgent --> VerifyUser{Identify Customer Account}
+    VerifyUser -->|Customer Identified| ClassifyLLM[n8n AI LLM Classification Node]
+    VerifyUser -->|Guest Visitor| LogGuest[Flag Guest Ticket] --> ClassifyLLM
+    
+    %% Intent Classification
+    ClassifyLLM --> SwitchIntent{Classify Inquiry Category}
+    SwitchIntent -->|Website Issue| TechDept[Tech Support Team]
+    SwitchIntent -->|General Inquiry| SalesDept[Sales & Car Acquisition Team]
+    SwitchIntent -->|Feedback| ReviewDept[Customer Experience Team]
+    SwitchIntent -->|Order Query| BillingDept[Billing & Orders Team]
+    
+    %% Department Lookup & Google Sheet Logging
+    TechDept & SalesDept & ReviewDept & BillingDept --> SheetLookup[4. Look up Department Email in Google Sheet]
+    SheetLookup --> RouteDept[5. Forward Ticket to Department Inbox]
+    RouteDept --> SheetLog[6. Append Ticket Entry in Google Sheet Audit Log]
+    SheetLog --> Complete([24/7 Support Workflow Execution Completed])
+```
+
+---
+
+### 5. AI Market Valuation Calculation Engine Flow
+
+```mermaid
+flowchart TD
+    Start([Vehicle Evaluation Triggered]) --> Step1Data[Step 1: Input Subject Vehicle Specs: Make, Model, Year, Price]
+    Step1Data --> Step2Dataset[Step 2: Query 100-Record Benchmark Luxury Dataset marketVehicles.json]
+    
+    %% Similarity & Matching Engine
+    Step2Dataset --> Step3Match[Step 3: Run KNN Proximity Algorithm in similarity.service.ts]
+    Step3Match --> Step4Comps[Select Top 5 Nearest Comparable Market Listings C1, C2, C3, C4, C5]
+    
+    %% Statistical Calculations
+    Step4Comps --> Step5Math[Step 4: Compute Statistical Bounds & Variance Metrics]
+    Step5Math --> FormulaAvg["Market Average P_avg = (Sum of Comp Prices) / 5"]
+    FormulaAvg --> FormulaVar["Price Variance = Listed Price - P_avg"]
+    FormulaVar --> FormulaVarPct["Variance % = ((Listed Price - P_avg) / P_avg) * 100"]
+    FormulaVarPct --> FormulaConf["Confidence Score = Calculated (60% - 95% High Precision)"]
+    
+    %% Deterministic Badge Assignment
+    FormulaConf --> Step6Badge{Step 5: Assign Deal Rating Badge}
+    Step6Badge -->|Variance % <= -5%| Badge1[🟢 EXCELLENT DEAL]
+    Step6Badge -->|-5% < Variance % <= +5%| Badge2[🟡 FAIR MARKET VALUE]
+    Step6Badge -->|+5% < Variance % <= +12%| Badge3[🟠 SLIGHTLY ABOVE BASELINE]
+    Step6Badge -->|Variance % > +12%| Badge4[🟣 PREMIUM PRICING]
+    
+    %% Groq LLaMA LLM Generation
+    Badge1 & Badge2 & Badge3 & Badge4 --> Step7Prompt[Step 6: Construct Structured JSON Prompt in promptBuilder.ts]
+    Step7Prompt --> CallGroq[Step 7: Execute Groq API LLaMA 3.3 70B Completion]
+    
+    CallGroq --> CheckLLM{Groq API Online?}
+    CheckLLM -->|Yes (~0.045s)| ParseJSON[Parse & Sanitize AI JSON Narrative Response]
+    CheckLLM -->|No / Timeout| FallbackEngine[Step 8: Execute Deterministic Zero-Crash Fallback Engine]
+    
+    ParseJSON & FallbackEngine --> SaveDB[Step 9: Persist Valuation Data directly into PostgreSQL Vehicle Schema]
+    SaveDB --> RenderUI[Step 10: Render Live Pricing Analytics & Valuation Insights Drawer on Frontend]
+    RenderUI --> Complete([AI Market Evaluation Complete])
+```
+
+---
+
+## 🖼️ Complete Visual Application Walkthrough
+
+---
+
+### 1. Homepage & Showroom Catalog Experience
+
+> **Discover flagship hypercars and luxury sedans with instant substring search, price filtering, and custom supercar alloy wheel spinners.**
+
+#### 1.1 Landing Hero Section
+![MotoVra Hero Section](docs/images/homepage_hero.png)
+
+#### 1.2 Featured Marques Collection
+![Featured Marques](docs/images/homepage_featured.png)
+
+#### 1.3 Luxury Concierge Banner & Footer
+![Concierge & Footer](docs/images/homepage_footer.png)
+
+#### 1.4 Custom Supercar Alloy Wheel Loading Spinner
+![Showroom Alloy Wheel Spinner](docs/images/showroom_loading_spinner.png)
+
+#### 1.5 Showroom Catalog Inventory Grid
+![Showroom Inventory Grid](docs/images/showroom_catalog_grid.png)
+
+#### 1.6 Showroom Live Price Range Filter (`< $250,000`)
+![Showroom Price Filter](docs/images/showroom_price_filter.png)
+
+---
+
+### 2. Dual-Option Authentication & Email Verification
+
+> **Frictionless signup featuring local bcrypt credential hashing with 6-digit Brevo OTP verification and one-click Google OAuth2 social login.**
+
+#### 2.1 Manual Account Registration Form
+![Register Form](docs/images/auth_register.png)
+
+#### 2.2 Brevo 6-Digit Verification Code Email Delivery
+![Brevo Email OTP Inbox](docs/images/auth_email_otp_inbox.png)
+
+#### 2.3 6-Digit Verification Code Input Screen (`/verify-email`)
+![Verify Email Form](docs/images/auth_verify_otp.png)
+
+#### 2.4 Google OAuth2 Consent Screen
+![Google OAuth Consent](docs/images/auth_google_oauth.png)
+
+#### 2.5 User Sign In Form
+![Sign In Form](docs/images/auth_login.png)
+
+---
+
+### 3. Vehicle Details & My Garage Wishlist
+
+> **Explore high-resolution vehicle galleries, provenance guarantees, stock availability, and personal garage bookmarking.**
+
+#### 3.1 Vehicle Detail Page (Porsche 911 GT3 RS)
+![Vehicle Detail Page](docs/images/vehicle_detail_page.png)
+
+#### 3.2 Wishlist Heart Bookmark Button
+![Wishlist Bookmark Button](docs/images/wishlist_bookmark_button.png)
+
+#### 3.3 My Garage / Saved Vehicles Page (`/profile`)
+![My Garage Saved Vehicles](docs/images/wishlist_my_garage_page.png)
+
+---
+
+### 4. Checkout, Razorpay Payment & Order Receipts
+
+> **Complete vehicle reservations with interactive location pinning, Razorpay SDK payment processing, and cryptographically verified HMAC-SHA256 signatures.**
+
+#### 4.1 Step 1: Delivery Address Selection & OpenStreetMap Location Pinning
+![Delivery Address Modal](docs/images/checkout_step1_address.png)
+
+#### 4.2 Step 2: Booking Summary & Deposit Price Breakdown
+![Booking Summary Modal](docs/images/checkout_step2_summary.png)
+
+#### 4.3 Step 3: Razorpay Payment Gateway Simulator (Sandbox Mode)
+![Razorpay Payment Simulator](docs/images/checkout_razorpay_modal.png)
+
+#### 4.4 Step 4: Vehicle Reserved Successfully Confirmation Page (`/order-success`)
+![Vehicle Reserved Successfully Page](docs/images/checkout_success_page.png)
+
+#### 4.5 Step 5: Customer Official Payment Receipt Email (Brevo)
+![Customer Payment Receipt Email](docs/images/checkout_customer_receipt_email.png)
+
+#### 4.6 Step 6: Dealership Admin Order Alert Email (Brevo)
+![Dealership Admin Order Alert Email](docs/images/checkout_admin_order_notification_email.png)
+
+---
+
+### 5. 24/7 Concierge Contact & Brevo Email Dispatch
+
+> **24/7 Concierge form dispatching dual instant email notifications to customers and dealership administrators.**
+
+#### 5.1 Customer Contact Inquiry Form (`/contact`)
+![Contact Inquiry Form](docs/images/contact_inquiry_form.png)
+
+#### 5.2 Customer Auto-Acknowledgement Email (Brevo)
+![Customer Receipt Email](docs/images/contact_customer_acknowledgement_email.png)
+
+#### 5.3 Dealership Admin Notification Email (Brevo)
+![Admin Notification Email](docs/images/contact_admin_notification_email.png)
+
+---
+
+### 6. AI Market Intelligence & Pricing Insights
+
+> **Real-time market valuation engine matching subject vehicles against a 100-record benchmark dataset, calculating price variance, and executing Groq LLaMA 3.3 70B AI narratives.**
+
+#### 6.1 Admin Inventory Table Executing Live AI Evaluation
+![AI Evaluation Loading State](docs/images/ai_evaluation_loading_state.png)
+
+#### 6.2 Real-Time Updated AI Deal Rating Badges (`EXCELLENT DEAL`, `FAIR MARKET VALUE`)
+![Updated AI Deal Badges](docs/images/ai_evaluation_updated_badge.png)
+
+#### 6.3 Pricing Analytics & Valuation Insights Drawer with Top 5 Comparables
+![AI Valuation Insights Drawer](docs/images/ai_market_intelligence_card.png)
+
+---
+
+### 7. Admin Control Panel, Inventory CRUD & Executive Analytics
+
+> **Complete administrative control center with executive KPI analytics cards, real-time activity feeds, transaction ledgers, inventory CRUD modals, and restock prompts.**
+
+#### 7.1 Executive Analytics KPI Summary Dashboard
+![Executive Analytics KPI Dashboard](docs/images/admin_analytics_kpi_dashboard.png)
+
+#### 7.2 Demand Velocity Ranking & Brand Mix Breakdown
+![Demand Ranking and Brand Mix](docs/images/admin_analytics_brand_demand.png)
+
+#### 7.3 Live Activity Feeds (Reservations, Payments, Inquiries)
+![Activity Feeds and Inquiries](docs/images/admin_analytics_activity_feed.png)
+
+#### 7.4 Customer Bookings & Verified Razorpay Transactions Ledger
+![Customer Bookings Table](docs/images/admin_customer_bookings_table.png)
+
+#### 7.5 Current Inventory Management Table
+![Admin Inventory Table](docs/images/admin_inventory_table.png)
+
+#### 7.6 Add New Vehicle Form Modal
+![Add New Vehicle Form Modal](docs/images/admin_add_vehicle_modal.png)
+
+#### 7.7 Edit Vehicle Specs Modal
+![Edit Vehicle Specs Modal](docs/images/admin_edit_vehicle_modal.png)
+
+#### 7.8 One-Click Stock Replenishment Prompt Dialog (`"Enter restock amount: 5"`)
+![One-Click Restock Prompt](docs/images/admin_restock_prompt.png)
+
+#### 7.9 Vehicle Deletion Confirmation Safeguard Dialog
+![Delete Confirmation Dialog](docs/images/admin_delete_prompt.png)
+
+> 📌 **Summary Note:** All administrative functionalities, analytics widgets, inventory CRUD controls, and transaction ledgers provided in the MotoVra platform are fully listed, detailed, and documented along with live screenshots above.
+
+---
+
+## ✨ Key Features Matrix
+
+| Module | Features Included |
 | :--- | :--- |
-| **Home Page Hero** | ![MotoVra Hero](docs/images/homepage_hero.png) |
-| **Featured Marques Grid** | ![Featured Marques](docs/images/homepage_featured.png) |
-| **Luxury Concierge & Footer** | ![Footer](docs/images/homepage_footer.png) |
-| **Showroom Loading Spinner** | ![Showroom Alloy Wheel Spinner](docs/images/showroom_loading_spinner.png) |
-| **Showroom Catalog Grid** | ![Showroom Catalog Grid](docs/images/showroom_catalog_grid.png) |
-| **Showroom Price Filter** | ![Showroom Filtered Grid](docs/images/showroom_price_filter.png) |
-| **Vehicle Detail Page** | ![Vehicle Detail View](docs/images/vehicle_detail_page.png) |
-| **Wishlist Heart Bookmark Button** | ![Wishlist Bookmark Button](docs/images/wishlist_bookmark_button.png) |
-| **My Garage / Saved Vehicles Page** | ![My Garage Saved Vehicles](docs/images/wishlist_my_garage_page.png) |
-| **AI Market Intelligence Card** | `![AI Market Intelligence Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=AI+Valuation+Card+%26+Comparables)` |
-| **Checkout & Razorpay Modal** | `![Razorpay Checkout Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=Razorpay+Payment+Modal)` |
-| **n8n Automation Workflow Canvas** | `![n8n Email Automation Canvas](https://via.placeholder.com/800x450/09090b/f59e0b?text=n8n+Intelligent+Email+Automation+Workflow+Canvas)` |
-| **Customer Orders Portal** | `![Customer Orders Placeholder](https://via.placeholder.com/800x450/09090b/f59e0b?text=My+Orders+History)` |
-| **Admin Inventory Management Table** | ![Admin Inventory Table](docs/images/admin_inventory_table.png) |
-| **Admin Add New Vehicle Modal** | ![Add New Vehicle Modal](docs/images/admin_add_vehicle_modal.png) |
-| **Admin Edit Vehicle Modal** | ![Edit Vehicle Modal](docs/images/admin_edit_vehicle_modal.png) |
-| **Admin One-Click Stock Restock** | ![One-Click Restock Prompt](docs/images/admin_restock_prompt.png) |
-| **Admin Vehicle Deletion Alert** | ![Delete Confirmation Alert](docs/images/admin_delete_prompt.png) |
+| **🔐 Authentication** | Local Bcrypt Hashing, 6-Digit Brevo Email OTP Verification, Google OAuth2 Social Sign-In, Dual JWT Tokens (15m Access / 7d HTTP-Only Refresh), Role-Based Access Control (`CUSTOMER` vs `ADMIN`). |
+| **🏎️ Inventory & Catalog** | Paginated Showroom, Real-Time Substring Search, Supercar Alloy Wheel Loading State, Vehicle Details Gallery, Category Filters (`SPORTS`, `LUXURY`, `SUV`, `ELECTRIC`, `SEDAN`), Price Range Slider. |
+| **❤️ Wishlist & Garage** | One-Click Heart Bookmarking, My Garage Profile Management (`/profile`), Saved Vehicles Persistence. |
+| **💳 Payments & Orders** | Step-by-Step Checkout Modal, OpenStreetMap Location Pinning, GPS Location Auto-Detect, Razorpay Gateway SDK Integration, Interactive Payment Simulator, HMAC-SHA256 Signature Verification, Vehicle Reservation Success UI. |
+| **📧 Email Infrastructure** | Brevo REST API v3 Integration, Dual Instant Transactional Email Dispatch (Customer Receipt + Admin Alert), 6-Digit OTP Verification Emails. |
+| **⚡ Support Automation** | 24/7 Concierge Contact Form, n8n Intelligent AI Email Classification Agent, Google Sheet Department Mapping, Auto-Reply Generation, Department Forwarding. |
+| **🧠 AI Valuation Engine** | 100-Record Regional Luxury Dataset (`marketVehicles.json`), KNN Nearest Neighbor Proximity Match, Price Variance %, Confidence Score (60-95%), Deal Badges (*🟢 EXCELLENT DEAL*, *🟡 FAIR MARKET VALUE*, *🟠 SLIGHTLY ABOVE BASELINE*, *🟣 PREMIUM PRICING*), Groq LLaMA 3.3 70B Completion (~0.045s execution), Zero-Crash Fallback System. |
+| **👑 Admin Control Panel** | Executive KPI Summary Cards (Total Vehicles, Available Stock, Total Bookings, Revenue, Total Customers), Demand Velocity Ranking, Brand Mix Breakdown, Live Activity Feeds, Full Inventory CRUD Modals, One-Click Stock Restock, Deletion Safeguard Alert. |
 
 ---
 
@@ -143,26 +412,7 @@
 
 ---
 
-## 📐 Project Architecture
-
-### System Data Flow Diagram
-
-```mermaid
-graph TD
-    User([Customer / Admin]) -->|HTTPS Requests| Frontend[React 18 + Vite Frontend]
-    Frontend -->|REST API / Bearer Token| Backend[Express + TypeScript Backend]
-    Backend -->|Prisma Client| DB[(Neon PostgreSQL Cloud)]
-    Backend -->|LLM Prompts| AI[Groq API / LLaMA 3.3 70B]
-    Backend -->|Transactional Emails| Brevo[Brevo Email API]
-    Backend -->|Order Verification| Razorpay[Razorpay Payment API]
-    CustomerEmail[Customer Support Email] -->|Gmail Trigger| n8n[n8n Automation Engine]
-    n8n -->|AI Classification| n8nAI[n8n LLM Agent]
-    n8nAI -->|Route & Auto Reply| SupportTeams[Sales / Support / Admin Inboxes]
-```
-
----
-
-## 📁 Folder Structure
+## 📁 Project Folder Structure
 
 ```
 motovra/
@@ -205,6 +455,8 @@ motovra/
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── vercel.json                    # Single Page App rewrite rule
+├── docs/
+│   └── images/                        # High-resolution application screenshots
 ├── test_report.md                     # Master 52-Feature & 77-Test Audit Report
 ├── deployment_guide.md                # Render & Vercel deployment documentation
 └── README.md
@@ -212,7 +464,7 @@ motovra/
 
 ---
 
-## 💻 Installation Guide
+## 💻 Installation & Setup Guide
 
 ### Prerequisites
 - **Node.js**: v18.0.0 or higher
@@ -287,7 +539,7 @@ motovra/
 
 ---
 
-## 🔑 Environment Variables
+## 🔑 Environment Variables Reference
 
 ### Backend Environment Variables (`backend/.env`)
 
@@ -298,7 +550,7 @@ motovra/
 | `DATABASE_URL` | PostgreSQL connection string | Yes | `postgresql://user:pass@host/db` |
 | `JWT_SECRET` | Secret key for signing Access Tokens | Yes | `super-secret-jwt-key` |
 | `JWT_REFRESH_SECRET` | Secret key for Refresh Token cookies | Yes | `super-secret-refresh-key` |
-| `GROQ_API_KEY` | Groq LLaMA 3.3 70B API Key | Yes | `gsk_...` |
+| `GROQ_API_KEY` | Groq LLaMA 3.3 70B API Key | Yes | `gsk_your_groq_api_key` |
 | `BREVO_API_KEY` | Brevo REST API Key | Yes | `xkeysib_your_brevo_api_key` |
 | `SENDER_EMAIL` | Verified Brevo sender email address | Yes | `jvora7990@gmail.com` |
 | `DEALERSHIP_EMAIL` | Admin contact recipient email | Yes | `king14011977@gmail.com` |
@@ -342,388 +594,6 @@ For complete feature-level test execution details, see [`test_report.md`](file:/
 ## 📑 API Documentation Overview
 
 The backend exposes an interactive **Swagger OpenAPI** playground at `http://localhost:3000/api-docs`.
-
----
-
-## 🌟 Advanced Implemented Features Deep Dive
-
----
-
-### 🔐 1. Authentication & Authorization System
-
-#### 1.1 Authentication Dual-Option Process Diagram
-
-```mermaid
-flowchart TD
-    Start([User Authentication Request]) --> Choice{Select Authentication Method}
-
-    %% Branch 1: Manual Credentials Flow
-    Choice -->|Option 1: Manual Email & Password| ManualReg[Enter Email & Password]
-    ManualReg --> HashPass[Hash Password with bcrypt 10 rounds]
-    HashPass --> GenOTP[Generate 6-Digit Numeric OTP & Store Hash in DB]
-    GenOTP --> SendBrevo[Dispatch Verification Email via Brevo REST API]
-    SendBrevo --> OTPInbox[User Receives 6-Digit OTP Code in Email Inbox]
-    OTPInbox --> EnterOTP[User Inputs 6-Digit Code on /verify-email]
-    EnterOTP --> VerifyCheck{Backend Validates OTP Hash & 15-Min Expiry}
-    VerifyCheck -->|Valid OTP| VerifyDB[Update User: isVerified = true]
-    VerifyCheck -->|Invalid / Expired| ErrOTP[Return 400 Bad Request & Allow Resend OTP]
-    ErrOTP --> EnterOTP
-    VerifyDB --> IssueTokens[Issue Access JWT & HTTP-Only Refresh Cookie]
-
-    %% Branch 2: Google OAuth Social Flow
-    Choice -->|Option 2: Google OAuth| ClickGoogle[Click 'Continue with Google']
-    ClickGoogle --> PassportAuth[Redirect to Google OAuth Consent Screen]
-    PassportAuth --> GoogleConsent[User Selects Google Account]
-    GoogleConsent --> OAuthCallback[Backend Passport Strategy Verifies Profile]
-    OAuthCallback --> IssueTokens
-
-    IssueTokens --> Success([Authenticated Session Active / Access Granted])
-```
-
-#### 1.2 Dual-Option Authentication & OTP Verification Showcase
-
-| Step / Authentication Option | Interface Preview |
-| :--- | :--- |
-| **Option 1: Manual Account Signup** | ![Manual Signup Form](docs/images/auth_register.png) |
-| **Brevo OTP Code Email Delivery** | ![Brevo Email OTP Inbox](docs/images/auth_email_otp_inbox.png) |
-| **6-Digit OTP Verification Screen** | ![6-Digit OTP Input Form](docs/images/auth_verify_otp.png) |
-| **Option 2: Google OAuth Consent Screen** | ![Google OAuth Consent](docs/images/auth_google_oauth.png) |
-| **User Sign In Form** | ![Sign In Screen](docs/images/auth_login.png) |
-
----
-
-#### 1.3 Why the Feature Was Implemented
-Securing user identity, protecting customer personal data, enforcing role separation between buyers and platform administrators, and providing frictionless authentication options (local credentials & Google OAuth) are fundamental requirements for any luxury e-commerce platform.
-
-#### 1.2 The Problem It Solves
-Unsecured APIs allow unauthorized data tampering, account hijacking, and unauthorized access to administrative functions like modifying inventory stock or altering vehicle prices. MotoVra implements multi-layered authentication to guarantee that sensitive management routes remain strictly accessible to verified administrators while providing customers with a seamless, secure shopping experience.
-
-#### 1.3 How It Works Internally
-1. **Password Security:** Passwords submitted during registration are salted and hashed using `bcrypt` (10 rounds). Plaintext passwords are never stored in the database.
-2. **Dual-Token System:** Upon authentication, the backend generates two JSON Web Tokens (JWTs):
-   - **Access Token:** Short-lived (15 minutes), signed with `JWT_SECRET`, returned to the client for inclusion in `Authorization: Bearer <token>` HTTP headers.
-   - **Refresh Token:** Long-lived (7 days), signed with `JWT_REFRESH_SECRET`, stored in an HTTP-only, secure, same-site-configured cookie to prevent XSS attacks.
-3. **Role-Based Access Control (RBAC):** Express middleware (`requireAuth` and `requireRole('ADMIN')`) inspects incoming Bearer tokens. If a customer attempts to access `/api/vehicles` `POST/PUT/DELETE` or `/api/analytics`, the system immediately returns a `403 Forbidden` response.
-
----
-
-### 💳 2. Razorpay Payment & Checkout Integration
-
-#### 2.1 Complete Order System & HMAC Signature Verification Process Diagram
-
-```mermaid
-flowchart TD
-    Start([User Selects Vehicle & Clicks 'Buy Now']) --> Step1Address{Step 1: Select Delivery Address}
-    
-    %% Address Options
-    Step1Address -->|Option A: Live Location| GPSLoc[Detect GPS Latitude & Longitude]
-    Step1Address -->|Option B: Interactive Map| PinMap[Pin Location on OpenStreetMap Leaflet Map]
-    Step1Address -->|Option C: Manual Entry| ManualForm[Fill Address Form: Name, Phone, City, State]
-    
-    GPSLoc & PinMap & ManualForm --> Step2Summary[Step 2: Review Booking Summary & Deposit Breakdown]
-    
-    %% Order Initialization
-    Step2Summary -->|Click 'Pay Deposit'| BackendCreate[Step 3: Backend Order API Request]
-    BackendCreate -->|Check Stock > 0| CheckStock{Stock Available?}
-    CheckStock -->|No Stock| Err409[Return 409 Conflict Error]
-    CheckStock -->|Stock OK| CallRazorpay[Call Razorpay Order API with Secret Key]
-    CallRazorpay --> GenOrderID[Razorpay Creates Order ID: order_TH1LKhuDQNPWjr]
-    GenOrderID --> Step3Checkout[Step 4: Frontend Opens Razorpay Checkout Modal]
-    
-    %% Payment Methods
-    Step3Checkout --> PayChoice{Customer Selects Payment Method}
-    PayChoice -->|UPI / QR| PayUPI[Google Pay, PhonePe, Paytm]
-    PayChoice -->|Cards| PayCard[Visa, MasterCard, Amex]
-    PayChoice -->|NetBanking| PayBank[All Major Banks]
-    PayChoice -->|Wallets| PayWallet[Paytm, Mobikwik]
-    
-    %% Signature Generation & Transmission
-    PayUPI & PayCard & PayBank & PayWallet --> RazorpayGen[Step 5: Razorpay Processes & Generates Signatures]
-    RazorpayGen --> ReturnSign[Return order_id, payment_id, razorpay_signature]
-    ReturnSign --> SendBackend[Step 6: Frontend Transmits Signatures to POST /api/payments/verify]
-    
-    %% Backend Security Verification
-    SendBackend --> BackendCompute[Step 7: Backend Computes Server-Side HMAC-SHA256 Hash]
-    BackendCompute --> ComputeFormula["generated_signature = HMAC_SHA256(order_id + '|' + payment_id, RAZORPAY_KEY_SECRET)"]
-    ComputeFormula --> CompareSign{Compare Signatures}
-    
-    CompareSign -->|Mismatched / Tampered| FailBlock[Reject Payment & Flag Fraud Warning]
-    CompareSign -->|Signatures Match ✅| VerifySuccess[Payment Authenticated & Genuine]
-    
-    %% Database Update & Dual Email Dispatch
-    VerifySuccess --> DBUpdate[Update Payment: PAID, Order: PROCESSING, Decrement Stock]
-    DBUpdate --> SuccessUI[Render Vehicle Reserved Successfully Page]
-    SuccessUI --> DualEmail{Dispatch Dual Transactional Emails}
-    DualEmail --> MailCust[Email 1: Customer Inbox Payment Receipt]
-    DualEmail --> MailAdmin[Email 2: Dealership Admin Inbox Order Alert]
-    MailCust & MailAdmin --> CompleteOrder([Order Lifecycle Fully Executed])
-```
-
----
-
-#### 2.2 Complete 6-Stage Checkout & Order Fulfillment Showcase
-
-| Stage / Order Step | Interface Preview |
-| :--- | :--- |
-| **1. Step 1: Delivery Address & Map Selection** | ![Delivery Address Modal](docs/images/checkout_step1_address.png) |
-| **2. Step 2: Booking Summary & Deposit Breakdown** | ![Booking Summary Modal](docs/images/checkout_step2_summary.png) |
-| **3. Step 3: Razorpay Payment Simulator Modal** | ![Razorpay Payment Modal](docs/images/checkout_razorpay_modal.png) |
-| **4. Step 4: Vehicle Reserved Successfully Page** | ![Order Success Confirmation](docs/images/checkout_success_page.png) |
-| **5. Step 5: Customer Payment Receipt Email (Brevo)** | ![Customer Receipt Email](docs/images/checkout_customer_receipt_email.png) |
-| **6. Step 6: Dealership Admin Order Alert Email (Brevo)** | ![Admin Order Alert Email](docs/images/checkout_admin_order_notification_email.png) |
-
----
-
-#### 2.3 Step-by-Step Security Protocol & HMAC Verification Mechanics
-
-1. **Step 1: Vehicle Selection & Multi-Option Address Capture**
-   The customer selects an available vehicle in the showroom catalog and clicks **Buy Now**. The checkout modal prompts the user to specify their delivery address via 3 options:
-   - **Option A:** Auto-detect live GPS location coordinates (`Use My Current Location`).
-   - **Option B:** Interactive map location pinning using OpenStreetMap & Leaflet.
-   - **Option C:** Manual form entry (Full Name, Phone Number, Address, City, State).
-
-2. **Step 2: Backend Order Creation via Razorpay API**
-   The frontend sends `POST /api/payments/order`. The backend verifies that `stock > 0` in PostgreSQL (returning `409 Conflict` if sold out). The backend calls Razorpay's Order API using `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` to generate a unique order reference:
-   $$\text{Razorpay Order ID} = \text{order\_TH1LKhuDQNPWjr}$$
-
-3. **Step 3: Secure Payment Authorization**
-   The frontend renders the official Razorpay Checkout SDK (or interactive test payment simulator in demo mode). The customer chooses their preferred payment method:
-   - **UPI / QR Code** (Google Pay, PhonePe, Paytm)
-   - **Credit / Debit Card** (Visa, MasterCard, Amex)
-   - **NetBanking** (All major retail banks)
-   - **Wallets** (Mobikwik, Paytm Wallet)
-
-4. **Step 4: Cryptographic Payment Signature Generation**
-   Upon payment authorization, Razorpay generates 3 parameters:
-   - `order_id`: `order_TH1LKhuDQNPWjr`
-   - `payment_id`: `pay_1784826452590_1239`
-   - `razorpay_signature`: `8d5bce79ab4d...`
-
-5. **Step 5: Client Transmission to Backend Verification Endpoint**
-   The frontend posts `{ order_id, payment_id, razorpay_signature }` to `POST /api/payments/verify`.
-   > ⚠️ **Zero-Trust Client Principle:** Frontend payload data is treated as unauthenticated and potentially untrusted. Verification occurs strictly on the Express backend server.
-
-6. **Step 6: Server-Side HMAC-SHA256 Signature Recalculation**
-   The backend combines the received `order_id` and `payment_id` with its confidential, server-side `RAZORPAY_KEY_SECRET` to recompute the cryptographic hash:
-   $$\text{generated\_signature} = \text{HMAC-SHA256}(\text{order\_id} + "|" + \text{payment\_id}, \text{RAZORPAY\_KEY\_SECRET})$$
-
-7. **Step 7: Signature Comparison, Database Settlement & Dual Email Dispatch**
-   The backend compares `received_signature` against `generated_signature`:
-   - **Match ✅:** Confirms genuine payment authorization.
-   - **Database Updates:** Updates Payment status to `PAID`, Order status to `PROCESSING`, and decrements vehicle inventory count in Neon PostgreSQL.
-   - **Success UI:** Renders the **Vehicle Reserved Successfully** page (`/order-success`).
-   - **Dual Email Dispatch via Brevo API:**
-     - **Email 1 (Customer Payment Receipt):** Dispatches official deposit receipt ($25,000 deposit paid, remaining balance due).
-     - **Email 2 (Dealership Admin Order Alert):** Dispatches instant order notification with customer contact information and scheduled delivery address.
-
----
-
-### 📧 3. Brevo Transactional Email Notification System
-
-#### 3.1 Why the Feature Was Implemented
-Providing real-time transactional communication (OTP codes, purchase receipts, inquiry acknowledgements) builds customer trust and automates dealership operations.
-
-#### 3.2 Technical Architecture & Sender Integrity
-- Integrated via **Brevo REST API v3** (`@getbrevo/brevo` HTTP client).
-- **Verified Account Sender:** All emails are dispatched using verified account owner credentials (`jvora7990@gmail.com`), guaranteeing high deliverability and zero quarantine drops.
-
----
-
-### ⚡ 4. 24/7 Intelligent Support Team & n8n Email Automation System
-
-#### 4.1 24/7 Concierge Support & n8n Workflow Architecture Diagram
-
-```mermaid
-flowchart TD
-    Customer([Customer / Website Visitor]) -->|1. Submits Inquiry Form| WebForm[MotoVra Frontend Concierge Form]
-    WebForm -->|POST /api/contact| Backend[Express REST API Backend]
-    
-    %% Dual Immediate Brevo Email Dispatch
-    Backend -->|2. Dispatches via Brevo REST API| DualMail{Dual Email Dispatch}
-    DualMail -->|Mail 1: Instant Receipt| CustAck[Customer Inbox: Auto-Acknowledgement Email]
-    DualMail -->|Mail 2: Admin Alert| AdminMail[Admin Inbox: New Inquiry Alert]
-    
-    %% n8n Intelligent Agent Processing
-    Backend -->|3. Passes Mail / Webhook Payload| n8nAgent[n8n Intelligent AI Agent]
-    n8nAgent --> VerifyUser{Identify Customer Account}
-    VerifyUser -->|Customer Identified| ClassifyLLM[n8n AI LLM Classification Node]
-    VerifyUser -->|Guest Visitor| LogGuest[Flag Guest Ticket] --> ClassifyLLM
-    
-    %% Intent Classification
-    ClassifyLLM --> SwitchIntent{Classify Inquiry Category}
-    SwitchIntent -->|Website Issue| TechDept[Tech Support Team]
-    SwitchIntent -->|General Inquiry| SalesDept[Sales & Car Acquisition Team]
-    SwitchIntent -->|Feedback| ReviewDept[Customer Experience Team]
-    SwitchIntent -->|Order Query| BillingDept[Billing & Orders Team]
-    
-    %% Department Lookup & Google Sheet Logging
-    TechDept & SalesDept & ReviewDept & BillingDept --> SheetLookup[4. Look up Department Email in Google Sheet]
-    SheetLookup --> RouteDept[5. Forward Ticket to Department Inbox]
-    RouteDept --> SheetLog[6. Append Ticket Entry in Google Sheet Audit Log]
-    SheetLog --> Complete([24/7 Support Workflow Execution Completed])
-```
-
----
-
-#### 4.2 Live Contact Inquiry & Email Verification Showcase
-
-| Stage / Email Notification | Interface Preview |
-| :--- | :--- |
-| **1. Customer Contact Inquiry Form (`/contact`)** | ![Contact Inquiry Form](docs/images/contact_inquiry_form.png) |
-| **2. Customer Auto-Acknowledgement Email (Brevo)** | ![Customer Receipt Email](docs/images/contact_customer_acknowledgement_email.png) |
-| **3. Dealership Admin Notification Email (Brevo)** | ![Admin Notification Email](docs/images/contact_admin_notification_email.png) |
-
----
-
-#### 4.3 Why the Feature Was Created
-In luxury automotive retail, customer support emails contain vastly different intent—ranging from urgent vehicle acquisition requests, website issues, order payment queries, customer feedback, and selling inquiries. Manually triaging every email causes response delays. This automated 24/7 concierge system guarantees instant dual notifications and intelligent department routing.
-
-#### 4.4 Step-by-Step Workflow Implementation
-1. **User Inquiry Submission:** Customer submits full name, email address, subject, and message on the `/contact` concierge page.
-2. **Dual Instant Email Dispatch:** The Express backend immediately dispatches:
-   - An auto-acknowledgement email to the customer guaranteeing a 24-hour response.
-   - An admin notification email to `DEALERSHIP_EMAIL` with complete inquiry details.
-3. **n8n Webhook Trigger & Customer Identification:** Captures incoming email payloads and verifies customer status.
-4. **AI LLM Intent Classification:** Classifies inquiry into *Website Issue*, *General Inquiry / Car Sales*, *Customer Feedback*, or *Order Query*.
-5. **Google Sheet Department Lookup:** Queries the Google Sheet database to retrieve the target department email address.
-6. **Department Forwarding & Audit Logging:** Forwards the ticket to the assigned department and logs the complete audit entry into the Google Sheet ledger.
-3. **Automated Department Routing:** Routes the email automatically to the corresponding team inbox or Slack notification channel.
-4. **Contextual AI Auto-Reply:** Generates a personalized, professional AI acknowledgement email confirming ticket receipt and providing expected resolution timelines.
-5. **Logging & Escalation:** Logs the ticket into a Google Sheets / CRM ledger. High-priority complaints trigger instant SMS/Slack alerts to human managers for manual intervention.
-
----
-
-### 👑 5. Admin Control Panel & Executive Intelligence Suite
-
-#### 5.1 Executive Analytics & Financial Intelligence Showcase
-
-| Analytics View / Admin Module | Interface Preview |
-| :--- | :--- |
-| **1. Executive Analytics KPI Header** | ![Executive Analytics KPI Dashboard](docs/images/admin_analytics_kpi_dashboard.png) |
-| **2. Demand Ranking & Brand Mix Mix** | ![Demand Ranking and Brand Mix](docs/images/admin_analytics_brand_demand.png) |
-| **3. Live Activity Feeds & Inquiries** | ![Activity Feeds and Inquiries](docs/images/admin_analytics_activity_feed.png) |
-| **4. Customer Bookings & Razorpay Ledger** | ![Customer Bookings Table](docs/images/admin_customer_bookings_table.png) |
-
----
-
-#### 5.2 Complete Inventory CRUD Control Showcase
-
-| CRUD Action / Modal | Interface Preview |
-| :--- | :--- |
-| **1. Current Inventory Table & Status Pills** | ![Admin Inventory Management Table](docs/images/admin_inventory_table.png) |
-| **2. Add New Vehicle Modal** | ![Add New Vehicle Form Modal](docs/images/admin_add_vehicle_modal.png) |
-| **3. Edit Vehicle Modal** | ![Edit Vehicle Specs Modal](docs/images/admin_edit_vehicle_modal.png) |
-| **4. One-Click Stock Replenishment** | ![One-Click Stock Restock Prompt](docs/images/admin_restock_prompt.png) |
-| **5. Vehicle Deletion Safeguard Alert** | ![Delete Confirmation Dialog](docs/images/admin_delete_prompt.png) |
-
----
-
-#### 5.3 Detailed Administrative Capabilities
-
-1. **Executive KPI Analytics Cards:** Real-time calculation of key performance indicators:
-   - **Total Vehicles:** `21 Vehicles`
-   - **Available Stock:** `20 Vehicles Available`
-   - **Total Bookings:** `11 Completed Reservations`
-   - **Total Revenue:** `$250,000 Total Deposit Revenue`
-   - **Total Registered Customers:** `29 Customers`
-
-2. **Demand Ranking & Brand Distribution:** 
-   - Ranks vehicles dynamically by customer demand velocity (e.g., *Porsche 911 GT3 RS* ranked #1 with 7 reservations flagged as **High Demand**).
-   - Visual bar chart displaying inventory distribution across luxury marques (Honda, McLaren, Porsche, Bentley, Lucid, Audi, Rolls-Royce, Tesla, Lexus, Range Rover, Lamborghini, Mercedes-Benz, Rivian, Aston Martin).
-
-3. **Real-Time Activity Feeds:**
-   - **Latest Reservations:** Real-time feed showing customer booking reference numbers (`MV-53733832`).
-   - **Recent Payments:** Live ledger tracking Razorpay deposit authorizations ($25,000 status `BOOKING_PAID`).
-   - **Customer Inquiries:** Stream of incoming contact form inquiries forwarded from the website concierge.
-
-4. **Customer Bookings & Razorpay Transactions Ledger:**
-   - Detailed ledger table displaying Booking Reference (`MV-BOOK-1001`), Vehicle Name, Total/Remaining Due, Verified Razorpay Deposit (`$25,000 Paid pay_verified_razorpay`), and Booking Status (`BOOKING_PAID`).
-
-5. **Full Inventory CRUD & Stock Replenishment:**
-   - **Add Vehicle:** Create new inventory entries with make, model, category, price, quantity, and Unsplash image URL.
-   - **Edit Vehicle:** Modify existing vehicle attributes, prices, and stock levels.
-   - **One-Click Restock:** Prompt dialog allowing admins to add stock units directly to any vehicle (`Enter restock amount: 5`).
-   - **Delete Vehicle:** Protected deletion modal preventing accidental inventory removal.
-
-> 📌 **Summary Note:** All administrative functionalities, analytics widgets, inventory CRUD controls, and transaction ledgers provided in the MotoVra platform are fully listed, detailed, and documented along with live screenshots above.
-
----
-
-### 🧠 6. AI Market Intelligence & Pricing Analytics Module
-
-#### 6.1 AI Valuation Calculation Architecture Diagram
-
-```mermaid
-flowchart TD
-    Start([Vehicle Evaluation Triggered]) --> Step1Data[Step 1: Input Subject Vehicle Specs: Make, Model, Year, Price]
-    Step1Data --> Step2Dataset[Step 2: Query 100-Record Benchmark Luxury Dataset marketVehicles.json]
-    
-    %% Similarity & Matching Engine
-    Step2Dataset --> Step3Match[Step 3: Run KNN Proximity Algorithm in similarity.service.ts]
-    Step3Match --> Step4Comps[Select Top 5 Nearest Comparable Market Listings C1, C2, C3, C4, C5]
-    
-    %% Statistical Calculations
-    Step4Comps --> Step5Math[Step 4: Compute Statistical Bounds & Variance Metrics]
-    Step5Math --> FormulaAvg["Market Average P_avg = (Sum of Comp Prices) / 5"]
-    FormulaAvg --> FormulaVar["Price Variance = Listed Price - P_avg"]
-    FormulaVar --> FormulaVarPct["Variance % = ((Listed Price - P_avg) / P_avg) * 100"]
-    FormulaVarPct --> FormulaConf["Confidence Score = Calculated (60% - 95% High Precision)"]
-    
-    %% Deterministic Badge Assignment
-    FormulaConf --> Step6Badge{Step 5: Assign Deal Rating Badge}
-    Step6Badge -->|Variance % <= -5%| Badge1[🟢 EXCELLENT DEAL]
-    Step6Badge -->|-5% < Variance % <= +5%| Badge2[🟡 FAIR MARKET VALUE]
-    Step6Badge -->|+5% < Variance % <= +12%| Badge3[🟠 SLIGHTLY ABOVE BASELINE]
-    Step6Badge -->|Variance % > +12%| Badge4[🟣 PREMIUM PRICING]
-    
-    %% Groq LLaMA LLM Generation
-    Badge1 & Badge2 & Badge3 & Badge4 --> Step7Prompt[Step 6: Construct Structured JSON Prompt in promptBuilder.ts]
-    Step7Prompt --> CallGroq[Step 7: Execute Groq API LLaMA 3.3 70B Completion]
-    
-    CallGroq --> CheckLLM{Groq API Online?}
-    CheckLLM -->|Yes (~0.045s)| ParseJSON[Parse & Sanitize AI JSON Narrative Response]
-    CheckLLM -->|No / Timeout| FallbackEngine[Step 8: Execute Deterministic Zero-Crash Fallback Engine]
-    
-    ParseJSON & FallbackEngine --> SaveDB[Step 9: Persist Valuation Data directly into PostgreSQL Vehicle Schema]
-    SaveDB --> RenderUI[Step 10: Render Live Pricing Analytics & Valuation Insights Drawer on Frontend]
-    RenderUI --> Complete([AI Market Evaluation Complete])
-```
-
----
-
-#### 6.2 Live AI Market Evaluation & Valuation Insights Showcase
-
-| Evaluation Stage / Component | Interface Preview |
-| :--- | :--- |
-| **1. Live Inventory Table AI Evaluation** | ![AI Evaluation Loading State](docs/images/ai_evaluation_loading_state.png) |
-| **2. Real-Time Updated AI Deal Badges** | ![Updated AI Deal Rating Badges](docs/images/ai_evaluation_updated_badge.png) |
-| **3. Pricing Analytics & Top 5 Comparables** | ![AI Valuation Insights Drawer](docs/images/ai_market_intelligence_card.png) |
-
----
-
-#### 6.3 Mathematical Valuation Formulas & Algorithm Mechanics
-
-1. **Top 5 Comparable Nearest Neighbor Matching:**
-   The `similarity.service.ts` module filters 100 regional luxury dealership benchmark records, selecting the 5 closest listings ($C_1 \dots C_5$) matching vehicle make, model, year proximity, and price range.
-
-2. **Market Average ($P_{avg}$):**
-   $$P_{avg} = \frac{\sum_{i=1}^{5} P_{\text{comp}_i}}{5}$$
-   *Example (Porsche 911 GT3 RS):* Top 5 market listings ($226k, $228k, $232k, $215k, $245k) yield $P_{avg} = \$229,200$.
-
-3. **Price Variance Dollars ($V_{USD}$) & Percentage ($V_{\%}$):**
-   $$V_{USD} = P_{\text{listed}} - P_{avg} = \$223,800 - \$229,200 = -\$5,400$$
-   $$V_{\%} = \left( \frac{P_{\text{listed}} - P_{avg}}{P_{avg}} \right) \times 100 = \left( \frac{-\$5,400}{\$229,200} \right) \times 100 = -2.356\% \approx -2.4\%$$
-
-4. **Confidence Score Calculation ($C_{score}$):**
-   Evaluates dataset density and price distribution variance. High dataset density yields **95% High Precision**.
-
-5. **Groq LLaMA 3.3 70B AI Narrative Generation:**
-   The server invokes the Groq API running `llama-3.3-70b-versatile` (~0.045s execution), receiving structured JSON containing:
-   - **Executive AI Assessment:** Market context and price positioning summary.
-   - **Key Vehicle Strengths:** 3 bullet points highlighting value drivers.
-   - **Buyer Considerations:** Service requirements and ownership factors.
-   - **Actionable Buyer Advice:** Custom financing or concierge negotiation guidance.
-   - **Top 5 Comparable Market Listings:** Detailed table showing source name, model year, mileage, market price, and price variance vs target vehicle.
 
 ---
 

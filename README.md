@@ -207,18 +207,18 @@ flowchart TD
     
     %% Deterministic Badge Assignment
     FormulaConf --> Step6Badge{Step 5: Assign Deal Rating Badge}
-    Step6Badge -->|Variance % <= -5%| Badge1[🟢 EXCELLENT DEAL]
-    Step6Badge -->|-5% < Variance % <= +5%| Badge2[🟡 FAIR MARKET VALUE]
-    Step6Badge -->|+5% < Variance % <= +12%| Badge3[🟠 SLIGHTLY ABOVE BASELINE]
-    Step6Badge -->|Variance % > +12%| Badge4[🟣 PREMIUM PRICING]
+    Step6Badge -->|"Variance <= -5%"| Badge1[🟢 EXCELLENT DEAL]
+    Step6Badge -->|"-5% < Variance <= +5%"| Badge2[🟡 FAIR MARKET VALUE]
+    Step6Badge -->|"+5% < Variance <= +12%"| Badge3[🟠 SLIGHTLY ABOVE BASELINE]
+    Step6Badge -->|"Variance > +12%"| Badge4[🟣 PREMIUM PRICING]
     
     %% Groq LLaMA LLM Generation
     Badge1 & Badge2 & Badge3 & Badge4 --> Step7Prompt[Step 6: Construct Structured JSON Prompt in promptBuilder.ts]
     Step7Prompt --> CallGroq[Step 7: Execute Groq API LLaMA 3.3 70B Completion]
     
     CallGroq --> CheckLLM{Groq API Online?}
-    CheckLLM -->|Yes (~0.045s)| ParseJSON[Parse & Sanitize AI JSON Narrative Response]
-    CheckLLM -->|No / Timeout| FallbackEngine[Step 8: Execute Deterministic Zero-Crash Fallback Engine]
+    CheckLLM -->|"Yes (Ultra Fast)"| ParseJSON[Parse & Sanitize AI JSON Narrative Response]
+    CheckLLM -->|"No or Timeout"| FallbackEngine[Step 8: Execute Deterministic Zero-Crash Fallback Engine]
     
     ParseJSON & FallbackEngine --> SaveDB[Step 9: Persist Valuation Data directly into PostgreSQL Vehicle Schema]
     SaveDB --> RenderUI[Step 10: Render Live Pricing Analytics & Valuation Insights Drawer on Frontend]
